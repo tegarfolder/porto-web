@@ -1,0 +1,36 @@
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Editors ---
+.idea/
+*.swp
+
+# --- Node (only if tooling is added later) ---
+node_modules/
+npm-debug.log*
+
+# --- Video masters + project files -------------------------------------
+# Never commit these. GitHub rejects any single file over 100MB, and even
+# smaller videos bloat the repo permanently — git keeps every version forever,
+# so a 40MB file replaced five times is 200MB in history that cannot be
+# removed without rewriting it.
+#
+# Full videos belong on Cloudflare R2 or Vimeo; put the URL in the
+# "video" or "embed" field in data/projects.json instead.
+#
+# Poster stills and images ARE fine to commit — they're small.
+*.mp4
+*.mov
+*.webm
+*.avi
+*.mkv
+
+# After Effects / Premiere / C4D project files
+*.aep
+*.prproj
+*.c4d
+
+# To commit one of these deliberately anyway:
+#   git add -f path/to/file.mp4

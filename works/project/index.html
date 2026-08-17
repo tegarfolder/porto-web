@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project — Putra Tegar</title>
+<link rel="stylesheet" href="../../assets/site.css">
+<script src="../../assets/theme.js"></script>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <a class="mark" href="../../">Putra Tegar</a>
+    <nav>
+      <a href="../" aria-current="page">Works</a>
+      <a href="../../services/">Services</a>
+      <a href="../../about/">About</a>
+    </nav>
+    <button class="mode" id="mode" type="button">Light</button>
+  </header>
+
+  <main id="proj">
+    <section class="phead">
+      <div class="crumb lab"><a href="../../">Home</a> &rsaquo; <a href="../">Works</a></div>
+      <h1 class="ptitle">Loading</h1>
+    </section>
+  </main>
+
+  <footer>
+    <span class="lab">Putra Tegar &mdash; 2026</span>
+    <span class="lab">Instagram &middot; Behance &middot; YouTube</span>
+  </footer>
+
+</div>
+<script src="../../assets/site.js" data-root="../../"></script>
+<script>
+(async function () {
+  const el = document.getElementById('proj');
+  const slug = new URLSearchParams(location.search).get('p');
+  try {
+    const d = await data();
+    const p = d.projects.find(x => x.slug === slug);
+    if (!p) {
+      el.innerHTML = `<section class="phead">
+        <div class="crumb lab"><a href="../../">Home</a> &rsaquo; <a href="../">Works</a></div>
+        <h1 class="ptitle">Not found</h1>
+        <p class="pblurb">No project matches "${slug ? slug.replace(/[<>&"]/g,'') : 'that address'}".
+        Browse everything on the <a class="mailto" href="../">works page</a>.</p></section>`;
+      return;
+    }
+    document.title = p.title + ' — Putra Tegar';
+    document.body.className = 'c-' + p.category;
+
+    const i = d.projects.indexOf(p);
+    const next = d.projects[(i + 1) % d.projects.length];
+    const cat = p.category[0].toUpperCase() + p.category.slice(1);
+
+    let player;
+    if (p.embed)      player = `<iframe src="${p.embed}" title="${p.title}" allowfullscreen loading="lazy"></iframe>`;
+    else if (p.video) player = `<video src="${p.video}" controls playsinline preload="metadata"></video>`;
+    else player = `<div style="aspect-ratio:16/9;position:relative;color:var(--acc)">
+        <svg viewBox="0 0 160 90" preserveAspectRatio="none"
+          style="position:absolute;inset:0;width:100%;height:100%;opacity:var(--art-op)"
+          aria-hidden="true">${art(p.category, 1, 160, 90)}</svg>
+        <span class="lab" style="position:absolute;left:16px;bottom:14px">Video not uploaded yet</span>
+      </div>`;
+
+    el.innerHTML = `
+      <section class="phead">
+        <div class="crumb lab"><a href="../../">Home</a> &rsaquo; <a href="../">Works</a>
+          &rsaquo; <a href="../${p.category}/">${cat}</a></div>
+        <h1 class="ptitle">${p.title}</h1>
+      </section>
+      <div class="player">${player}</div>
+      <div class="pmeta">
+        <div class="body"><p>${p.summary}</p></div>
+        <div class="specs">
+          <dl>
+            <dt>Client</dt><dd>${p.client}</dd>
+            <dt>Mode</dt><dd style="color:var(--acc)">${cat}</dd>
+            <dt>Year</dt><dd>${p.year}</dd>
+            <dt>Runtime</dt><dd>${Math.floor(p.seconds/60)}:${String(p.seconds%60).padStart(2,'0')}</dd>
+            <dt>Format</dt><dd>${p.format}</dd>
+            <dt>Role</dt><dd>${p.role}</dd>
+            <dt>Tools</dt><dd>${p.tools}</dd>
+          </dl>
+        </div>
+      </div>
+      <div class="nextrow">
+        <span class="lab">Next</span>
+        <a href="./?p=${next.slug}">${next.title}</a>
+      </div>`;
+  } catch (e) {
+    el.innerHTML = `<section class="phead"><h1 class="ptitle">Unavailable</h1>
+      <p class="pblurb">${e.message}</p></section>`;
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Putra Tegar — Motion graphics</title>
+<meta name="description" content="Putra Tegar makes explainer, product, event, and brand motion graphics.">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/theme.js"></script>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <a class="mark" href="./">Putra Tegar</a>
+    <nav>
+      <a href="works/">Works</a>
+      <a href="services/">Services</a>
+      <a href="about/">About</a>
+    </nav>
+    <button class="mode" id="mode" type="button">Light</button>
+  </header>
+
+  <section class="hero center">
+    <!-- Showreel slot. Drop in when the loop exists:
+         <video src="…" autoplay muted loop playsinline poster="…"></video> -->
+    <div class="hero-bg" aria-hidden="true"></div>
+
+    <div class="inner">
+      <span class="lab">Motion graphics &mdash; Jakarta &middot; Remote</span>
+      <div class="lede">
+        <h1>We animate the part people keep not getting.</h1>
+        <p>Explainer, product, event, and brand films. Script and storyboard
+        first, animation second.</p>
+      </div>
+      <div class="cta">
+        <a class="btn solid" href="works/">See the work</a>
+        <a class="btn" href="mailto:hello@putrategar.studio">Start a project</a>
+      </div>
+      <div class="disc">
+        <a class="c-explainer" href="works/explainer/"><i class="dot"></i>Explainer</a>
+        <a class="c-product" href="works/product/"><i class="dot"></i>Product</a>
+        <a class="c-event" href="works/event/"><i class="dot"></i>Event</a>
+        <a class="c-brand" href="works/brand/"><i class="dot"></i>Brand</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section>
+    <div class="grid-head">
+      <span class="lab">Selected work &mdash; <span id="count">loading</span></span>
+      <span class="lab" id="hint">Hover a card to scrub</span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="nextrow">
+      <a href="works/">See all works</a>
+      <span class="lab">Four modes, one studio</span>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="l">
+      <h2>Studio</h2>
+      <p>Putra Tegar is a motion graphics studio working in four modes: explainers that
+      make a product make sense, product films, event opens, and motion systems for
+      brands. Script and storyboard first, animation second.</p>
+    </div>
+    <div class="r">
+      <h2>Start</h2>
+      <p>Send the deck, the deadline, and the budget range.
+      <br><a class="mailto" href="mailto:hello@putrategar.studio">hello@putrategar.studio</a></p>
+    </div>
+  </section>
+
+  <footer>
+    <span class="lab">Putra Tegar &mdash; 2026</span>
+    <span class="lab">Instagram &middot; Behance &middot; YouTube</span>
+  </footer>
+
+</div>
+<script src="assets/site.js" data-root="./"></script>
+<script>renderGrid({ limit: 4, hrefBase: 'works/project/' });</script>
+</body>
+</html>
