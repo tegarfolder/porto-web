@@ -58,7 +58,8 @@
 
     let player;
     if (p.embed)      player = `<iframe src="${p.embed}" title="${p.title}" allowfullscreen loading="lazy"></iframe>`;
-    else if (p.video) player = `<video src="${p.video}" controls playsinline preload="metadata"></video>`;
+    else if (p.video) player = `<video src="${assetUrl(p.video)}" controls playsinline preload="metadata"${p.poster ? ` poster="${esc(assetUrl(p.poster))}"` : ''}></video>`;
+    else if (p.poster) player = `<img src="${esc(assetUrl(p.poster))}" alt="${esc(p.title)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">`;
     else player = `<div style="aspect-ratio:16/9;position:relative;color:var(--acc)">
         <svg viewBox="0 0 160 90" preserveAspectRatio="none"
           style="position:absolute;inset:0;width:100%;height:100%;opacity:var(--art-op)"

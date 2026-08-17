@@ -9,6 +9,15 @@ const tc  = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+/* Resolve a content path stored in projects.json. Data keeps paths relative to
+   the site root ("assets/x.jpg" or "https://…"), but pages live at different
+   depths, so a relative path gets the page's ROOT prefix (./ ../ ../../). */
+const assetUrl = path => {
+  if (!path) return '';
+  if (/^(https?:)?\/\//.test(path) || path[0] === '/') return path;
+  return ROOT + path;
+};
+
 /* ---------- theme ---------- */
 function initTheme() {
   const root = document.documentElement;
@@ -84,14 +93,19 @@ function art(kind, t, W, H) {
 /* ---------- cards ---------- */
 function cardHTML(p, maxSeconds, hrefBase) {
   const vert = p.format === '4:5', W = 160, H = vert ? 200 : 90;
-  const frames = Array.from({ length: N }, (_, k) =>
-    `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="${k === N-1 ? 'on' : ''}" aria-hidden="true">${art(p.category, .12 + .88 * k / (N-1), W, H)}</svg>`
-  ).join('');
+  /* A real still wins over the generated scrub art. With a poster the card
+     shows the image (gentle zoom on hover); without one it falls back to the
+     8-frame artwork that pointer-scrub animates. */
+  const media = p.poster
+    ? `<img class="poster" src="${esc(assetUrl(p.poster))}" alt="" loading="lazy">`
+    : Array.from({ length: N }, (_, k) =>
+        `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="${k === N-1 ? 'on' : ''}" aria-hidden="true">${art(p.category, .12 + .88 * k / (N-1), W, H)}</svg>`
+      ).join('');
   const width = (p.seconds / maxSeconds * 100).toFixed(1);
   const cat = p.category[0].toUpperCase() + p.category.slice(1);
   return `<a class="card w${p.span} c-${p.category}" href="${hrefBase}?p=${p.slug}"
     aria-label="${esc(p.title)} — ${cat}, ${tc(p.seconds)}">
-    <div class="frame" style="aspect-ratio:${vert ? '4/5' : '16/9'}">${frames}</div>
+    <div class="frame" style="aspect-ratio:${vert ? '4/5' : '16/9'}">${media}</div>
     <div class="track"><span class="fill" style="width:${width}%"></span><span class="head" style="left:0"></span></div>
     <div class="meta"><h3>${esc(p.title)}</h3><span class="tc">${tc(p.seconds)}</span></div>
     <div class="under"><span class="cat">${cat}</span><span class="fmt">${p.format}</span></div>
@@ -117,7 +131,10 @@ function wireCards(scope) {
     const set = k => {
       k = Math.max(0, Math.min(N - 1, k));
       if (k === cur) return;
-      svgs[cur].classList.remove('on'); svgs[k].classList.add('on'); cur = k;
+      if (svgs.length) {
+        svgs[cur].classList.remove('on'); svgs[k].classList.add('on');
+      }
+      cur = k;
     };
     const seek = p => {
       set(Math.floor(p * N));

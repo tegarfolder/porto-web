@@ -71,14 +71,16 @@ nav a[aria-current="page"]{color:var(--fg)}
 .hero.center .inner{position:relative;z-index:1;
   padding:0 clamp(12px,4vw,64px)}
 .hero.center .lab{display:block;padding-bottom:clamp(20px,3.4vh,34px)}
-/* The headline wipes in behind a travelling playhead — the same hairline
-   marker that scrubs the project cards, at hero scale. Both animations share
-   a duration and easing so the line stays welded to the reveal edge. */
+/* Character-offset glitch reveal. An inline script (see index.html) splits the
+   headline into .ch spans; each letter staggers in with a chromatic split
+   (--event / --product) that shakes out to a clean rest. The last letter
+   lands ~1.3s in, echoing the old wipe's beat. */
 .lede{position:relative;display:block}
 .lede h1{font-weight:800;line-height:1.02;letter-spacing:-.035em;
   font-size:clamp(29px,4.5vw,64px);max-width:19ch;margin:0 auto;
-  text-wrap:balance;
-  animation:wipe 1.05s cubic-bezier(.25,.62,.25,1) .15s both}
+  text-wrap:balance}
+.lede h1 .ch{display:inline-block;
+  animation:ch-in .44s cubic-bezier(.19,1,.22,1) both}
 .lede p{color:var(--dim);font-size:clamp(15px,1.5vw,18px);line-height:1.5;
   max-width:46ch;margin:18px auto 0;letter-spacing:-.01em}
 
@@ -91,17 +93,17 @@ nav a[aria-current="page"]{color:var(--fg)}
 .btn:hover,.btn:focus-visible{border-color:var(--fg)}
 .btn.solid{background:var(--fg);color:var(--ink);border-color:var(--fg)}
 .btn.solid:hover,.btn.solid:focus-visible{opacity:.85}
-.lede::after{content:"";position:absolute;top:-2%;bottom:-2%;width:1px;
-  background:var(--fg);left:0;opacity:0;
-  animation:playhead 1.05s cubic-bezier(.25,.62,.25,1) .15s both}
-@keyframes wipe{
-  from{clip-path:inset(-8% 100% -8% 0)}
-  to{clip-path:inset(-8% 0% -8% 0)}}
-@keyframes playhead{
-  0%{left:0;opacity:0}
-  9%{opacity:.55}
-  88%{opacity:.55}
-  100%{left:100%;opacity:0}}
+@keyframes ch-in{
+  0%{opacity:0;transform:translate(-.5em,.12em) skewX(-10deg);
+     text-shadow:-3px 0 var(--event),3px 0 var(--product)}
+  15%{opacity:1;text-shadow:3px 0 var(--event),-3px 0 var(--product)}
+  30%{text-shadow:-2px 0 var(--event),2px 0 var(--product)}
+  45%{text-shadow:2px 0 var(--event),-2px 0 var(--product)}
+  60%{text-shadow:-1px 0 var(--event),1px 0 var(--product)}
+  75%{transform:translate(.06em,-.06em) skewX(3deg);
+      text-shadow:1px 0 var(--event),-1px 0 var(--product)}
+  100%{opacity:1;transform:translate(0,0) skewX(0);text-shadow:none}
+}
 .disc{display:flex;gap:14px 22px;flex-wrap:wrap;justify-content:center;
   padding:clamp(26px,4vh,42px) 0 6px}
 .disc a{font-size:11px;font-weight:600;letter-spacing:.16em;
@@ -135,6 +137,9 @@ nav a[aria-current="page"]{color:var(--fg)}
 .frame svg{display:block;width:100%;height:100%;position:absolute;inset:0;
   opacity:0;transition:opacity .04s linear}
 .frame svg.on{opacity:var(--art-op)}
+.frame img.poster{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;transition:transform .5s ease}
+.card:hover .frame img.poster{transform:scale(1.04)}
 
 .track{position:relative;height:1px;background:var(--line);margin-top:11px}
 .fill{position:absolute;left:0;top:0;height:1px;background:currentColor}
@@ -251,7 +256,6 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
   .mode{min-height:44px;padding:11px 13px}
 }
 @media (prefers-reduced-motion:reduce){
-  .lede h1{animation:none;clip-path:none}
-  .lede::after{display:none}
+  .lede h1 .ch{animation:none}
   *{transition-duration:.01ms !important;animation-duration:.01ms !important}
 }

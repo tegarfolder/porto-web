@@ -7,13 +7,13 @@
   ],
   "projects": [
     {
-      "slug": "ledgerline", "title": "Ledgerline", "category": "explainer",
-      "client": "Ledgerline", "year": 2026, "seconds": 84, "format": "16:9",
+      "slug": "testing", "title": "Testing", "category": "event",
+      "client": "Me", "year": 2025, "seconds": 84, "format": "16:9",
       "span": 8, "featured": true,
-      "role": "Script, design, animation",
-      "tools": "After Effects, Illustrator",
+      "role": "Script, layouting, animation",
+      "tools": "Blender",
       "summary": "Reconciliation software is a hard sell because the pain it removes is invisible. The film shows the manual version first, at speed, then removes it.",
-      "video": "", "embed": "https://www.youtube.com/watch?v=1j_3i1iphRo"
+      "video": "assets/Nyawiji.mp4", "embed": "", "poster": ""
     },
     {
       "slug": "halo-kettle", "title": "Halo Kettle", "category": "product",
@@ -22,7 +22,7 @@
       "role": "Design, animation",
       "tools": "Cinema 4D, After Effects",
       "summary": "A vertical cut for launch day. One object, one rotation, one temperature curve.",
-      "video": "", "embed": ""
+      "video": "", "embed": "", "poster": ""
     },
     {
       "slug": "northbound-26", "title": "Northbound 26", "category": "event",
@@ -31,7 +31,7 @@
       "role": "Design, animation",
       "tools": "After Effects",
       "summary": "Conference open for a 4:5 stage screen. Built to loop without a visible seam.",
-      "video": "", "embed": ""
+      "video": "", "embed": "", "poster": ""
     },
     {
       "slug": "onda", "title": "Onda", "category": "brand",
@@ -40,7 +40,7 @@
       "role": "Motion system, guidelines",
       "tools": "After Effects, Figma",
       "summary": "A motion language for a wordmark that had none — entry, exit, and the three transitions the team is allowed to use.",
-      "video": "", "embed": ""
+      "video": "", "embed": "", "poster": ""
     },
     {
       "slug": "sift", "title": "Sift", "category": "explainer",
@@ -49,7 +49,7 @@
       "role": "Script, storyboard, animation",
       "tools": "After Effects",
       "summary": "Onboarding film cut to sit inside the product, not in front of it.",
-      "video": "", "embed": ""
+      "video": "", "embed": "", "poster": ""
     },
     {
       "slug": "tandem-cards", "title": "Tandem Cards", "category": "product",
@@ -58,7 +58,7 @@
       "role": "Design, animation",
       "tools": "After Effects, Figma",
       "summary": "Interface film for a card issuer. Real screens, retimed so each state holds long enough to read.",
-      "video": "", "embed": ""
+      "video": "", "embed": "", "poster": ""
     },
     {
       "slug": "frame-festival", "title": "Frame Festival", "category": "event",
@@ -67,7 +67,7 @@
       "role": "Design, animation",
       "tools": "After Effects",
       "summary": "Festival sting. Nineteen seconds, one gesture, no dialogue.",
-      "video": "", "embed": ""
+      "video": "", "embed": "", "poster": ""
     },
     {
       "slug": "perch", "title": "Perch", "category": "brand",
@@ -76,7 +76,7 @@
       "role": "Motion system",
       "tools": "Cinema 4D, After Effects",
       "summary": "Identity in motion for a property platform — how the mark lands, and what it does when it has to wait.",
-      "video": "", "embed": ""
+      "video": "", "embed": "", "poster": ""
     }
   ]
 }

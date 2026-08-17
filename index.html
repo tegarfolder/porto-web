@@ -24,7 +24,9 @@
   <section class="hero center">
     <!-- Showreel slot. Drop in when the loop exists:
          <video src="…" autoplay muted loop playsinline poster="…"></video> -->
-    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-bg" aria-hidden="true">
+      <video src="assets/hero1.mp4" autoplay muted loop playsinline poster="assets/hero-poster.jpg"></video>
+    </div>
 
     <div class="inner">
       <span class="lab">Motion graphics &mdash; Jakarta &middot; Remote</span>
@@ -33,6 +35,22 @@
         <p>Explainer, product, event, and brand films. Script and storyboard
         first, animation second.</p>
       </div>
+      <script>
+      /* Split the hero headline into per-letter spans for the glitch reveal.
+         Runs inline (before first paint) so the intact headline never flashes;
+         screen readers still get the whole sentence via aria-label. */
+      (function () {
+        var h1 = document.querySelector('.lede h1');
+        if (!h1) return;
+        var chars = Array.from(h1.textContent);
+        h1.setAttribute('aria-label', h1.textContent);
+        h1.innerHTML = chars.map(function (c, i) {
+          if (c === ' ') return ' ';
+          return '<span class="ch" aria-hidden="true" style="animation-delay:' + (100 + i * 20) + 'ms">' +
+            (c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : c) + '</span>';
+        }).join('');
+      })();
+      </script>
       <div class="cta">
         <a class="btn solid" href="works/">See the work</a>
         <a class="btn" href="mailto:hello@putrategar.studio">Start a project</a>
