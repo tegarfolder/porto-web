@@ -164,7 +164,7 @@ strongest piece first.
 | `tools` | e.g. "After Effects, Cinema 4D". |
 | `summary` | One or two sentences on the project page. |
 | `video` | Direct URL to an MP4. Leave `""` if unused. |
-| `embed` | Vimeo/YouTube embed URL. Leave `""` if unused. |
+| `embed` | YouTube/Vimeo **embed** URL — `https://www.youtube.com/embed/ID` or `https://player.vimeo.com/video/ID`. A `watch?v=` link will not render in a frame. The admin panel converts share links for you. Leave `""` if unused. |
 | `poster` | Thumbnail still, used on the card and as the video poster. Paths are **relative to the site root** (`assets/name.jpg`) or absolute URLs. Leave `""` for the generated placeholder art. |
 
 Content paths (`video`, `poster`) are written **relative to the site root**, not
@@ -365,8 +365,12 @@ Save stays disabled while anything is wrong, and a panel lists every problem:
 - A slug that is duplicated, or not lowercase-with-hyphens
 - A category outside the four valid ones
 - Runtime that is not a whole number above zero, or a year that is not four digits
-- A YouTube **watch** link in the embed field — an iframe needs the `/embed/`
-  form, so it warns rather than letting you ship a blank player
+- A non-embeddable video URL. Paste any normal YouTube or Vimeo share link
+  (`watch?v=`, `youtu.be/`, `/shorts/`, `vimeo.com/123`) and it is **rewritten
+  to the embeddable form** when you leave the field, and again on save. A
+  `watch` page sends `X-Frame-Options: SAMEORIGIN`, so an iframe pointing at
+  one renders nothing at all — no error, just a blank box. Anything that
+  cannot be converted blocks the save
 
 It also previews the poster image live and tells you if the path resolves to
 nothing.
@@ -444,12 +448,15 @@ happen and the sentence renders normally.
 ### Open bugs
 
 1. **Missing media files.** `index.html` points at `assets/hero1.mp4` and
-   `assets/hero-poster.jpg`; the `testing` project points at
-   `assets/Nyawiji.mp4`. **None of these files exist** — all three return 404, so
-   the hero panel is empty and that project page shows a dead player.
+   `assets/hero-poster.jpg`; the `testing` project also carries
+   `video: "assets/Nyawiji.mp4"`. **None of these files exist** — all three
+   return 404, so the hero panel renders as an empty box.
 
-   Worse, `.gitignore` excludes `*.mp4`, so adding them locally still won't get
-   them to GitHub or Cloudflare. Resolve it one of two ways:
+   The `testing` project itself now plays, because its `embed` takes priority
+   over `video` — but clear that embed and the dead path is exposed again.
+
+   `.gitignore` also excludes `*.mp4`, so adding the files locally still won't
+   get them to GitHub or Cloudflare. Resolve it one of two ways:
    - Host the videos on Cloudflare R2 or Vimeo and put the **URL** in
      `video` / `embed` (recommended — see §5), or
    - Keep them local and add a deliberate exception to `.gitignore`, accepting
@@ -461,10 +468,11 @@ happen and the sentence renders normally.
 2. **Content mismatch.** The `testing` project still carries Ledgerline's
    summary about reconciliation software.
 
-3. **Inconsistent escaping.** `cardHTML()` escapes everything through `esc()`,
-   but `works/project/index.html` interpolates `p.embed`, `p.title`, `p.summary`,
-   `p.client`, `p.role` and `p.tools` straight into `innerHTML`. Harmless while
-   you write the JSON by hand; a real hole if that file ever comes from elsewhere.
+3. **Partly inconsistent escaping.** The project page now escapes the player's
+   `src`, `title` and `alt`, but still interpolates `summary`, `client`, `year`,
+   `format`, `role` and `tools` straight into `innerHTML`, while `cardHTML()`
+   escapes everything. Harmless while you write the JSON yourself; a real hole
+   if that file ever comes from somewhere else.
 
 4. **The hero video ignores `prefers-reduced-motion`.** An autoplaying loop is
    exactly what that setting exists to suppress. There is also no scrim behind
@@ -521,3 +529,7 @@ happen and the sentence renders normally.
 | Card shows generated art, not my still | `poster` is empty, or the path is wrong. The admin panel (§6) previews it and flags a bad path. |
 | Admin panel's Save button stays greyed out | Something failed validation — the panel above the list names every problem. |
 | Admin panel downloads a file instead of saving | Firefox or Safari. Use Chrome or Edge to write in place (§6). |
+| Admin panel asks for the file every time | The handle could not be stored — private/incognito window, or site data was cleared. |
+| Embedded video is a blank box, no error | A `watch?v=` or `youtu.be` link in `embed`. Those send `X-Frame-Options: SAMEORIGIN` and refuse to load in a frame; only `youtube.com/embed/ID` works. Re-save via the admin panel and it converts the link. |
+| Video plays but fullscreen is missing | The iframe needs `allow` and `allowfullscreen` — present on the project page; check any player you hand-wrote. |
+| Home cards overlap each other | The packed grid's row spans went stale and were not recomputed. Reload the page; report it if it survives a reload. |

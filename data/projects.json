@@ -1,82 +1,162 @@
 {
   "categories": [
-    { "slug": "explainer", "name": "Explainer", "blurb": "Films that make a product make sense before anyone reads a word of documentation." },
-    { "slug": "product",   "name": "Product",   "blurb": "Feature launches and interface films — the thing itself, moving." },
-    { "slug": "event",     "name": "Event",     "blurb": "Opens, stings, and stage loops built for a room and a running order." },
-    { "slug": "brand",     "name": "Brand",     "blurb": "Motion systems: how a logo behaves, how a transition resolves, what moves and what never does." }
+    {
+      "slug": "explainer",
+      "name": "Explainer",
+      "blurb": "Films that make a product make sense before anyone reads a word of documentation."
+    },
+    {
+      "slug": "product",
+      "name": "Product",
+      "blurb": "Feature launches and interface films — the thing itself, moving."
+    },
+    {
+      "slug": "event",
+      "name": "Event",
+      "blurb": "Opens, stings, and stage loops built for a room and a running order."
+    },
+    {
+      "slug": "brand",
+      "name": "Brand",
+      "blurb": "Motion systems: how a logo behaves, how a transition resolves, what moves and what never does."
+    }
   ],
   "projects": [
     {
-      "slug": "testing", "title": "Testing", "category": "event",
-      "client": "Me", "year": 2025, "seconds": 84, "format": "16:9",
-      "span": 8, "featured": true,
+      "slug": "testing",
+      "title": "Testing",
+      "category": "event",
+      "client": "Me",
+      "year": 2025,
+      "seconds": 84,
+      "format": "16:9",
+      "span": 8,
+      "featured": true,
       "role": "Script, layouting, animation",
       "tools": "Blender",
       "summary": "Reconciliation software is a hard sell because the pain it removes is invisible. The film shows the manual version first, at speed, then removes it.",
-      "video": "assets/Nyawiji.mp4", "embed": "", "poster": ""
+      "video": "assets/Nyawiji.mp4",
+      "embed": "https://www.youtube.com/embed/rmdT12aICmo",
+      "poster": ""
     },
     {
-      "slug": "halo-kettle", "title": "Halo Kettle", "category": "product",
-      "client": "Halo", "year": 2026, "seconds": 38, "format": "4:5",
-      "span": 4, "featured": true,
+      "slug": "halo-kettle",
+      "title": "Halo Kettle",
+      "category": "product",
+      "client": "Halo",
+      "year": 2026,
+      "seconds": 38,
+      "format": "4:5",
+      "span": 4,
+      "featured": true,
       "role": "Design, animation",
       "tools": "Cinema 4D, After Effects",
       "summary": "A vertical cut for launch day. One object, one rotation, one temperature curve.",
-      "video": "", "embed": "", "poster": ""
+      "video": "",
+      "embed": "",
+      "poster": ""
     },
     {
-      "slug": "northbound-26", "title": "Northbound 26", "category": "event",
-      "client": "Northbound", "year": 2026, "seconds": 22, "format": "4:5",
-      "span": 4, "featured": false,
+      "slug": "northbound-26",
+      "title": "Northbound 26",
+      "category": "event",
+      "client": "Northbound",
+      "year": 2026,
+      "seconds": 22,
+      "format": "4:5",
+      "span": 4,
+      "featured": false,
       "role": "Design, animation",
       "tools": "After Effects",
       "summary": "Conference open for a 4:5 stage screen. Built to loop without a visible seam.",
-      "video": "", "embed": "", "poster": ""
+      "video": "",
+      "embed": "",
+      "poster": ""
     },
     {
-      "slug": "onda", "title": "Onda", "category": "brand",
-      "client": "Onda", "year": 2025, "seconds": 58, "format": "16:9",
-      "span": 8, "featured": true,
+      "slug": "onda",
+      "title": "Onda",
+      "category": "brand",
+      "client": "Onda",
+      "year": 2025,
+      "seconds": 58,
+      "format": "16:9",
+      "span": 8,
+      "featured": true,
       "role": "Motion system, guidelines",
       "tools": "After Effects, Figma",
       "summary": "A motion language for a wordmark that had none — entry, exit, and the three transitions the team is allowed to use.",
-      "video": "", "embed": "", "poster": ""
+      "video": "",
+      "embed": "",
+      "poster": ""
     },
     {
-      "slug": "sift", "title": "Sift", "category": "explainer",
-      "client": "Sift", "year": 2025, "seconds": 52, "format": "16:9",
-      "span": 6, "featured": false,
+      "slug": "sift",
+      "title": "Sift",
+      "category": "explainer",
+      "client": "Sift",
+      "year": 2025,
+      "seconds": 52,
+      "format": "16:9",
+      "span": 6,
+      "featured": false,
       "role": "Script, storyboard, animation",
       "tools": "After Effects",
       "summary": "Onboarding film cut to sit inside the product, not in front of it.",
-      "video": "", "embed": "", "poster": ""
+      "video": "",
+      "embed": "",
+      "poster": ""
     },
     {
-      "slug": "tandem-cards", "title": "Tandem Cards", "category": "product",
-      "client": "Tandem", "year": 2025, "seconds": 41, "format": "16:9",
-      "span": 6, "featured": false,
+      "slug": "tandem-cards",
+      "title": "Tandem Cards",
+      "category": "product",
+      "client": "Tandem",
+      "year": 2025,
+      "seconds": 41,
+      "format": "16:9",
+      "span": 6,
+      "featured": false,
       "role": "Design, animation",
       "tools": "After Effects, Figma",
       "summary": "Interface film for a card issuer. Real screens, retimed so each state holds long enough to read.",
-      "video": "", "embed": "", "poster": ""
+      "video": "",
+      "embed": "",
+      "poster": ""
     },
     {
-      "slug": "frame-festival", "title": "Frame Festival", "category": "event",
-      "client": "Frame", "year": 2025, "seconds": 19, "format": "4:5",
-      "span": 4, "featured": false,
+      "slug": "frame-festival",
+      "title": "Frame Festival",
+      "category": "event",
+      "client": "Frame",
+      "year": 2025,
+      "seconds": 19,
+      "format": "4:5",
+      "span": 4,
+      "featured": false,
       "role": "Design, animation",
       "tools": "After Effects",
       "summary": "Festival sting. Nineteen seconds, one gesture, no dialogue.",
-      "video": "", "embed": "", "poster": ""
+      "video": "",
+      "embed": "",
+      "poster": ""
     },
     {
-      "slug": "perch", "title": "Perch", "category": "brand",
-      "client": "Perch", "year": 2025, "seconds": 65, "format": "16:9",
-      "span": 8, "featured": true,
+      "slug": "perch",
+      "title": "Perch",
+      "category": "brand",
+      "client": "Perch",
+      "year": 2025,
+      "seconds": 65,
+      "format": "16:9",
+      "span": 8,
+      "featured": true,
       "role": "Motion system",
       "tools": "Cinema 4D, After Effects",
       "summary": "Identity in motion for a property platform — how the mark lands, and what it does when it has to wait.",
-      "video": "", "embed": "", "poster": ""
+      "video": "",
+      "embed": "",
+      "poster": ""
     }
   ]
 }

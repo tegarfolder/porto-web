@@ -57,7 +57,10 @@
     const cat = p.category[0].toUpperCase() + p.category.slice(1);
 
     let player;
-    if (p.embed)      player = `<iframe src="${p.embed}" title="${p.title}" allowfullscreen loading="lazy"></iframe>`;
+    if (p.embed)      player = `<iframe src="${esc(p.embed)}" title="${esc(p.title)}"
+      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen loading="lazy"></iframe>`;
     else if (p.video) player = `<video src="${assetUrl(p.video)}" controls playsinline preload="metadata"${p.poster ? ` poster="${esc(assetUrl(p.poster))}"` : ''}></video>`;
     else if (p.poster) player = `<img src="${esc(assetUrl(p.poster))}" alt="${esc(p.title)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">`;
     else player = `<div style="aspect-ratio:16/9;position:relative;color:var(--acc)">

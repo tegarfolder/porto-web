@@ -132,6 +132,23 @@ const FORMATS= ['16:9', '4:5'];
 const SPANS  = [4, 6, 8];
 const CAN_FS = 'showOpenFilePicker' in window;
 
+/* ---------- embed URLs ----------
+   A youtube.com/watch page sends X-Frame-Options: SAMEORIGIN, so an iframe
+   pointing at one renders nothing at all — no error, just blank. Only the
+   /embed/ form is frameable. Paste any normal share link and toEmbed()
+   rewrites it; EMBED_OK is what validation insists on. */
+const EMBED_OK = /^https:\/\/(www\.)?(youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/|player\.vimeo\.com\/video\/)/;
+
+function toEmbed(url) {
+  if (!url) return url;
+  const u = url.trim();
+  let m = u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([\w-]{6,})/);
+  if (m) return 'https://www.youtube.com/embed/' + m[1];
+  m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (m) return 'https://player.vimeo.com/video/' + m[1];
+  return u;
+}
+
 let doc = null;      // whole parsed file, categories preserved
 let handle = null;   // FileSystemFileHandle when available
 let dirty = false;
@@ -170,6 +187,10 @@ function validate() {
       p._err.year = 'Four-digit year';
     if (!FORMATS.includes(p.format)) p._err.format = 'Pick a format';
     if (!SPANS.includes(p.span)) p._err.span = 'Pick a width';
+    if (p.embed && p.embed.trim() && !EMBED_OK.test(p.embed.trim()))
+      p._err.embed = /youtube|youtu\.be|vimeo/i.test(p.embed)
+        ? 'Not the embeddable form — click out of the field and it will be converted'
+        : 'Must be a YouTube or Vimeo embed URL (a watch link will not load in a frame)';
   });
   return doc.projects.reduce((n, p) => n + Object.keys(p._err).length, 0);
 }
@@ -234,6 +255,14 @@ function field(p, key, label, opts = {}) {
     markDirty();
     if (opts.rerender) render();
   });
+  /* Rewrite on commit rather than per keystroke, so it doesn't fight typing. */
+  if (opts.normalize) {
+    input.addEventListener('change', () => {
+      const fixed = opts.normalize(input.value);
+      if (fixed !== input.value) { input.value = fixed; p[key] = fixed; markDirty(); }
+      render();
+    });
+  }
   return wrap;
 }
 
@@ -384,11 +413,10 @@ function render() {
           hint: 'Self-hosted file or an R2 URL. Large files must not go in the repo.'
         }),
         field(p, 'embed', 'Embed URL', {
-          wide: 6, placeholder: 'https://player.vimeo.com/video/123456',
-          rerender: true,
-          hint: p.embed && /youtube\.com\/watch|youtu\.be\//.test(p.embed)
-            ? '⚠ That is a watch link — an iframe needs the /embed/ form.'
-            : 'Takes priority over Video URL if both are filled.'
+          wide: 6, placeholder: 'Paste any YouTube or Vimeo link',
+          normalize: toEmbed,
+          hint: 'Paste a normal share link — it is converted to the embeddable '
+              + 'form automatically. Takes priority over Video URL if both are filled.'
         })
       );
       body.appendChild(g);
@@ -536,6 +564,9 @@ $('add').addEventListener('click', () => {
 });
 
 $('save').addEventListener('click', async () => {
+  /* Backstop: normalise every embed here too, so a watch URL cannot reach the
+     file even if the field never lost focus before the click. */
+  doc.projects.forEach(p => { if (p.embed) p.embed = toEmbed(p.embed); });
   if (validate() > 0) { render(); return; }
 
   const out = {
