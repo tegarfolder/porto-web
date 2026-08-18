@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Content — Putra Tegar</title>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/theme.js"></script>
+<style>
+  body{padding-bottom:120px}
+  .bar{position:sticky;top:0;z-index:20;background:var(--ink);
+    border-bottom:1px solid var(--line);display:flex;align-items:center;
+    gap:12px;flex-wrap:wrap;padding:14px 0;margin-bottom:26px}
+  .bar .grow{margin-left:auto}
+  .status{font-size:12px;font-weight:500;letter-spacing:.06em;color:var(--dim);
+    display:flex;align-items:center;gap:8px}
+  .dot-s{width:7px;height:7px;border-radius:50%;background:var(--dimmer);flex:none}
+  .dot-s.dirty{background:var(--event)}
+  .dot-s.saved{background:var(--product)}
+
+  .intro{max-width:60ch;color:var(--dim);font-size:15px;line-height:1.6;
+    margin-bottom:26px}
+  .intro code{font-size:13.5px;background:var(--card);padding:2px 6px;
+    border:1px solid var(--line-soft)}
+
+  .proj{border:1px solid var(--line);margin-bottom:14px;background:var(--card)}
+  .proj.bad{border-color:var(--event)}
+  .phd{display:flex;align-items:center;gap:12px;padding:12px 14px;
+    cursor:pointer;user-select:none}
+  .phd:hover{background:var(--art)}
+  .idx{font-size:12px;font-weight:600;color:var(--dimmer);
+    font-variant-numeric:tabular-nums;min-width:22px}
+  .pname{font-weight:600;font-size:15.5px;letter-spacing:-.02em;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chip{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--acc);border:1px solid currentColor;padding:3px 7px;flex:none}
+  .warn{font-size:11px;color:var(--event);font-weight:600;flex:none}
+  .phd .tools{margin-left:auto;display:flex;gap:6px;flex:none}
+  .mini{background:none;border:1px solid var(--line);color:var(--dim);
+    font:inherit;font-size:11px;font-weight:600;padding:5px 9px;cursor:pointer;
+    min-width:30px;min-height:30px}
+  .mini:hover:not(:disabled){color:var(--fg);border-color:var(--dim)}
+  .mini:disabled{opacity:.35;cursor:not-allowed}
+  .mini.del:hover{color:var(--event);border-color:var(--event)}
+
+  .body-f{display:none;padding:4px 14px 18px;border-top:1px solid var(--line-soft)}
+  .proj.open .body-f{display:block}
+  .grid-f{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+  .f{grid-column:span 3;display:flex;flex-direction:column;gap:5px}
+  .f.w6{grid-column:span 6}
+  .f.w12{grid-column:span 12}
+  .f > label{font-size:10.5px;font-weight:600;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--dimmer)}
+  .f input,.f select,.f textarea{font:inherit;font-size:14px;
+    background:var(--ink);color:var(--fg);border:1px solid var(--line);
+    padding:9px 10px;border-radius:0;width:100%}
+  .f textarea{min-height:74px;resize:vertical;line-height:1.5}
+  .f input:focus,.f select:focus,.f textarea:focus{outline:2px solid var(--acc);
+    outline-offset:-1px;border-color:var(--acc)}
+  .f .hint{font-size:11.5px;color:var(--dimmer);line-height:1.45}
+  .f .err{font-size:11.5px;color:var(--event);font-weight:600}
+  .f.invalid input,.f.invalid select{border-color:var(--event)}
+  .row-check{display:flex;align-items:center;gap:9px;padding-top:22px}
+  .row-check input{width:17px;height:17px;accent-color:var(--acc)}
+  .row-check label{font-size:13.5px;font-weight:500;color:var(--fg);
+    letter-spacing:-.01em;text-transform:none}
+
+  .thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line-soft);
+    background:var(--art);margin-top:4px}
+  .thumb.hide{display:none}
+
+  .empty{border:1px dashed var(--line);padding:34px 20px;text-align:center;
+    color:var(--dim);font-size:15px}
+  .issues{border:1px solid var(--event);padding:12px 14px;margin-bottom:16px;
+    font-size:13.5px;line-height:1.6;color:var(--fg)}
+  .issues b{color:var(--event)}
+  .issues ul{margin:6px 0 0 18px}
+
+  @media (max-width:900px){
+    .f{grid-column:span 6}
+    .f.w6,.f.w12{grid-column:span 12}
+  }
+  @media (max-width:560px){
+    .f{grid-column:span 12}
+    .pname{white-space:normal}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <a class="mark" href="../">Putra Tegar</a>
+    <nav>
+      <a href="../works/">Works</a>
+      <a href="./" aria-current="page">Content</a>
+    </nav>
+    <button class="mode" id="mode" type="button">Light</button>
+  </header>
+
+  <div class="bar">
+    <button class="btn" id="add" type="button" disabled>Add project</button>
+    <button class="btn" id="reload" type="button" disabled>Reload from disk</button>
+    <button class="btn" id="open" type="button">Choose file&hellip;</button>
+    <span class="grow"></span>
+    <span class="status"><i class="dot-s" id="dot"></i><span id="msg">Loading&hellip;</span></span>
+    <button class="btn solid" id="save" type="button" disabled>Save</button>
+  </div>
+
+  <p class="intro" id="intro">
+    Edits <code>data/projects.json</code> directly on disk — no server, no account,
+    nothing uploaded. Content loads on its own; edit, save, then commit in VS Code
+    as usual. <strong>Choose file&hellip;</strong> is only needed if the automatic
+    load fails, or to point at a different copy.
+  </p>
+
+  <div id="issues"></div>
+  <div id="list"></div>
+
+</div>
+
+<script>
+/* ------------------------------------------------------------------ *
+ * Local content editor for data/projects.json.
+ * Uses the File System Access API to write the real file in place.
+ * Browsers without it (Firefox, Safari) fall back to load-and-download.
+ * ------------------------------------------------------------------ */
+
+const CATS   = ['explainer', 'product', 'event', 'brand'];
+const FORMATS= ['16:9', '4:5'];
+const SPANS  = [4, 6, 8];
+const CAN_FS = 'showOpenFilePicker' in window;
+
+let doc = null;      // whole parsed file, categories preserved
+let handle = null;   // FileSystemFileHandle when available
+let dirty = false;
+let openIdx = -1;    // which project is expanded
+
+const $ = id => document.getElementById(id);
+const tc = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+
+/* ---------- status ---------- */
+function setStatus(text, state) {
+  $('msg').textContent = text;
+  $('dot').className = 'dot-s' + (state ? ' ' + state : '');
+}
+function markDirty() {
+  dirty = true;
+  setStatus('Unsaved changes', 'dirty');
+  $('save').disabled = false;
+}
+
+/* ---------- validation ---------- */
+function validate() {
+  const seen = new Map();
+  doc.projects.forEach((p, i) => {
+    p._err = {};
+    if (!p.slug || !p.slug.trim()) p._err.slug = 'Required';
+    else if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(p.slug))
+      p._err.slug = 'Lowercase letters, numbers and single hyphens only';
+    else if (seen.has(p.slug)) p._err.slug = 'Already used by #' + (seen.get(p.slug) + 1);
+    else seen.set(p.slug, i);
+
+    if (!p.title || !p.title.trim()) p._err.title = 'Required';
+    if (!CATS.includes(p.category)) p._err.category = 'Pick a category';
+    if (!Number.isInteger(p.seconds) || p.seconds <= 0)
+      p._err.seconds = 'Whole number above 0';
+    if (!Number.isInteger(p.year) || p.year < 1990 || p.year > 2100)
+      p._err.year = 'Four-digit year';
+    if (!FORMATS.includes(p.format)) p._err.format = 'Pick a format';
+    if (!SPANS.includes(p.span)) p._err.span = 'Pick a width';
+  });
+  return doc.projects.reduce((n, p) => n + Object.keys(p._err).length, 0);
+}
+
+function renderIssues(count) {
+  const box = $('issues');
+  if (!count) { box.innerHTML = ''; return; }
+  const lines = doc.projects.flatMap((p, i) =>
+    Object.entries(p._err).map(([f, m]) =>
+      `<li>#${i + 1} ${p.title || p.slug || 'untitled'} — <b>${f}</b>: ${m}</li>`));
+  box.innerHTML = `<div class="issues"><b>${count} problem${count > 1 ? 's' : ''}
+    to fix before saving</b><ul>${lines.join('')}</ul></div>`;
+}
+
+/* ---------- field builders ---------- */
+function field(p, key, label, opts = {}) {
+  const wrap = document.createElement('div');
+  wrap.className = 'f' + (opts.wide ? ' w' + opts.wide : '');
+  const id = key + '-' + Math.random().toString(36).slice(2, 7);
+
+  const lab = document.createElement('label');
+  lab.textContent = label; lab.htmlFor = id;
+  wrap.appendChild(lab);
+
+  let input;
+  if (opts.options) {
+    input = document.createElement('select');
+    opts.options.forEach(o => {
+      const op = document.createElement('option');
+      op.value = String(o); op.textContent = opts.labels ? opts.labels[o] : o;
+      input.appendChild(op);
+    });
+    input.value = String(p[key] ?? '');
+  } else if (opts.textarea) {
+    input = document.createElement('textarea');
+    input.value = p[key] ?? '';
+  } else {
+    input = document.createElement('input');
+    input.type = opts.number ? 'number' : 'text';
+    if (opts.placeholder) input.placeholder = opts.placeholder;
+    input.value = p[key] ?? '';
+  }
+  input.id = id;
+  wrap.appendChild(input);
+
+  if (p._err && p._err[key]) {
+    wrap.classList.add('invalid');
+    const e = document.createElement('div');
+    e.className = 'err'; e.textContent = p._err[key];
+    wrap.appendChild(e);
+  } else if (opts.hint) {
+    const h = document.createElement('div');
+    h.className = 'hint'; h.textContent = opts.hint;
+    wrap.appendChild(h);
+  }
+
+  input.addEventListener('input', () => {
+    let v = input.value;
+    if (opts.number) v = v === '' ? null : parseInt(v, 10);
+    if (opts.options && opts.numericOption) v = parseInt(v, 10);
+    p[key] = v;
+    markDirty();
+    if (opts.rerender) render();
+  });
+  return wrap;
+}
+
+function checkbox(p, key, label) {
+  const wrap = document.createElement('div');
+  wrap.className = 'f row-check';
+  const input = document.createElement('input');
+  input.type = 'checkbox'; input.checked = !!p[key];
+  input.id = key + '-' + Math.random().toString(36).slice(2, 7);
+  const lab = document.createElement('label');
+  lab.textContent = label; lab.htmlFor = input.id;
+  input.addEventListener('change', () => { p[key] = input.checked; markDirty(); });
+  wrap.append(input, lab);
+  return wrap;
+}
+
+/* ---------- render ---------- */
+function render() {
+  const problems = validate();
+  renderIssues(problems);
+  $('save').disabled = !dirty || problems > 0;
+
+  const list = $('list');
+  list.innerHTML = '';
+
+  if (!doc.projects.length) {
+    list.innerHTML = `<div class="empty">No projects yet. Click
+      <strong>Add project</strong> to create the first one.</div>`;
+    return;
+  }
+
+  doc.projects.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'proj c-' + (CATS.includes(p.category) ? p.category : 'event')
+      + (i === openIdx ? ' open' : '')
+      + (Object.keys(p._err).length ? ' bad' : '');
+
+    /* header */
+    const hd = document.createElement('div');
+    hd.className = 'phd';
+    hd.innerHTML =
+      `<span class="idx">${String(i + 1).padStart(2, '0')}</span>
+       <span class="pname">${(p.title || 'Untitled').replace(/[<>&]/g, '')}</span>
+       <span class="chip">${p.category || '—'}</span>
+       ${Object.keys(p._err).length ? '<span class="warn">needs attention</span>' : ''}
+       <span class="tools"></span>`;
+    hd.addEventListener('click', ev => {
+      if (ev.target.closest('.tools')) return;
+      openIdx = (openIdx === i ? -1 : i);
+      render();
+    });
+
+    const tools = hd.querySelector('.tools');
+    const mk = (txt, title, fn, off) => {
+      const b = document.createElement('button');
+      b.className = 'mini'; b.type = 'button';
+      b.textContent = txt; b.title = title; b.setAttribute('aria-label', title);
+      b.disabled = !!off;
+      b.addEventListener('click', fn);
+      tools.appendChild(b);
+      return b;
+    };
+    mk('↑', 'Move up', () => {
+      [doc.projects[i - 1], doc.projects[i]] = [doc.projects[i], doc.projects[i - 1]];
+      if (openIdx === i) openIdx = i - 1;
+      markDirty(); render();
+    }, i === 0);
+    mk('↓', 'Move down', () => {
+      [doc.projects[i + 1], doc.projects[i]] = [doc.projects[i], doc.projects[i + 1]];
+      if (openIdx === i) openIdx = i + 1;
+      markDirty(); render();
+    }, i === doc.projects.length - 1);
+    mk('Duplicate', 'Duplicate this project', () => {
+      const copy = JSON.parse(JSON.stringify(p));
+      delete copy._err;
+      copy.slug = (copy.slug || 'project') + '-copy';
+      copy.title = copy.title + ' (copy)';
+      doc.projects.splice(i + 1, 0, copy);
+      openIdx = i + 1; markDirty(); render();
+    });
+    mk('Delete', 'Delete this project', () => {
+      if (!confirm(`Delete "${p.title || p.slug}"? This cannot be undone here — ` +
+                   `you can still discard the change with git.`)) return;
+      doc.projects.splice(i, 1);
+      openIdx = -1; markDirty(); render();
+    }).classList.add('del');
+
+    el.appendChild(hd);
+
+    /* fields — built only for the open row, so 30 projects stay light */
+    const body = document.createElement('div');
+    body.className = 'body-f';
+    if (i === openIdx) {
+      const g = document.createElement('div');
+      g.className = 'grid-f';
+      g.append(
+        field(p, 'title', 'Title', { wide: 6, rerender: true }),
+        field(p, 'slug', 'Slug (URL)', { wide: 6, hint: 'Used in the address. Changing it breaks existing links.' }),
+        field(p, 'category', 'Category', { options: CATS, rerender: true }),
+        field(p, 'format', 'Format', { options: FORMATS, hint: '4:5 makes a portrait card' }),
+        field(p, 'span', 'Card width', {
+          options: SPANS, numericOption: true,
+          labels: { 4: '4 — narrow', 6: '6 — half', 8: '8 — wide' }
+        }),
+        field(p, 'seconds', 'Runtime (seconds)', {
+          number: true,
+          hint: Number.isInteger(p.seconds) && p.seconds > 0 ? 'Shows as ' + tc(p.seconds) : ''
+        }),
+        field(p, 'client', 'Client', { wide: 6 }),
+        field(p, 'year', 'Year', { number: true }),
+        checkbox(p, 'featured', 'Featured on the home page'),
+        field(p, 'role', 'Role', { wide: 6, placeholder: 'Script, design, animation' }),
+        field(p, 'tools', 'Tools', { wide: 6, placeholder: 'After Effects, Blender' }),
+        field(p, 'summary', 'Summary', { wide: 12, textarea: true }),
+        field(p, 'poster', 'Poster image', {
+          wide: 6, placeholder: 'assets/posters/acme.jpg',
+          rerender: true,
+          hint: 'Path from the site root, or a full URL. Without one the card shows generated art.'
+        })
+      );
+
+      /* live poster preview */
+      const prev = document.createElement('div');
+      prev.className = 'f w6';
+      const plab = document.createElement('label');
+      plab.textContent = 'Preview';
+      const img = document.createElement('img');
+      img.className = 'thumb' + (p.poster ? '' : ' hide');
+      img.alt = '';
+      if (p.poster) {
+        img.src = /^(https?:)?\/\//.test(p.poster) || p.poster[0] === '/'
+          ? p.poster : '../' + p.poster;
+      }
+      const pmsg = document.createElement('div');
+      pmsg.className = 'hint';
+      pmsg.textContent = p.poster ? '' : 'No poster — generated art will be used.';
+      img.addEventListener('error', () => {
+        img.classList.add('hide');
+        pmsg.textContent = 'Not found at that path. Check it against the assets folder.';
+        pmsg.style.color = 'var(--event)';
+      });
+      prev.append(plab, img, pmsg);
+      g.appendChild(prev);
+
+      g.append(
+        field(p, 'video', 'Video URL', {
+          wide: 6,
+          hint: 'Self-hosted file or an R2 URL. Large files must not go in the repo.'
+        }),
+        field(p, 'embed', 'Embed URL', {
+          wide: 6, placeholder: 'https://player.vimeo.com/video/123456',
+          rerender: true,
+          hint: p.embed && /youtube\.com\/watch|youtu\.be\//.test(p.embed)
+            ? '⚠ That is a watch link — an iframe needs the /embed/ form.'
+            : 'Takes priority over Video URL if both are filled.'
+        })
+      );
+      body.appendChild(g);
+    }
+    el.appendChild(body);
+    list.appendChild(el);
+  });
+}
+
+/* ---------- remembering which file we write to ----------
+   A FileSystemFileHandle survives in IndexedDB, so the file only has to be
+   picked once ever. Chrome still needs a user gesture to re-grant write
+   permission, which the Save click itself provides. */
+const DB_NAME = 'pt-admin', STORE = 'handles', KEY = 'projects';
+
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB_NAME, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore(STORE);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbSet(v) {
+  const db = await idb();
+  return new Promise((res, rej) => {
+    const t = db.transaction(STORE, 'readwrite');
+    t.objectStore(STORE).put(v, KEY);
+    t.oncomplete = res; t.onerror = () => rej(t.error);
+  });
+}
+async function idbGet() {
+  const db = await idb();
+  return new Promise((res, rej) => {
+    const t = db.transaction(STORE, 'readonly');
+    const q = t.objectStore(STORE).get(KEY);
+    q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error);
+  });
+}
+
+/* ---------- file IO ---------- */
+function load(text, name, connected) {
+  let parsed;
+  try { parsed = JSON.parse(text); }
+  catch (e) {
+    alert('That file is not valid JSON.\n\n' + e.message +
+          '\n\nFix it in a text editor, or reopen the last committed version.');
+    return false;
+  }
+  if (!parsed || !Array.isArray(parsed.projects)) {
+    alert('That JSON has no "projects" array — is it the right file?');
+    return false;
+  }
+  doc = parsed;
+  doc.categories = doc.categories || [];
+  dirty = false; openIdx = -1;
+  $('add').disabled = false;
+  $('reload').disabled = false;
+  $('save').disabled = true;
+  setStatus(doc.projects.length + ' projects — ' +
+    (connected ? name : name + ' (read-only until the first save)'), 'saved');
+  render();
+  return true;
+}
+
+/* Pick the file once; it is remembered for every session after. */
+async function pickFile() {
+  if (!CAN_FS) return false;
+  try {
+    [handle] = await window.showOpenFilePicker({
+      types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+    });
+    try { await idbSet(handle); } catch (e) { /* private mode: no memory */ }
+    return true;
+  } catch (e) {
+    if (e.name !== 'AbortError') alert('Could not open that file: ' + e.message);
+    return false;
+  }
+}
+
+async function readFromHandle() {
+  const f = await handle.getFile();
+  return load(await f.text(), f.name, true);
+}
+
+/* Fetching puts the content on screen with no dialog at all. Writing still
+   needs a handle, which is why Save may ask for the file the first time. */
+async function fetchContent() {
+  try {
+    const r = await fetch('../data/projects.json', { cache: 'no-store' });
+    if (!r.ok) return false;
+    return load(await r.text(), 'data/projects.json', false);
+  } catch (e) { return false; }
+}
+
+async function boot() {
+  if (CAN_FS) {
+    try {
+      const stored = await idbGet();
+      if (stored) {
+        handle = stored;
+        if (await handle.queryPermission({ mode: 'read' }) === 'granted') {
+          if (await readFromHandle()) return;
+        }
+      }
+    } catch (e) { handle = null; }
+  }
+  if (await fetchContent()) return;
+  setStatus('Click "Choose file…" to load data/projects.json', '');
+}
+
+$('open').addEventListener('click', async () => {
+  if (CAN_FS) { if (await pickFile()) await readFromHandle(); return; }
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.addEventListener('change', async () => {
+    const f = inp.files[0];
+    if (f) load(await f.text(), f.name, false);
+  });
+  inp.click();
+});
+
+$('reload').addEventListener('click', async () => {
+  if (dirty && !confirm('Discard unsaved changes and reload from disk?')) return;
+  if (handle) {
+    try {
+      if (await handle.queryPermission({ mode: 'read' }) === 'granted') {
+        await readFromHandle(); return;
+      }
+    } catch (e) { /* fall through to fetch */ }
+  }
+  await fetchContent();
+});
+
+$('add').addEventListener('click', () => {
+  doc.projects.unshift({
+    slug: '', title: '', category: 'explainer', client: '',
+    year: new Date().getFullYear(), seconds: 30, format: '16:9',
+    span: 6, featured: false, role: '', tools: '', summary: '',
+    video: '', embed: '', poster: ''
+  });
+  openIdx = 0;
+  markDirty(); render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+$('save').addEventListener('click', async () => {
+  if (validate() > 0) { render(); return; }
+
+  const out = {
+    categories: doc.categories,
+    projects: doc.projects.map(p => { const c = { ...p }; delete c._err; return c; })
+  };
+  const text = JSON.stringify(out, null, 2) + '\n';
+
+  if (CAN_FS) {
+    /* The very first save picks the file; after that the handle comes back
+       from IndexedDB and this never runs again. */
+    if (!handle && !await pickFile()) return;
+    try {
+      if (await handle.queryPermission({ mode: 'readwrite' }) !== 'granted' &&
+          await handle.requestPermission({ mode: 'readwrite' }) !== 'granted') {
+        alert('Write permission was declined, so nothing was saved.');
+        return;
+      }
+      const w = await handle.createWritable();
+      await w.write(text);
+      await w.close();
+      dirty = false;
+      setStatus('Saved — commit it in VS Code', 'saved');
+      $('save').disabled = true;
+    } catch (e) {
+      alert('Could not write the file: ' + e.message);
+    }
+    return;
+  }
+
+  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'projects.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  dirty = false;
+  setStatus('Downloaded — replace data/projects.json with it', 'saved');
+  $('save').disabled = true;
+});
+
+boot();
+
+addEventListener('beforeunload', e => {
+  if (dirty) { e.preventDefault(); e.returnValue = ''; }
+});
+
+if (!CAN_FS) {
+  $('intro').innerHTML +=
+    '<br><br><strong>This browser cannot write files directly.</strong> ' +
+    'Saving will download <code>projects.json</code> instead, and you replace ' +
+    'the file in <code>data/</code> yourself. Chrome or Edge can write in place.';
+}
+</script>
+</body>
+</html>

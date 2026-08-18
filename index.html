@@ -36,18 +36,25 @@
         first, animation second.</p>
       </div>
       <script>
-      /* Split the hero headline into per-letter spans for the glitch reveal.
-         Runs inline (before first paint) so the intact headline never flashes;
-         screen readers still get the whole sentence via aria-label. */
+      /* Wrap each word of the hero headline in a span for the rise-from-blur
+         reveal. Runs inline (before first paint) so the plain headline never
+         flashes; screen readers get the whole sentence via aria-label.
+         Word-level, not per-letter — inline-block letters let a line break
+         mid-word, which put "people" across two lines on phones. */
       (function () {
         var h1 = document.querySelector('.lede h1');
         if (!h1) return;
-        var chars = Array.from(h1.textContent);
-        h1.setAttribute('aria-label', h1.textContent);
-        h1.innerHTML = chars.map(function (c, i) {
-          if (c === ' ') return ' ';
-          return '<span class="ch" aria-hidden="true" style="animation-delay:' + (100 + i * 20) + 'ms">' +
-            (c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : c) + '</span>';
+        var text = h1.textContent;
+        h1.setAttribute('aria-label', text);
+        var i = 0;
+        h1.innerHTML = text.split(/(\s+)/).map(function (part) {
+          if (!part || /^\s+$/.test(part)) return part;
+          var delay = 120 + (i++) * 80;
+          var safe = part.replace(/&/g, '&amp;')
+                         .replace(/</g, '&lt;')
+                         .replace(/>/g, '&gt;');
+          return '<span class="wd" aria-hidden="true" style="animation-delay:' +
+                 delay + 'ms">' + safe + '</span>';
         }).join('');
       })();
       </script>
@@ -99,6 +106,6 @@
 
 </div>
 <script src="assets/site.js" data-root="./"></script>
-<script>renderGrid({ limit: 4, hrefBase: 'works/project/' });</script>
+<script>renderGrid({ limit: 6, layout: 'pins', hrefBase: 'works/project/' });</script>
 </body>
 </html>

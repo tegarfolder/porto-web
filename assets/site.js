@@ -172,6 +172,54 @@ function wireCards(scope) {
   }
 }
 
+/* ---------- packed grid ----------
+   Gives each card a row span matching its own height, so a fixed-column grid
+   packs like a pinboard. Cheap because card heights are already deterministic:
+   .frame carries an explicit aspect-ratio, so a poster reserves its space
+   before the image loads and nothing reflows. */
+function layoutPins(grid) {
+  if (!grid || !grid.classList.contains('pins')) return;
+  grid.classList.remove('packed');            // measure against auto rows
+  const row = 1;
+  grid.querySelectorAll('.card').forEach(card => {
+    card.style.gridRowEnd = 'auto';           // reset before measuring
+    const h = card.getBoundingClientRect().height;
+    if (!h) return;
+    /* The card's own bottom margin is the visual gap — see site.css. */
+    const gap = parseFloat(getComputedStyle(card).marginBottom) || 0;
+    card.style.gridRowEnd = 'span ' + Math.ceil((h + gap) / row);
+  });
+  grid.classList.add('packed');
+}
+
+function watchPins(grid) {
+  if (!grid.classList.contains('pins')) return;
+  const run = () => layoutPins(grid);
+  const debounced = () => {
+    clearTimeout(watchPins._t);
+    watchPins._t = setTimeout(run, 60);
+  };
+  run();
+  addEventListener('load', run);
+  /* ResizeObserver is the accurate signal, but it runs off the frame loop and
+     can be starved in odd environments — the resize/orientation listeners are
+     a cheap guarantee that a stale pack never survives a viewport change. */
+  addEventListener('resize', debounced);
+  addEventListener('orientationchange', debounced);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(run);
+  /* Re-pack when the column count changes. Guarded on width: our own row-span
+     edits change the grid's height, which would otherwise loop forever. */
+  if ('ResizeObserver' in window) {
+    let lastW = 0;
+    new ResizeObserver(entries => {
+      const w = Math.round(entries[0].contentRect.width);
+      if (!w || w === lastW) return;
+      lastW = w;
+      debounced();
+    }).observe(grid);
+  }
+}
+
 /* ---------- data ---------- */
 let _data = null;
 async function data() {
@@ -187,9 +235,11 @@ function fail(el, err) {
 }
 
 /* Renders a grid into #grid. `filter` narrows by category slug. */
-async function renderGrid({ filter = null, limit = null, hrefBase = 'project/' } = {}) {
+async function renderGrid({ filter = null, limit = null, hrefBase = 'project/',
+                            layout = null } = {}) {
   const el = document.getElementById('grid');
   if (!el) return;
+  if (layout === 'pins') el.classList.add('pins');
   try {
     const d = await data();
     let list = d.projects;
@@ -204,6 +254,7 @@ async function renderGrid({ filter = null, limit = null, hrefBase = 'project/' }
       count.textContent = `${list.length} ${list.length === 1 ? 'piece' : 'pieces'}, ${tc(total)} total`;
     }
     wireCards(el);
+    watchPins(el);
   } catch (e) { fail(el, e); }
 }
 

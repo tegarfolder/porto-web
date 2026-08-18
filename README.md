@@ -42,13 +42,34 @@ npx serve -l 5173
 
 Stop the server with `Ctrl+C`.
 
+**Which one?** For a static site they are functionally identical — all three just
+hand files to the browser. Practical differences:
+
+| | Good | Watch out |
+| --- | --- | --- |
+| **Live Server** (VS Code) | Auto-reloads the page every time you save. Best for editing CSS/JS. | Also reloads on *any* file change — including when the admin panel saves `projects.json` (see below). |
+| **Python** | Already installed, works offline, one command. | Caches aggressively: after editing `site.js` or `site.css` you may need `Ctrl+Shift+R` to see the change. |
+| **Node** (`npx serve`) | Sensible caching headers. | Downloads the package on first run, so it needs internet once. |
+
+Recommended: **Live Server while building, Python when using the admin panel.**
+
+If you want Live Server for both, stop it reloading on content saves — add this
+to VS Code settings (`Ctrl+,` → Open Settings JSON):
+
+```json
+"liveServer.settings.ignoreFiles": ["data/**", "**/*.json"]
+```
+
 ### Checking it works
 
 You should see, on the home page:
 
-- A centred headline that wipes in behind a thin vertical line
+- A centred headline whose words rise into place out of a blur, one after
+  another left to right (the last word lands about 1.4s in)
 - 4 project cards below it
 - The label "Selected work — 4 pieces, 4:05 total"
+
+The hero video panel will be empty until `assets/hero1.mp4` exists — see §8.
 
 If the count says "loading" forever, the server isn't serving `data/projects.json`
 — confirm you started the server from the project root, not a parent folder.
@@ -72,6 +93,7 @@ assets/site.css          All styling, design tokens, responsive rules
 assets/site.js           Card rendering, hover-scrub, data loading
 assets/theme.js          Restores light/dark choice before first paint
 data/projects.json       ALL CONTENT LIVES HERE
+admin/index.html         Local editor for projects.json (see §6)
 .claude/launch.json      Dev-server config (editor tooling only)
 ```
 
@@ -82,8 +104,9 @@ rather than `/works-event.html`.
 
 ## 3. Managing content
 
-Everything is in **`data/projects.json`**. Edit it in any text editor and refresh
-the browser. There is no build to run.
+Everything is in **`data/projects.json`**. Either use the admin panel at
+**`/admin/`** (§6 — a form, with validation) or edit the file by hand as below.
+There is no build to run either way.
 
 ### Add a project
 
@@ -233,54 +256,141 @@ Poster stills and other images are small and **should** be committed.
 
 ## 5. Deploying
 
-The site is static files, so almost any host works. Two routes:
+The site is static files, so hosting is free — permanently, not as a trial.
 
-### Fastest — drag and drop (no accounts beyond the host)
+### Which host
 
-1. Go to <https://app.netlify.com/drop> or Cloudflare Pages → Create → Direct Upload
-2. Drag the whole project folder in
-3. You get a live URL in about 30 seconds
+**Cloudflare Pages.** For a motion portfolio the deciding factor is bandwidth,
+and Pages does not meter it on the free plan. Video is heavy; a 100GB/month cap
+is one moderately popular project away from being a problem.
 
-Good for showing someone. To update, you drag the folder again — there's no
-version history and no admin panel.
+| Host | Free tier | Custom domain | Catch |
+| --- | --- | --- | --- |
+| **Cloudflare Pages** | Unmetered bandwidth, 500 builds/mo | Free, with SSL | **25MB max per file** — video must live elsewhere |
+| Netlify | ~100GB/mo bandwidth | Free, with SSL | Bandwidth cap; large media needs Git LFS |
+| GitHub Pages | ~100GB/mo soft cap | Free, with SSL | Free plan only serves **public** repos |
+| Vercel | ~100GB/mo | Free, with SSL | Hobby plan is for non-commercial use — a portfolio that wins work is arguable |
 
-### Recommended — Cloudflare Pages + GitHub
+Limits change; check the current pages before relying on a number.
 
-1. Create a free GitHub account
-2. Push this folder to a new repository
-3. Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git
-4. Pick the repo. **Leave the build command empty** and set the output directory
-   to `/` — there is no build step
-5. Deploy
+### Deploy, step by step
 
-After this, every change you push goes live automatically, and it's the
-prerequisite for the admin panel below.
+1. Push the repo to GitHub (§4)
+2. Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** →
+   **Connect to Git**
+3. Authorise GitHub, pick the repository
+4. Build settings — this is the step people get wrong:
+   - Framework preset: **None**
+   - Build command: **leave empty**
+   - Build output directory: **`/`**
+
+   There is no build step. Anything in the build command field will fail.
+5. **Save and Deploy.** You get a `*.pages.dev` URL in under a minute.
+
+Every push to `main` redeploys automatically. Pull requests get their own preview
+URL, which is a good way to check a change before it goes live.
+
+### Custom domain
+
+Buy the domain anywhere — **Cloudflare Registrar** sells at wholesale with no
+markup and no first-year-cheap/renewal-expensive trick, which is the thing to
+watch elsewhere. Compare the **renewal** price, not the first year.
+
+Then: Pages project → **Custom domains** → **Set up a domain** → enter it. If the
+domain uses Cloudflare DNS, the record is created for you and SSL is issued
+automatically within minutes. If it is registered elsewhere, either point its
+nameservers at Cloudflare or add the CNAME they show you.
+
+### Free email on your domain
+
+**Cloudflare Email Routing** forwards `hello@yourdomain.com` to your Gmail for
+free — which replaces the placeholder address in §8. Receiving and forwarding is
+free and takes about two minutes. *Sending* as that address needs an SMTP
+provider (Zoho Mail's free tier is the usual choice) — set it up only if replying
+from your personal Gmail address bothers you.
 
 ### Video hosting
 
-Do **not** put large video files in the repository — GitHub caps individual files
-at 100MB and a repo full of video becomes painful to clone.
+**Cloudflare Pages rejects any file over 25MB**, and `.gitignore` blocks `*.mp4`
+anyway, so video never ships with the site.
 
-Put full videos on **Cloudflare R2** (10GB free, and critically **zero egress
-fees** — bandwidth, not storage, is what actually costs money with self-hosted
-video). Paste the resulting URL into the `video` field. Long pieces can go to
-Vimeo instead via `embed`.
+Put it on **Cloudflare R2** — 10GB free and, critically, **zero egress fees**.
+With self-hosted video, bandwidth is the cost that bites, not storage. Upload the
+file, copy its public URL, paste it into the `video` field. Long pieces can go to
+Vimeo via `embed` instead.
 
----
+### Before the first deploy
 
-## 6. Admin panel (not set up yet)
-
-The plan is **Sveltia CMS** — free, open source, and it writes to this same
-`projects.json`. You'd get `yoursite.com/admin`: log in, fill a form, upload a
-still, publish. It requires the GitHub route above, because that's where it
-stores and versions content.
-
-Sveltia rather than the better-known Decap because Decap is barely maintained now;
-Sveltia is a drop-in rewrite with a much better media library.
-
-Not built yet — ask when you want it.
+- [ ] Delete `garskey-direction.html` (old mockup, wrong studio name)
+- [ ] Upload `hero1.mp4`, `hero-poster.jpg` and `Nyawiji.mp4` to R2 and replace
+      the paths with their URLs — right now all three 404 (§8.1)
+- [ ] Replace `hello@putrategar.studio` with the real address
+- [ ] Add a favicon
+- [ ] Decide whether `/admin/` should ship (harmless and `noindex`, but it is a
+      public URL)
 
 ---
+
+## 6. Admin panel
+
+Open **`/admin/`** in the browser (with the local server running, that's
+<http://localhost:5173/admin/>). It is a single file with no dependencies, no
+account, and no server — it edits `data/projects.json` directly on your disk.
+
+### Using it
+
+1. Open `/admin/` — **the content loads by itself**, no dialog
+2. Click any row to expand its form; edit the fields
+3. **Save** — the first time ever, it asks which file to write (choose
+   `data/projects.json`) and then grants write permission. It remembers the
+   file from then on, so later saves are one click
+4. Commit in VS Code as usual (§4)
+
+**Reload from disk** re-reads the file, discarding unsaved edits — useful after
+a `git pull`. **Choose file…** is only for when the automatic load fails, or to
+point at a different copy.
+
+The file is remembered in IndexedDB, not the file *contents* — nothing about your
+work is stored in the browser.
+
+Rows can be reordered with ↑ / ↓ (array order is display order), copied with
+**Duplicate**, or removed with **Delete**. **Add project** puts a new blank entry
+at the top.
+
+### What it checks before saving
+
+Save stays disabled while anything is wrong, and a panel lists every problem:
+
+- Missing slug or title
+- A slug that is duplicated, or not lowercase-with-hyphens
+- A category outside the four valid ones
+- Runtime that is not a whole number above zero, or a year that is not four digits
+- A YouTube **watch** link in the embed field — an iframe needs the `/embed/`
+  form, so it warns rather than letting you ship a blank player
+
+It also previews the poster image live and tells you if the path resolves to
+nothing.
+
+### Browser support
+
+Writing in place uses the File System Access API — **Chrome or Edge**. Firefox
+and Safari still work, but **Save** downloads `projects.json` and you replace
+the file in `data/` yourself. The page detects this and says so.
+
+### Notes
+
+- Saving reformats the file with 2-space indentation. The **first** save will
+  therefore produce a large diff; every one after that is clean.
+- The `categories` array is preserved untouched — edit it by hand for now.
+- Deploying `/admin/` publicly is harmless (it can only write to a file you pick
+  in a dialog, and it carries `noindex`), but you can exclude it if you'd rather.
+- The page makes **no network requests at all** — it only reads the file you
+  choose in the dialog. So it also works by opening `admin/index.html` directly
+  from disk, without a server. (The rest of the site does not; it needs one.)
+- **If you use VS Code Live Server**, saving from the panel changes
+  `projects.json`, which makes Live Server reload the page — and the reload
+  drops the open file, so you have to pick it again. Either use the Python
+  server for content work, or add the `ignoreFiles` setting shown in §1.
 
 ## 7. Design system quick reference
 
@@ -310,32 +420,89 @@ passes WCAG AA contrast in both.
 **Typeface** is Inter Tight, loaded from Google Fonts via `@import` at the top of
 `site.css`. It needs an internet connection; offline it falls back to the system
 sans-serif and looks noticeably different. Self-hosting the font is a later
-improvement.
+improvement — `@import` is also the slowest way to load a webfont, since the
+browser must fetch and parse `site.css` before it even discovers the font.
+
+### Motion
+
+| Where | What |
+| --- | --- |
+| Hero headline | Per-word rise from blur. An inline script in `index.html` wraps each word in a `.wd` span (before first paint, so the plain headline never flashes); each animates `wd-in` — 0.72s, up from `translateY(.62em)` and `blur(14px)` — on an 80ms stagger. Word-level rather than per-letter, so a word can never break across two lines. |
+| Hero background | Looping muted video behind the text at 50% opacity. |
+| Cards without a poster | 8 generated SVG frames that pointer position scrubs through. |
+| Home-page grid | Packed "pinboard" layout (`layout: 'pins'`). Fixed column count per breakpoint — 4 / 3 / 2 / 1 — with each card given a row span matching its own height, so cards pack instead of aligning into ragged rows. Reading order stays left-to-right. |
+| Cards with a poster | Still image, gentle zoom on hover. |
+| Touch devices | No hover, so each card plays its build once as it scrolls into view. |
+
+The headline keeps working with JavaScript disabled — the split simply doesn't
+happen and the sentence renders normally.
 
 ---
 
 ## 8. Known gaps
 
-Honest list of what isn't finished:
+### Open bugs
 
-1. **Image field added — `poster`.** Each project now takes a `poster` field
-   (path relative to the site root, e.g. `assets/acme.jpg`). When set it shows a
-   real still on the card *and* as the video's poster; leave it `""` to keep the
-   generated placeholder art. Drop your stills in `assets/` and fill the field.
-2. **All content is placeholder.** The eight projects are invented. Client names,
-   summaries, and runtimes are fake.
-3. **`hello@putrategar.studio` is a guess.** Replace it with the real address —
-   it appears on the home, works, services, and about pages.
-4. **Project URLs use a query string** (`/works/project/?p=slug`) rather than
-   `/works/acme-launch/`. That's the cost of having no build step. A small
-   generator script could produce clean URLs later.
-5. **Client-side rendering.** The work grid is built by JavaScript, so it's
-   weaker for SEO than pre-rendered HTML. Google executes JS and will index it,
-   but it's a real trade-off.
-6. **`garskey-direction.html`** in the root is the superseded single-page mockup
-   under the old studio name. Delete it before launching.
-7. **The "Brand" category** exists as a fourth mode. The sitemap diagram only
-   showed three (Explainer, Product, Event) — confirm whether Brand stays.
+1. **Missing media files.** `index.html` points at `assets/hero1.mp4` and
+   `assets/hero-poster.jpg`; the `testing` project points at
+   `assets/Nyawiji.mp4`. **None of these files exist** — all three return 404, so
+   the hero panel is empty and that project page shows a dead player.
+
+   Worse, `.gitignore` excludes `*.mp4`, so adding them locally still won't get
+   them to GitHub or Cloudflare. Resolve it one of two ways:
+   - Host the videos on Cloudflare R2 or Vimeo and put the **URL** in
+     `video` / `embed` (recommended — see §5), or
+   - Keep them local and add a deliberate exception to `.gitignore`, accepting
+     that they bloat the repo permanently.
+
+   The hero loop in particular should be a heavily compressed 3–6 second file,
+   not a full render — it downloads on every visit, including on mobile data.
+
+2. **Content mismatch.** The `testing` project still carries Ledgerline's
+   summary about reconciliation software.
+
+3. **Inconsistent escaping.** `cardHTML()` escapes everything through `esc()`,
+   but `works/project/index.html` interpolates `p.embed`, `p.title`, `p.summary`,
+   `p.client`, `p.role` and `p.tools` straight into `innerHTML`. Harmless while
+   you write the JSON by hand; a real hole if that file ever comes from elsewhere.
+
+4. **The hero video ignores `prefers-reduced-motion`.** An autoplaying loop is
+   exactly what that setting exists to suppress. There is also no scrim behind
+   the hero text, so legibility depends entirely on the footage.
+
+5. **No favicon** — every page load logs a 404.
+
+6. **`document.body.className = 'c-' + p.category`** on the project page
+   overwrites rather than adds, destroying any other body class.
+
+### Deliberate trade-offs
+
+7. **All content is placeholder** apart from the first entry. Client names,
+   summaries and runtimes are invented.
+
+8. **`hello@putrategar.studio` is a guess.** Replace it — it appears on the home,
+   works, services and about pages.
+
+9. **Project URLs use a query string** (`/works/project/?p=slug`) rather than
+    `/works/acme-launch/`. The cost of having no build step; a small generator
+    could produce clean URLs later.
+
+10. **Client-side rendering.** The work grid is built by JavaScript, so it is
+    weaker for SEO than pre-rendered HTML. Google executes JS and will index it,
+    but it is a real trade-off.
+
+11. **Header and footer are duplicated across 9 pages.** Changing a nav item
+    means 9 edits. Fine at this size; the first thing that will decay.
+
+12. **Generated card art is heavy.** With no posters, `/works/` ships 64 inline
+    SVGs (~986 nodes, ~120KB of grid HTML). Each real `poster` removes one
+    card's worth.
+
+13. **`garskey-direction.html`** in the root is the superseded mockup under the
+    old studio name. Delete it before launching.
+
+16. **The "Brand" category** exists as a fourth mode, but the sitemap only showed
+    three (Explainer, Product, Event). Confirm whether it stays.
 
 ---
 
@@ -349,3 +516,8 @@ Honest list of what isn't finished:
 | Cards look plain / wrong font | `site.css` didn't load, or no internet for Google Fonts. |
 | Theme toggle resets when navigating | `theme.js` isn't loading — it must be in `<head>` on every page, before the stylesheet renders. |
 | Clicking a card 404s | `slug` doesn't match, or you're viewing a stale copy of `projects.json` — hard-refresh with `Ctrl+Shift+R`. |
+| Hero area is an empty panel | `assets/hero1.mp4` is missing (§8.1). |
+| Project page shows a broken player | The `video` path points at a file that isn't there — check it resolves, and remember `.gitignore` excludes `*.mp4` (§8.1). |
+| Card shows generated art, not my still | `poster` is empty, or the path is wrong. The admin panel (§6) previews it and flags a bad path. |
+| Admin panel's Save button stays greyed out | Something failed validation — the panel above the list names every problem. |
+| Admin panel downloads a file instead of saving | Firefox or Safari. Use Chrome or Edge to write in place (§6). |

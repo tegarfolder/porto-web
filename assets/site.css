@@ -71,16 +71,16 @@ nav a[aria-current="page"]{color:var(--fg)}
 .hero.center .inner{position:relative;z-index:1;
   padding:0 clamp(12px,4vw,64px)}
 .hero.center .lab{display:block;padding-bottom:clamp(20px,3.4vh,34px)}
-/* Character-offset glitch reveal. An inline script (see index.html) splits the
-   headline into .ch spans; each letter staggers in with a chromatic split
-   (--event / --product) that shakes out to a clean rest. The last letter
-   lands ~1.3s in, echoing the old wipe's beat. */
+/* Per-word rise. An inline script (see index.html) wraps each word in a .wd
+   span; they lift into place out of a blur, staggered left to right, with the
+   last word landing ~1.3s in. Split at word boundaries rather than per letter
+   so a word can never break across two lines. */
 .lede{position:relative;display:block}
 .lede h1{font-weight:800;line-height:1.02;letter-spacing:-.035em;
   font-size:clamp(29px,4.5vw,64px);max-width:19ch;margin:0 auto;
   text-wrap:balance}
-.lede h1 .ch{display:inline-block;
-  animation:ch-in .44s cubic-bezier(.19,1,.22,1) both}
+.lede h1 .wd{display:inline-block;
+  animation:wd-in .72s cubic-bezier(.22,.74,.24,1) both}
 .lede p{color:var(--dim);font-size:clamp(15px,1.5vw,18px);line-height:1.5;
   max-width:46ch;margin:18px auto 0;letter-spacing:-.01em}
 
@@ -93,16 +93,9 @@ nav a[aria-current="page"]{color:var(--fg)}
 .btn:hover,.btn:focus-visible{border-color:var(--fg)}
 .btn.solid{background:var(--fg);color:var(--ink);border-color:var(--fg)}
 .btn.solid:hover,.btn.solid:focus-visible{opacity:.85}
-@keyframes ch-in{
-  0%{opacity:0;transform:translate(-.5em,.12em) skewX(-10deg);
-     text-shadow:-3px 0 var(--event),3px 0 var(--product)}
-  15%{opacity:1;text-shadow:3px 0 var(--event),-3px 0 var(--product)}
-  30%{text-shadow:-2px 0 var(--event),2px 0 var(--product)}
-  45%{text-shadow:2px 0 var(--event),-2px 0 var(--product)}
-  60%{text-shadow:-1px 0 var(--event),1px 0 var(--product)}
-  75%{transform:translate(.06em,-.06em) skewX(3deg);
-      text-shadow:1px 0 var(--event),-1px 0 var(--product)}
-  100%{opacity:1;transform:translate(0,0) skewX(0);text-shadow:none}
+@keyframes wd-in{
+  from{opacity:0;transform:translateY(.62em);filter:blur(14px)}
+  to{opacity:1;transform:translateY(0);filter:blur(0)}
 }
 .disc{display:flex;gap:14px 22px;flex-wrap:wrap;justify-content:center;
   padding:clamp(26px,4vh,42px) 0 6px}
@@ -255,7 +248,37 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
   nav a{padding:12px 0}
   .mode{min-height:44px;padding:11px 13px}
 }
+/* ---------- packed ("pinterest") grid ----------
+   Used for the home-page selection. Column count is fixed per breakpoint and
+   each card spans as many 8px rows as its own height needs, so cards pack
+   tightly instead of leaving the ragged gaps a fixed-row grid produces when
+   16:9 and 4:5 cards share a row. Row spans are set by layoutPins() in
+   site.js. Reading order stays left-to-right, unlike CSS multi-column. */
+.grid.pins{grid-template-columns:repeat(4,1fr);
+  align-items:start;row-gap:0;column-gap:clamp(12px,1.4vw,20px);
+  padding-bottom:64px}
+/* The 1px row unit only applies once layoutPins() has set every span — the
+   .packed class is its signal. Without it (JS blocked or failed) the grid
+   falls back to normal auto rows: aligned rather than packed, but readable,
+   instead of every card collapsing into a 1px track and overlapping. */
+.grid.pins.packed{grid-auto-rows:1px}
+/* Vertical spacing is the card's own margin, not row-gap: a row-gap would be
+   counted inside every span and leave dead space under the taller cards.
+   With 1px rows the span math is exact. */
+.grid.pins .card{margin-bottom:clamp(16px,2vw,26px)}
+.grid.pins .card,
+.grid.pins .card.w8,
+.grid.pins .card.w4{grid-column:auto}
+.grid.pins .meta{padding-top:8px}
+.grid.pins .meta h3{font-size:14px;letter-spacing:-.02em}
+.grid.pins .tc{font-size:12.5px}
+.grid.pins .cat,.grid.pins .fmt{font-size:9.5px;letter-spacing:.12em}
+.grid.pins .track{margin-top:9px}
+@media (max-width:1199px){.grid.pins{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:860px){.grid.pins{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:430px){.grid.pins{grid-template-columns:1fr}}
+
 @media (prefers-reduced-motion:reduce){
-  .lede h1 .ch{animation:none}
+  .lede h1 .wd{animation:none;filter:none}
   *{transition-duration:.01ms !important;animation-duration:.01ms !important}
 }
