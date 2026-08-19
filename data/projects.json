@@ -19,6 +19,11 @@
       "slug": "brand",
       "name": "Brand",
       "blurb": "Motion systems: how a logo behaves, how a transition resolves, what moves and what never does."
+    },
+    {
+      "slug": "exploration",
+      "name": "Exploration",
+      "blurb": "Self-initiated pieces — technique tests, style frames, and things made to find out what happens."
     }
   ],
   "projects": [
@@ -125,18 +130,18 @@
       "poster": ""
     },
     {
-      "slug": "frame-festival",
-      "title": "Frame Festival",
-      "category": "event",
-      "client": "Frame",
+      "slug": "grain-study",
+      "title": "Grain Study",
+      "category": "exploration",
+      "client": "Self-initiated",
       "year": 2025,
       "seconds": 19,
-      "format": "4:5",
+      "format": "1:1",
       "span": 4,
       "featured": false,
       "role": "Design, animation",
       "tools": "After Effects",
-      "summary": "Festival sting. Nineteen seconds, one gesture, no dialogue.",
+      "summary": "A loop testing how far film grain can carry a flat vector composition.",
       "video": "",
       "embed": "",
       "poster": ""

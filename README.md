@@ -82,9 +82,10 @@ If the count says "loading" forever, the server isn't serving `data/projects.jso
 index.html               Home
 works/index.html         All work + category cards
 works/explainer/         ┐
-works/product/           │ one page per category
-works/event/             │
-works/brand/             ┘
+works/product/           │
+works/event/             │ one page per category
+works/brand/             │
+works/exploration/       ┘
 works/project/           Project template — reads ?p=<slug>
 services/index.html      Services
 about/index.html         About
@@ -153,7 +154,7 @@ strongest piece first.
 | --- | --- |
 | `slug` | Becomes the URL. Unique, lowercase, hyphens, no spaces. Changing it breaks any existing link to that project. |
 | `title` | Shown on the card and as the page heading. |
-| `category` | Must be exactly `explainer`, `product`, `event`, or `brand`. A typo hides the piece from its category page. |
+| `category` | Must be exactly `explainer`, `product`, `event`, `brand`, or `exploration`. A typo hides the piece from its category page. |
 | `client` | Shown in the project specs. |
 | `year` | Number, not a string. |
 | `seconds` | Runtime in seconds. Sets the displayed timecode **and** the length of the duration bar, which is scaled against your longest piece. |
@@ -363,7 +364,7 @@ Save stays disabled while anything is wrong, and a panel lists every problem:
 
 - Missing slug or title
 - A slug that is duplicated, or not lowercase-with-hyphens
-- A category outside the four valid ones
+- A category outside the five valid ones
 - Runtime that is not a whole number above zero, or a year that is not four digits
 - A non-embeddable video URL. Paste any normal YouTube or Vimeo share link
   (`watch?v=`, `youtu.be/`, `/shorts/`, `vimeo.com/123`) and it is **rewritten
@@ -412,6 +413,8 @@ remembered in `localStorage` under `pt-theme`.
 | `--product` | `#136D7B` | `#56C5D0` |
 | `--event` | `#A82F60` | `#E0609B` |
 | `--brand` | `#5040A8` | `#8B7BE8` |
+| `--exploration` | `#14713F` | `#5ED08C` |
+| `--scrim` | `rgba(10,10,12,.72)` — same in both | |
 
 Each accent is tuned separately per theme rather than inverted, so all text
 passes WCAG AA contrast in both.
@@ -432,7 +435,7 @@ browser must fetch and parse `site.css` before it even discovers the font.
 | Where | What |
 | --- | --- |
 | Hero headline | Per-word rise from blur. An inline script in `index.html` wraps each word in a `.wd` span (before first paint, so the plain headline never flashes); each animates `wd-in` — 0.72s, up from `translateY(.62em)` and `blur(14px)` — on an 80ms stagger. Word-level rather than per-letter, so a word can never break across two lines. |
-| Hero background | Looping muted video behind the text at 50% opacity. |
+| Hero background | Looping muted video, **full-bleed** — it breaks out of `.shell`'s 1440px cap with a `100vw` + `translateX(-50%)` centre-out, so it runs edge to edge on any screen while the text stays on the grid. `object-fit: cover` crops it. A `--scrim` overlay sits between video and text: the footage is unknown, so the scrim is what guarantees contrast rather than the frame. **The hero is a dark island in both themes** — `.hero.center` redefines `--fg`, `--dim`, `--dimmer`, `--ink`, `--line`, `--art` and the four accents for that subtree only, so the copy is white on a dark scrim even in light mode while the rest of the page follows the theme normally. Under `prefers-reduced-motion` the video pauses (not hidden) so its poster frame remains. |
 | Cards without a poster | 8 generated SVG frames that pointer position scrubs through. |
 | Card thumbnails | Preference order: explicit `poster` → YouTube still derived from `embed` → generated art. YouTube stills come from `img.youtube.com/vi/<id>/maxresdefault.jpg`, falling back to `mqdefault.jpg`. Only those two are true 16:9 — `hqdefault` and `sddefault` are 4:3 with black bars. Videos never uploaded in HD return either a 404 **or a 200 carrying a 120×90 grey placeholder**, so the fallback triggers on both. |
 | Card shapes | Six ratios, defined once in `FORMATS` in `assets/site.js` (mirrored in `admin/index.html`). Each entry carries the CSS ratio for the box and a viewBox for the generated art, so placeholder artwork stays in proportion at any shape. |
@@ -476,13 +479,9 @@ happen and the sentence renders normally.
    escapes everything. Harmless while you write the JSON yourself; a real hole
    if that file ever comes from somewhere else.
 
-4. **The hero video ignores `prefers-reduced-motion`.** An autoplaying loop is
-   exactly what that setting exists to suppress. There is also no scrim behind
-   the hero text, so legibility depends entirely on the footage.
+4. **No favicon** — every page load logs a 404.
 
-5. **No favicon** — every page load logs a 404.
-
-6. **`document.body.className = 'c-' + p.category`** on the project page
+5. **`document.body.className = 'c-' + p.category`** on the project page
    overwrites rather than adds, destroying any other body class.
 
 ### Deliberate trade-offs

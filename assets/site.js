@@ -314,4 +314,21 @@ async function renderGrid({ filter = null, limit = null, hrefBase = 'project/',
   } catch (e) { fail(el, e); }
 }
 
+/* ---------- hero background ----------
+   An autoplaying loop is exactly what prefers-reduced-motion exists to
+   suppress. Pausing rather than hiding keeps the poster frame on screen, so
+   the hero still has an image. */
+function initHero() {
+  const v = document.querySelector('.hero-bg video');
+  if (!v) return;
+  const still = matchMedia('(prefers-reduced-motion:reduce)');
+  const apply = () => {
+    if (still.matches) { v.autoplay = false; v.pause(); }
+    else if (v.paused) { v.play().catch(() => {}); }
+  };
+  still.addEventListener('change', apply);
+  apply();
+}
+
 initTheme();
+initHero();
