@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <title>Content — Putra Tegar</title>
 <link rel="stylesheet" href="../assets/site.css">
 <script src="../assets/theme.js"></script>
@@ -128,7 +129,19 @@
  * ------------------------------------------------------------------ */
 
 const CATS   = ['explainer', 'product', 'event', 'brand'];
-const FORMATS= ['16:9', '4:5'];
+/* Keep in step with FORMATS in assets/site.js. Ordered widest to tallest. */
+const FORMATS = ['21:9', '16:9', '4:3', '1:1', '4:5', '9:16'];
+const FORMAT_LABEL = {
+  '21:9': '21:9 — cinematic',
+  '16:9': '16:9 — landscape',
+  '4:3':  '4:3 — standard',
+  '1:1':  '1:1 — square',
+  '4:5':  '4:5 — portrait',
+  '9:16': '9:16 — vertical'
+};
+/* height ÷ width, for the "how tall will this card be" hint */
+const FORMAT_RATIO = { '21:9': 9/21, '16:9': 9/16, '4:3': 3/4,
+                       '1:1': 1, '4:5': 5/4, '9:16': 16/9 };
 const SPANS  = [4, 6, 8];
 const CAN_FS = 'showOpenFilePicker' in window;
 
@@ -138,6 +151,18 @@ const CAN_FS = 'showOpenFilePicker' in window;
    /embed/ form is frameable. Paste any normal share link and toEmbed()
    rewrites it; EMBED_OK is what validation insists on. */
 const EMBED_OK = /^https:\/\/(www\.)?(youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/|player\.vimeo\.com\/video\/)/;
+
+/* Mirrors ytThumbs() in assets/site.js — the admin page does not load it. */
+const YT_ID = /(?:youtube(?:-nocookie)?\.com\/(?:embed\/|watch\?(?:.*&)?v=|shorts\/|live\/)|youtu\.be\/)([\w-]{6,})/;
+
+function ytThumbs(url) {
+  const m = url && String(url).match(YT_ID);
+  if (!m) return null;
+  return {
+    best: 'https://img.youtube.com/vi/' + m[1] + '/maxresdefault.jpg',
+    fallback: 'https://img.youtube.com/vi/' + m[1] + '/mqdefault.jpg'
+  };
+}
 
 function toEmbed(url) {
   if (!url) return url;
@@ -362,10 +387,25 @@ function render() {
         field(p, 'title', 'Title', { wide: 6, rerender: true }),
         field(p, 'slug', 'Slug (URL)', { wide: 6, hint: 'Used in the address. Changing it breaks existing links.' }),
         field(p, 'category', 'Category', { options: CATS, rerender: true }),
-        field(p, 'format', 'Format', { options: FORMATS, hint: '4:5 makes a portrait card' }),
+        field(p, 'format', 'Format', {
+          options: FORMATS, labels: FORMAT_LABEL, rerender: true,
+          hint: 'Aspect ratio of the card and the still.'
+        }),
         field(p, 'span', 'Card width', {
-          options: SPANS, numericOption: true,
-          labels: { 4: '4 — narrow', 6: '6 — half', 8: '8 — wide' }
+          options: SPANS, numericOption: true, rerender: true,
+          labels: { 4: '4 — narrow', 6: '6 — half', 8: '8 — wide' },
+          /* On the works page span sets the width and format sets the height,
+             so a tall ratio in a wide slot produces a monstrous card. The home
+             page is unaffected — its packed grid has fixed columns. */
+          hint: (() => {
+            const w = { 4: 391, 6: 597, 8: 802 }[p.span];
+            const r = FORMAT_RATIO[p.format];
+            if (!w || !r) return 'Width on the works page. Ignored on phones.';
+            const h = Math.round(w * r);
+            return (h > 900 ? '⚠ ' : '') +
+              `≈ ${w}×${h}px on the works page` +
+              (h > 900 ? ' — very tall, consider a narrower width' : '');
+          })()
         }),
         field(p, 'seconds', 'Runtime (seconds)', {
           number: true,
@@ -389,22 +429,42 @@ function render() {
       prev.className = 'f w6';
       const plab = document.createElement('label');
       plab.textContent = 'Preview';
+      const yt = p.poster ? null : ytThumbs(p.embed);
       const img = document.createElement('img');
-      img.className = 'thumb' + (p.poster ? '' : ' hide');
+      img.className = 'thumb' + (p.poster || yt ? '' : ' hide');
       img.alt = '';
       if (p.poster) {
         img.src = /^(https?:)?\/\//.test(p.poster) || p.poster[0] === '/'
           ? p.poster : '../' + p.poster;
+      } else if (yt) {
+        img.src = yt.best;
+        img.addEventListener('error', () => { img.src = yt.fallback; }, { once: true });
       }
       const pmsg = document.createElement('div');
       pmsg.className = 'hint';
-      pmsg.textContent = p.poster ? '' : 'No poster — generated art will be used.';
-      img.addEventListener('error', () => {
-        img.classList.add('hide');
-        pmsg.textContent = 'Not found at that path. Check it against the assets folder.';
-        pmsg.style.color = 'var(--event)';
-      });
+      pmsg.textContent = p.poster ? ''
+        : yt ? 'Using the YouTube thumbnail automatically — no upload needed.'
+             : 'No poster — generated art will be used.';
+      if (p.poster) {
+        img.addEventListener('error', () => {
+          img.classList.add('hide');
+          pmsg.textContent = 'Not found at that path. Check it against the assets folder.';
+          pmsg.style.color = 'var(--event)';
+        });
+      }
       prev.append(plab, img, pmsg);
+      /* Pin the derived URL into the field, for when you want it fixed rather
+         than following whatever the video's thumbnail becomes later. */
+      if (yt) {
+        const pin = document.createElement('button');
+        pin.type = 'button'; pin.className = 'mini';
+        pin.textContent = 'Pin this URL into Poster';
+        pin.style.marginTop = '8px'; pin.style.alignSelf = 'flex-start';
+        pin.addEventListener('click', () => {
+          p.poster = yt.best; markDirty(); render();
+        });
+        prev.appendChild(pin);
+      }
       g.appendChild(prev);
 
       g.append(

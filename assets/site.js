@@ -5,6 +5,36 @@ const ROOT = document.currentScript.dataset.root || './';
 const N = 8;                       // frames per scrub strip
 const C = 'currentColor';
 
+/* Card shapes. `css` drives the actual box; `w`/`h` are the viewBox the
+   generated placeholder art is drawn into, so it stays in proportion at any
+   ratio. Keep this list in step with FORMATS in admin/index.html. */
+const FORMATS = {
+  '21:9': { css: '21/9', w: 210, h: 90  },   // cinematic
+  '16:9': { css: '16/9', w: 160, h: 90  },   // landscape
+  '4:3':  { css: '4/3',  w: 160, h: 120 },   // standard
+  '1:1':  { css: '1/1',  w: 120, h: 120 },   // square
+  '4:5':  { css: '4/5',  w: 160, h: 200 },   // portrait
+  '9:16': { css: '9/16', w: 90,  h: 160 }    // vertical
+};
+const shapeOf = f => FORMATS[f] || FORMATS['16:9'];
+
+/* ---------- YouTube thumbnails ----------
+   A project with a YouTube embed already has a still on Google's CDN, so it
+   needs no poster of its own. maxresdefault only exists when the video was
+   uploaded in HD — older uploads 404 — hence the fallback. Only maxresdefault
+   (1280x720) and mqdefault (320x180) are true 16:9; hqdefault and sddefault
+   are 4:3 with black bars baked in, so they are deliberately not used. */
+const YT_ID = /(?:youtube(?:-nocookie)?\.com\/(?:embed\/|watch\?(?:.*&)?v=|shorts\/|live\/)|youtu\.be\/)([\w-]{6,})/;
+
+function ytThumbs(url) {
+  const m = url && String(url).match(YT_ID);
+  if (!m) return null;
+  return {
+    best: 'https://img.youtube.com/vi/' + m[1] + '/maxresdefault.jpg',
+    fallback: 'https://img.youtube.com/vi/' + m[1] + '/mqdefault.jpg'
+  };
+}
+
 const tc  = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -91,13 +121,21 @@ function art(kind, t, W, H) {
 }
 
 /* ---------- cards ---------- */
-function cardHTML(p, maxSeconds, hrefBase) {
-  const vert = p.format === '4:5', W = 160, H = vert ? 200 : 90;
-  /* A real still wins over the generated scrub art. With a poster the card
-     shows the image (gentle zoom on hover); without one it falls back to the
-     8-frame artwork that pointer-scrub animates. */
+function cardHTML(p, maxSeconds, hrefBase, index = 99) {
+  const shape = shapeOf(p.format), W = shape.w, H = shape.h;
+  /* Card image, in order of preference: an explicit poster, then the YouTube
+     still derived from the embed, then the generated scrub artwork. */
+  const yt = p.poster ? null : ytThumbs(p.embed);
+  /* The first cards are above the fold on every breakpoint; lazy-loading them
+     delays the largest paint for no saving. */
+  const eager = index < 2;
+  const loadAttr = eager
+    ? 'loading="eager"' + (index === 0 ? ' fetchpriority="high"' : '')
+    : 'loading="lazy"';
   const media = p.poster
-    ? `<img class="poster" src="${esc(assetUrl(p.poster))}" alt="" loading="lazy">`
+    ? `<img class="poster" src="${esc(assetUrl(p.poster))}" alt="" ${loadAttr}>`
+    : yt
+    ? `<img class="poster" src="${esc(yt.best)}" data-fallback="${esc(yt.fallback)}" alt="" ${loadAttr}>`
     : Array.from({ length: N }, (_, k) =>
         `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="${k === N-1 ? 'on' : ''}" aria-hidden="true">${art(p.category, .12 + .88 * k / (N-1), W, H)}</svg>`
       ).join('');
@@ -105,7 +143,7 @@ function cardHTML(p, maxSeconds, hrefBase) {
   const cat = p.category[0].toUpperCase() + p.category.slice(1);
   return `<a class="card w${p.span} c-${p.category}" href="${hrefBase}?p=${p.slug}"
     aria-label="${esc(p.title)} — ${cat}, ${tc(p.seconds)}">
-    <div class="frame" style="aspect-ratio:${vert ? '4/5' : '16/9'}">${media}</div>
+    <div class="frame" style="aspect-ratio:${shape.css}">${media}</div>
     <div class="track"><span class="fill" style="width:${width}%"></span><span class="head" style="left:0"></span></div>
     <div class="meta"><h3>${esc(p.title)}</h3><span class="tc">${tc(p.seconds)}</span></div>
     <div class="under"><span class="cat">${cat}</span><span class="fmt">${p.format}</span></div>
@@ -121,6 +159,24 @@ function wireCards(scope) {
       mqHover.matches ? 'Hover a card to scrub' : 'Tap a card to open';
     mqHover.addEventListener('change', setHint); setHint();
   }
+
+  /* Videos never uploaded in HD have no maxresdefault. YouTube signals that
+     two different ways: sometimes a 404, but often a 200 carrying a 120x90
+     grey placeholder — which fires `load`, not `error`. Listening for the
+     error alone leaves that placeholder stretched across the card, so treat
+     any implausibly small image as a miss too. */
+  scope.querySelectorAll('img.poster[data-fallback]').forEach(img => {
+    const swap = () => {
+      if (!img.dataset.fallback) return;
+      const next = img.dataset.fallback;
+      delete img.dataset.fallback;
+      img.src = next;
+    };
+    const check = () => { if (img.naturalWidth && img.naturalWidth <= 120) swap(); };
+    img.addEventListener('error', swap);
+    img.addEventListener('load', check);
+    if (img.complete) img.naturalWidth === 0 ? swap() : check();
+  });
 
   const cards = [...scope.querySelectorAll('.card')].map(card => {
     const svgs = card.querySelectorAll('svg');
@@ -246,7 +302,7 @@ async function renderGrid({ filter = null, limit = null, hrefBase = 'project/',
     if (filter) list = list.filter(p => p.category === filter);
     if (limit)  list = list.filter(p => p.featured).slice(0, limit);
     const max = Math.max(...list.map(p => p.seconds));
-    el.innerHTML = list.map(p => cardHTML(p, max, hrefBase)).join('');
+    el.innerHTML = list.map((p, i) => cardHTML(p, max, hrefBase, i)).join('');
 
     const count = document.getElementById('count');
     if (count) {

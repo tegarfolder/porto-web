@@ -157,15 +157,15 @@ strongest piece first.
 | `client` | Shown in the project specs. |
 | `year` | Number, not a string. |
 | `seconds` | Runtime in seconds. Sets the displayed timecode **and** the length of the duration bar, which is scaled against your longest piece. |
-| `format` | `16:9` (landscape card) or `4:5` (portrait card). |
-| `span` | Grid width: `8` wide, `6` half, `4` narrow. Ignored on phones. |
+| `format` | Card and still aspect ratio. One of `21:9` (cinematic), `16:9` (landscape), `4:3` (standard), `1:1` (square), `4:5` (portrait), `9:16` (vertical). |
+| `span` | Grid width on `/works/`: `8` wide, `6` half, `4` narrow. Ignored on phones, and ignored entirely on the home page (its packed grid uses fixed columns). **`span` sets the width and `format` sets the height**, so a tall ratio in a wide slot makes a huge card — `9:16` at span 8 is about 802×1426px. The admin panel shows the resulting size and warns past 900px. |
 | `featured` | `true` makes it eligible for the home page, which shows the first 4 featured pieces. |
 | `role` | e.g. "Script, design, animation". |
 | `tools` | e.g. "After Effects, Cinema 4D". |
 | `summary` | One or two sentences on the project page. |
 | `video` | Direct URL to an MP4. Leave `""` if unused. |
 | `embed` | YouTube/Vimeo **embed** URL — `https://www.youtube.com/embed/ID` or `https://player.vimeo.com/video/ID`. A `watch?v=` link will not render in a frame. The admin panel converts share links for you. Leave `""` if unused. |
-| `poster` | Thumbnail still, used on the card and as the video poster. Paths are **relative to the site root** (`assets/name.jpg`) or absolute URLs. Leave `""` for the generated placeholder art. |
+| `poster` | Thumbnail still. Paths are **relative to the site root** (`assets/name.jpg`) or absolute URLs. Leave `""` and, if `embed` is a YouTube link, the card uses **YouTube's own thumbnail automatically** — nothing to upload. Falls back to the generated art only when there is neither. |
 
 Content paths (`video`, `poster`) are written **relative to the site root**, not
 to the page — the renderer resolves the correct depth automatically, so
@@ -434,6 +434,8 @@ browser must fetch and parse `site.css` before it even discovers the font.
 | Hero headline | Per-word rise from blur. An inline script in `index.html` wraps each word in a `.wd` span (before first paint, so the plain headline never flashes); each animates `wd-in` — 0.72s, up from `translateY(.62em)` and `blur(14px)` — on an 80ms stagger. Word-level rather than per-letter, so a word can never break across two lines. |
 | Hero background | Looping muted video behind the text at 50% opacity. |
 | Cards without a poster | 8 generated SVG frames that pointer position scrubs through. |
+| Card thumbnails | Preference order: explicit `poster` → YouTube still derived from `embed` → generated art. YouTube stills come from `img.youtube.com/vi/<id>/maxresdefault.jpg`, falling back to `mqdefault.jpg`. Only those two are true 16:9 — `hqdefault` and `sddefault` are 4:3 with black bars. Videos never uploaded in HD return either a 404 **or a 200 carrying a 120×90 grey placeholder**, so the fallback triggers on both. |
+| Card shapes | Six ratios, defined once in `FORMATS` in `assets/site.js` (mirrored in `admin/index.html`). Each entry carries the CSS ratio for the box and a viewBox for the generated art, so placeholder artwork stays in proportion at any shape. |
 | Home-page grid | Packed "pinboard" layout (`layout: 'pins'`). Fixed column count per breakpoint — 4 / 3 / 2 / 1 — with each card given a row span matching its own height, so cards pack instead of aligning into ragged rows. Reading order stays left-to-right. |
 | Cards with a poster | Still image, gentle zoom on hover. |
 | Touch devices | No hover, so each card plays its build once as it scrolls into view. |
