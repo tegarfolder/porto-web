@@ -21,7 +21,7 @@ npm-debug.log*
 # "video" or "embed" field in data/projects.json instead.
 #
 # Poster stills and images ARE fine to commit — they're small.
-*.mp4
+# *.mp4
 *.mov
 *.webm
 *.avi
