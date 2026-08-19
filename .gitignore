@@ -23,7 +23,7 @@ npm-debug.log*
 # Poster stills and images ARE fine to commit — they're small.
 # *.mp4
 *.mov
-*.webm
+# *.webm
 *.avi
 *.mkv
 

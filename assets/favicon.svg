@@ -1,5 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="10" fill="#111111"/>
-  <path d="M16 14h21c8 0 13 5 13 12s-5 12-13 12H25v12h-9V14zm9 8v8h11c3 0 5-1 5-4s-2-4-5-4H25z" fill="#f4f1e8"/>
-  <path d="M16 50h9v-8h-9v8z" fill="#e85d3f"/>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 28.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 64 64" style="enable-background:new 0 0 64 64;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#111111;}
+	.st1{fill:#F4F1E8;}
+	.st2{fill:#E85D3F;}
+</style>
+<rect class="st0" width="64" height="64"/>
+<path class="st1" d="M37,14H16v8l9,3.8V22h11c3,0,5,1,5,4s-2,4-5,4H16v20h9V38h12c8,0,13-5,13-12S45,14,37,14z"/>
+<path class="st2" d="M16,50h9v-8h-9V50z"/>
 </svg>

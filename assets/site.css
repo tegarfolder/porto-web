@@ -25,10 +25,17 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
+html{scroll-padding-top:80px}
 body{background:var(--ink);color:var(--fg);font-family:var(--sans);
   -webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;
   transition:background-color .3s ease,color .3s ease}
 .shell{max-width:1440px;margin:0 auto;padding:0 var(--gut)}
+/* Fixed glass nav sits on top of the hero footage. Body gets top padding
+   equal to the header height so non-hero pages clear the fixed bar; body's
+   overflow-x:hidden establishes a block formatting context, so the padding
+   won't collapse with the first section's margin. On hero pages the hero
+   pulls itself up under the bar with a negative top margin instead. */
+body:not(.has-hero){padding-top:64px}
 .rule{border-top:1px solid var(--line-soft)}
 img,video{max-width:100%;display:block}
 
@@ -42,10 +49,36 @@ img,video{max-width:100%;display:block}
   text-transform:uppercase;color:var(--dimmer)}
 
 /* ---------- header ---------- */
-header{display:flex;align-items:center;gap:clamp(14px,2vw,26px);
-  height:64px;border-bottom:1px solid var(--line-soft)}
-.mark{font-size:17px;font-weight:900;letter-spacing:-.035em;
-  text-transform:uppercase;color:inherit;text-decoration:none}
+/* Fixed glassmorphism bar: full-bleed, translucent, blurred. Sits over the
+   hero footage on the home page and over the page bg elsewhere. Content is
+   kept aligned with .shell via padding that grows on wide screens. */
+header{position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;gap:clamp(14px,2vw,26px);
+  height:64px;
+  padding-inline:max(var(--gut),calc((100vw - 1440px)/2 + var(--gut)));
+  background:color-mix(in srgb,var(--ink) 62%,transparent);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  backdrop-filter:blur(14px) saturate(140%);
+  border-bottom:1px solid var(--line-soft)}
+/* On hero pages the bar floats over footage, so the bg is more transparent
+   and the bottom border lighter. The nav text also flips to light values
+   (matching the hero's own tokens) so it stays legible over the dark footage
+   in light mode — same as it reads in dark mode. */
+.has-hero header{
+  --fg:#EDEDF0;
+  --dim:#D2D2DC;
+  --dimmer:#C4C4D0;
+  --line:rgba(255,255,255,.30);
+  color:var(--fg);
+  background:rgba(10,10,12,.26);
+  -webkit-backdrop-filter:blur(16px) saturate(160%);
+  backdrop-filter:blur(16px) saturate(160%);
+  border-bottom-color:rgba(255,255,255,.12)}
+.mark{display:inline-flex;align-items:center;gap:8px;
+  font-size:17px;font-weight:900;letter-spacing:-.035em;
+  color:inherit;text-decoration:none}
+.mark-icon{width:28px;height:28px;display:block;flex:none;
+  border-radius:5px}
 nav{display:flex;gap:clamp(14px,1.6vw,26px);margin-left:auto}
 nav a{color:var(--dim);text-decoration:none;font-size:13.5px;font-weight:500;
   letter-spacing:-.008em}
@@ -58,9 +91,13 @@ nav a[aria-current="page"]{color:var(--fg)}
 .mode:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 
 /* ---------- hero ---------- */
-.hero{padding:clamp(56px,10vh,112px) 0 clamp(36px,5vh,56px)}
+/* On hero pages the shell sits at the top of the viewport (body has no
+   padding-top), so the hero box starts at 0 — its footage runs to the top of
+   the screen, under the fixed glass nav. The nav height is added to the
+   hero's top padding so the copy keeps its original vertical position. */
+.hero{padding:calc(64px + clamp(56px,10vh,112px)) 0 clamp(36px,5vh,56px)}
 .hero.center{text-align:center;position:relative;
-  padding:clamp(62px,12vh,132px) 0 clamp(44px,7vh,76px);
+  padding:calc(64px + clamp(62px,12vh,132px)) 0 clamp(44px,7vh,76px);
   /* The hero is a dark island in BOTH themes. Footage reads better against a
      dark ground, and the copy sits on the scrim rather than on the page — so
      these tokens are redefined for this subtree only. Everything inside reads

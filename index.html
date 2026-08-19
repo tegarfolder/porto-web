@@ -9,11 +9,11 @@
 <link rel="stylesheet" href="assets/site.css">
 <script src="assets/theme.js"></script>
 </head>
-<body>
+<body class="has-hero">
 <div class="shell">
 
   <header>
-    <a class="mark" href="./">Putra Tegar</a>
+    <a class="mark" href="./"><img class="mark-icon" src="assets/favicon.svg" alt="" width="28" height="28">Putra Tegar</a>
     <nav>
       <a href="works/">Works</a>
       <a href="services/">Services</a>
@@ -26,14 +26,14 @@
     <!-- Showreel slot. Drop in when the loop exists:
          <video src="…" autoplay muted loop playsinline poster="…"></video> -->
     <div class="hero-bg" aria-hidden="true">
-      <video src="assets/hero.mp4" autoplay muted loop playsinline poster="assets/hero1.png"></video>
+      <video src="assets/hero.webm" autoplay muted loop playsinline poster="assets/hero1.png"></video>
     </div>
 
     <div class="inner">
       <!-- <span class="lab">Motion graphics &mdash; Jakarta &middot; Remote</span> -->
       <div class="lede">
         <!-- <h1>We animate the part people keep not getting.</h1> -->
-        <h1>Static is boring, your brand deserves to move.</h1>
+        <h1>Static is boring, your&nbsp;brand&nbsp;deserves&nbsp;to&nbsp;move.</h1>
         <p>Explainer, product, event, and brand films. Script and storyboard
         first, animation second.</p>
       </div>
@@ -47,17 +47,28 @@
         var h1 = document.querySelector('.lede h1');
         if (!h1) return;
         var text = h1.textContent;
-        h1.setAttribute('aria-label', text);
+        h1.setAttribute('aria-label', text.replace(/\u00A0/g, ' '));
+        /* Words joined by non-breaking spaces (U+00A0) must stay on one line,
+           so "your brand deserves to move" never splits across lines. Split
+           only on regular whitespace to form &nbsp;-bound groups, then wrap
+           each multi-word group in a nowrap span. The .wd spans inside still
+           rise one word at a time. */
         var i = 0;
-        h1.innerHTML = text.split(/(\s+)/).map(function (part) {
-          if (!part || /^\s+$/.test(part)) return part;
-          var delay = 120 + (i++) * 80;
-          var safe = part.replace(/&/g, '&amp;')
-                         .replace(/</g, '&lt;')
-                         .replace(/>/g, '&gt;');
-          return '<span class="wd" aria-hidden="true" style="animation-delay:' +
-                 delay + 'ms">' + safe + '</span>';
-        }).join('');
+        h1.innerHTML = text.split(/[ \t\r\n\f\v]+/).filter(Boolean).map(function (group) {
+          var words = group.split(/\u00A0+/);
+          var spans = words.map(function (word) {
+            var delay = 120 + (i++) * 80;
+            var safe = word.replace(/&/g, '&amp;')
+                           .replace(/</g, '&lt;')
+                           .replace(/>/g, '&gt;');
+            return '<span class="wd" aria-hidden="true" style="animation-delay:' +
+                   delay + 'ms">' + safe + '</span>';
+          });
+          var inner = spans.join(' ');
+          return words.length > 1
+            ? '<span class="wd-grp" style="white-space:nowrap">' + inner + '</span>'
+            : inner;
+        }).join(' ');
       })();
       </script>
       <div class="cta">
