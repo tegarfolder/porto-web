@@ -2,7 +2,6 @@
    No build step: every page pulls data/projects.json and renders from it. */
 
 const ROOT = document.currentScript.dataset.root || './';
-const N = 8;                       // frames per scrub strip
 const C = 'currentColor';
 
 /* Card shapes. `css` drives the actual box; `w`/`h` are the viewBox the
@@ -73,7 +72,9 @@ function initTheme() {
 
 
 /* ---------- placeholder frame art ----------
-   Stands in for real stills until the CMS has them. Draws in currentColor
+   Stands in for real stills until a project has a poster or a YouTube embed.
+   A single static illustration per category, drawn at its fully-resolved
+   state (t=1) — no build-on animation, no frame strip. Draws in currentColor
    so a card inherits its category accent and follows the theme. */
 function art(kind, t, W, H) {
   const cx = W / 2, cy = H / 2, e = t * t * (3 - 2 * t), g = [];
@@ -123,10 +124,10 @@ function art(kind, t, W, H) {
 }
 
 /* ---------- cards ---------- */
-function cardHTML(p, maxSeconds, hrefBase, index = 99) {
+function cardHTML(p, hrefBase, index = 99) {
   const shape = shapeOf(p.format), W = shape.w, H = shape.h;
   /* Card image, in order of preference: an explicit poster, then the YouTube
-     still derived from the embed, then the generated scrub artwork. */
+     still derived from the embed, then a single generated illustration. */
   const yt = p.poster ? null : ytThumbs(p.embed);
   /* The first cards are above the fold on every breakpoint; lazy-loading them
      delays the largest paint for no saving. */
@@ -138,30 +139,17 @@ function cardHTML(p, maxSeconds, hrefBase, index = 99) {
     ? `<img class="poster" src="${esc(assetUrl(p.poster))}" alt="" ${loadAttr}>`
     : yt
     ? `<img class="poster" src="${esc(yt.best)}" data-fallback="${esc(yt.fallback)}" alt="" ${loadAttr}>`
-    : Array.from({ length: N }, (_, k) =>
-        `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="${k === N-1 ? 'on' : ''}" aria-hidden="true">${art(p.category, .12 + .88 * k / (N-1), W, H)}</svg>`
-      ).join('');
-  const width = (p.seconds / maxSeconds * 100).toFixed(1);
+    : `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${art(p.category, 1, W, H)}</svg>`;
   const cat = p.category[0].toUpperCase() + p.category.slice(1);
   return `<a class="card w${p.span} c-${p.category}" href="${hrefBase}?p=${p.slug}"
     aria-label="${esc(p.title)} — ${cat}, ${tc(p.seconds)}">
     <div class="frame" style="aspect-ratio:${shape.css}">${media}</div>
-    <div class="track"><span class="fill" style="width:${width}%"></span><span class="head" style="left:0"></span></div>
     <div class="meta"><h3>${esc(p.title)}</h3><span class="tc">${tc(p.seconds)}</span></div>
     <div class="under"><span class="cat">${cat}</span><span class="fmt">${p.format}</span></div>
   </a>`;
 }
 
 function wireCards(scope) {
-  const mqHover = matchMedia('(hover:hover) and (pointer:fine)');
-  const still = matchMedia('(prefers-reduced-motion:reduce)').matches;
-  const hint = document.getElementById('hint');
-  if (hint) {
-    const setHint = () => hint.textContent =
-      mqHover.matches ? 'Hover a card to scrub' : 'Tap a card to open';
-    mqHover.addEventListener('change', setHint); setHint();
-  }
-
   /* Videos never uploaded in HD have no maxresdefault. YouTube signals that
      two different ways: sometimes a 404, but often a 200 carrying a 120x90
      grey placeholder — which fires `load`, not `error`. Listening for the
@@ -179,55 +167,6 @@ function wireCards(scope) {
     img.addEventListener('load', check);
     if (img.complete) img.naturalWidth === 0 ? swap() : check();
   });
-
-  const cards = [...scope.querySelectorAll('.card')].map(card => {
-    const svgs = card.querySelectorAll('svg');
-    const head = card.querySelector('.head');
-    const bar  = card.querySelector('.fill');
-    const frame = card.querySelector('.frame');
-    let cur = N - 1;
-    const set = k => {
-      k = Math.max(0, Math.min(N - 1, k));
-      if (k === cur) return;
-      if (svgs.length) {
-        svgs[cur].classList.remove('on'); svgs[k].classList.add('on');
-      }
-      cur = k;
-    };
-    const seek = p => {
-      set(Math.floor(p * N));
-      head.style.left = (p * parseFloat(bar.style.width)) + '%';
-      head.style.opacity = 1;
-    };
-    const rest = () => { set(N - 1); head.style.left = '0%'; head.style.removeProperty('opacity'); };
-
-    /* Bound to pointerType, not a load-time media query — a tablet with a
-       mouse attached still gets the scrub. */
-    frame.addEventListener('pointermove', ev => {
-      if (ev.pointerType !== 'mouse') return;
-      const r = frame.getBoundingClientRect();
-      seek(Math.min(.999, Math.max(0, (ev.clientX - r.left) / r.width)));
-    });
-    frame.addEventListener('pointerleave', ev => { if (ev.pointerType === 'mouse') rest(); });
-    return { card, seek, rest, played: false };
-  });
-
-  /* Touch has no hover, so the build plays itself once as each card scrolls in. */
-  if (!mqHover.matches && !still && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver(es => es.forEach(e => {
-      const c = cards.find(x => x.card === e.target);
-      if (!e.isIntersecting || !c || c.played) return;
-      c.played = true;
-      const t0 = performance.now(), dur = 780;
-      const step = now => {
-        const p = Math.min(1, (now - t0) / dur);
-        c.seek(p * .999);
-        if (p < 1) requestAnimationFrame(step); else setTimeout(c.rest, 220);
-      };
-      requestAnimationFrame(step);
-    }), { threshold: .45 });
-    cards.forEach(c => io.observe(c.card));
-  }
 }
 
 /* ---------- packed grid ----------
@@ -303,8 +242,7 @@ async function renderGrid({ filter = null, limit = null, hrefBase = 'project/',
     let list = d.projects;
     if (filter) list = list.filter(p => p.category === filter);
     if (limit)  list = list.filter(p => p.featured).slice(0, limit);
-    const max = Math.max(...list.map(p => p.seconds));
-    el.innerHTML = list.map((p, i) => cardHTML(p, max, hrefBase, i)).join('');
+    el.innerHTML = list.map((p, i) => cardHTML(p, hrefBase, i)).join('');
 
     const count = document.getElementById('count');
     if (count) {
