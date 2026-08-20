@@ -57,9 +57,42 @@
     const next = d.projects[(i + 1) % d.projects.length];
     const cat = p.category[0].toUpperCase() + p.category.slice(1);
 
+    /* Playback params are applied here rather than stored in projects.json, so
+       the saved URL stays clean and this behaviour can change without
+       re-saving every project.
+
+       No autoplay, deliberately: browsers block sound-on autoplay outright, so
+       autoplay and audio are mutually exclusive. The piece is meant to be heard
+       from frame one, so the visitor presses play and gets sound immediately —
+       rather than autostarting silent and missing half the sound design.
+
+       controls=1 also gives YouTube's native hide-on-idle behaviour: the bar
+       fades out during playback while the pointer is away and returns on mouse
+       move. That cannot be built ourselves — the iframe is cross-origin, so its
+       UI is unreachable from this page.
+
+       rel=0 does NOT remove recommendations; since 2018 it only limits them to
+       this same channel. loop does more for that goal, by never letting the
+       video reach the end screen where they appear most prominently. Looping
+       requires playlist=<id> alongside it.
+
+       showinfo and modestbranding are deprecated and no longer do anything.
+    */
+    const ytPlayback = url => {
+      const id = (url.match(/embed\/([\w-]+)/) || [])[1];
+      if (!id || !/youtube(-nocookie)?\.com\/embed\//.test(url)) return url;
+      const q = new URLSearchParams({
+        controls: '1', rel: '0',
+        playsinline: '1', iv_load_policy: '3', loop: '1', playlist: id
+      });
+      return url.split('?')[0] + '?' + q;
+    };
+
     let player;
-    if (p.embed)      player = `<iframe src="${esc(p.embed)}" title="${esc(p.title)}"
-      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    /* `autoplay` stays in allow= so re-enabling it is a one-line change to
+       ytPlayback above; without it the iframe would be refused permission. */
+    if (p.embed)      player = `<iframe src="${esc(ytPlayback(p.embed))}" title="${esc(p.title)}"
+      allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       referrerpolicy="strict-origin-when-cross-origin"
       allowfullscreen loading="lazy"></iframe>`;
     else if (p.video) player = `<video src="${assetUrl(p.video)}" controls playsinline preload="metadata"${p.poster ? ` poster="${esc(assetUrl(p.poster))}"` : ''}></video>`;
