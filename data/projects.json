@@ -29,19 +29,23 @@
   "social": [
     {
       "platform": "instagram",
-      "url": "https://instagram.com/"
+      "url": "https://www.instagram.com/tegarfolder/"
     },
     {
       "platform": "behance",
-      "url": "https://behance.net/"
+      "url": "https://www.behance.net/tegarfolder"
     },
     {
       "platform": "linkedin",
-      "url": "https://linkedin.com/in/"
+      "url": "https://www.linkedin.com/in/tegarfolder"
     },
     {
-      "platform": "youtube",
-      "url": "https://youtube.com/"
+      "platform": "github",
+      "url": "https://github.com/tegarfolder"
+    },
+    {
+      "platform": "upwork",
+      "url": "https://www.upwork.com/freelancers/~01ddb56de5cad8ffc9?mp_source=share"
     }
   ],
   "projects": [
@@ -80,37 +84,37 @@
       "poster": ""
     },
     {
-      "slug": "halo-kettle",
-      "title": "Halo Kettle",
-      "category": "product",
-      "client": "Halo",
-      "year": 2026,
-      "seconds": 38,
-      "format": "9:16",
-      "span": 4,
-      "featured": true,
-      "role": "Design, animation",
-      "tools": "Cinema 4D, After Effects",
-      "summary": "A vertical cut for launch day. One object, one rotation, one temperature curve.",
+      "slug": "travie",
+      "title": "Travie, Travel and Selfie",
+      "category": "event",
+      "client": "Northbound",
+      "year": 2021,
+      "seconds": 11,
+      "format": "16:9",
+      "span": 6,
+      "featured": false,
+      "role": "Design, Animation",
+      "tools": "After Effects",
+      "summary": "An Intro for travel TV show",
       "video": "",
-      "embed": "",
+      "embed": "https://www.youtube.com/embed/F8V7gy8jOnU",
       "poster": ""
     },
     {
-      "slug": "northbound-26",
-      "title": "Northbound 26",
+      "slug": "distory",
+      "title": "Distory - Diary of Story",
       "category": "event",
-      "client": "Northbound",
-      "year": 2026,
-      "seconds": 22,
-      "format": "1:1",
-      "span": 4,
-      "featured": false,
-      "role": "Design, animation",
-      "tools": "After Effects",
-      "summary": "Conference open for a 4:5 stage screen. Built to loop without a visible seam.",
+      "client": "Eleven™ Entertainment",
+      "year": 2022,
+      "seconds": 30,
+      "format": "16:9",
+      "span": 6,
+      "featured": true,
+      "role": "Design, Animation",
+      "tools": "Adobe Illustrator, After Effects",
+      "summary": "A vertical cut for launch day. One object, one rotation, one temperature curve.",
       "video": "",
-      "embed": "",
+      "embed": "https://www.youtube.com/embed/yAa8SkJLWwc",
       "poster": ""
     },
     {
