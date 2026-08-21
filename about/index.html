@@ -51,6 +51,13 @@
           <dt>Available</dt><dd>Taking projects</dd>
         </dl>
       </div>
+
+      <!-- Filled from data/projects.json; the whole block stays hidden when no
+           links are set, so an empty list never leaves a stray heading. -->
+      <div id="social-block" hidden style="padding-top:26px">
+        <span class="lab">Elsewhere</span>
+        <div class="social" id="social"></div>
+      </div>
     </div>
   </section>
 
@@ -75,5 +82,13 @@
 
 </div>
 <script src="../assets/site.js" data-root="../"></script>
+<script src="../assets/social.js"></script>
+<script>
+data().then(d => {
+  if (renderSocialRow(document.getElementById('social'), d.social)) {
+    document.getElementById('social-block').hidden = false;
+  }
+}).catch(() => { /* leave the block hidden */ });
+</script>
 </body>
 </html>

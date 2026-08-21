@@ -8,6 +8,9 @@
 <title>Content — Putra Tegar</title>
 <link rel="stylesheet" href="../assets/site.css">
 <script src="../assets/theme.js"></script>
+<!-- SOCIAL / SOCIAL_KEYS come from here, shared with the About page so the
+     list of platforms is defined in exactly one place. -->
+<script src="../assets/social.js"></script>
 <style>
   body{padding-bottom:120px}
   .bar{position:sticky;top:0;z-index:20;background:var(--ink);
@@ -71,6 +74,29 @@
     background:var(--art);margin-top:4px}
   .thumb.hide{display:none}
 
+  .socbox{border:1px solid var(--line);background:var(--card);
+    margin-bottom:22px;padding:0 14px}
+  .socbox summary{cursor:pointer;padding:13px 0;font-weight:600;font-size:15px;
+    letter-spacing:-.015em;user-select:none}
+  .socbox[open] summary{border-bottom:1px solid var(--line-soft);
+    margin-bottom:14px}
+  .soccount{color:var(--dimmer);font-weight:500;font-size:12.5px;
+    letter-spacing:.06em;margin-left:6px}
+  .sochelp{color:var(--dim);font-size:13px;line-height:1.55;margin-bottom:14px;
+    max-width:60ch}
+  .socrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;
+    flex-wrap:wrap}
+  .socrow .icon{width:32px;height:32px;flex:none;display:grid;
+    place-items:center;border:1px solid var(--line);color:var(--dim)}
+  .socrow .icon svg{width:15px;height:15px;fill:currentColor;display:block}
+  .socrow select{flex:0 0 150px}
+  .socrow input{flex:1 1 240px;min-width:0}
+  .socrow select,.socrow input{font:inherit;font-size:13.5px;
+    background:var(--ink);color:var(--fg);border:1px solid var(--line);
+    padding:7px 9px;border-radius:0}
+  .socrow.invalid input{border-color:var(--event)}
+  .socbox > button{margin:6px 0 16px}
+
   .empty{border:1px dashed var(--line);padding:34px 20px;text-align:center;
     color:var(--dim);font-size:15px}
   .issues{border:1px solid var(--event);padding:12px 14px;margin-bottom:16px;
@@ -117,6 +143,15 @@
   </p>
 
   <div id="issues"></div>
+
+  <details class="socbox" id="socbox">
+    <summary>Social links <span class="soccount" id="soccount"></span></summary>
+    <p class="sochelp">Shown as an icon row on the About page, in this order.
+    Leave the list empty to hide the row entirely.</p>
+    <div id="soclist"></div>
+    <button class="btn" id="socadd" type="button">Add link</button>
+  </details>
+
   <div id="list"></div>
 
 </div>
@@ -217,7 +252,97 @@ function validate() {
         ? 'Not the embeddable form — click out of the field and it will be converted'
         : 'Must be a YouTube or Vimeo embed URL (a watch link will not load in a frame)';
   });
-  return doc.projects.reduce((n, p) => n + Object.keys(p._err).length, 0);
+  const projectErrs = doc.projects.reduce((n, p) => n + Object.keys(p._err).length, 0);
+
+  /* Social rows: a row with neither field filled is just an empty slot the
+     user hasn't finished — it gets dropped on save rather than blocking it.
+     A half-filled row is a real mistake and does block. */
+  let socialErrs = 0;
+  (doc.social || []).forEach(s => {
+    s._err = '';
+    const hasUrl = s.url && s.url.trim();
+    if (!s.platform && !hasUrl) return;
+    if (!s.platform) s._err = 'Pick a platform';
+    else if (!hasUrl) s._err = 'Add the URL';
+    else if (!/^https?:\/\/.+/i.test(s.url.trim()))
+      s._err = 'Must start with https://';
+    if (s._err) socialErrs++;
+  });
+
+  return projectErrs + socialErrs;
+}
+
+/* ---------- social links editor ---------- */
+function renderSocial() {
+  const box = $('soclist');
+  if (!box) return;
+  box.innerHTML = '';
+  const list = doc.social || [];
+
+  $('soccount').textContent = list.length
+    ? '— ' + list.length + (list.length === 1 ? ' link' : ' links') : '— none yet';
+
+  list.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'socrow' + (s._err ? ' invalid' : '');
+
+    /* Live mark, so it's obvious which platform a row is without reading. */
+    const icon = document.createElement('span');
+    icon.className = 'icon';
+    const ic = SOCIAL[s.platform];
+    icon.innerHTML = ic
+      ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ic.path}"/></svg>`
+      : '';
+    row.appendChild(icon);
+
+    const sel = document.createElement('select');
+    sel.setAttribute('aria-label', 'Platform');
+    sel.appendChild(new Option('Platform…', ''));
+    SOCIAL_KEYS.forEach(k => {
+      const o = new Option(SOCIAL[k].title, k);
+      if (k === s.platform) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', () => {
+      s.platform = sel.value; markDirty(); render();
+    });
+    row.appendChild(sel);
+
+    const url = document.createElement('input');
+    url.type = 'url';
+    url.placeholder = 'https://…';
+    url.value = s.url || '';
+    url.setAttribute('aria-label', 'Profile URL');
+    url.addEventListener('input', () => { s.url = url.value; markDirty(); });
+    url.addEventListener('change', () => render());
+    row.appendChild(url);
+
+    const mk = (txt, title, fn, off) => {
+      const b = document.createElement('button');
+      b.className = 'mini'; b.type = 'button';
+      b.textContent = txt; b.title = title; b.setAttribute('aria-label', title);
+      b.disabled = !!off;
+      b.addEventListener('click', fn);
+      row.appendChild(b);
+      return b;
+    };
+    mk('↑', 'Move up', () => {
+      [list[i - 1], list[i]] = [list[i], list[i - 1]]; markDirty(); render();
+    }, i === 0);
+    mk('↓', 'Move down', () => {
+      [list[i + 1], list[i]] = [list[i], list[i + 1]]; markDirty(); render();
+    }, i === list.length - 1);
+    mk('Delete', 'Remove this link', () => {
+      list.splice(i, 1); markDirty(); render();
+    }).classList.add('del');
+
+    if (s._err) {
+      const e = document.createElement('div');
+      e.className = 'err'; e.style.flexBasis = '100%'; e.textContent = s._err;
+      row.appendChild(e);
+    }
+    box.appendChild(row);
+  });
 }
 
 function renderIssues(count) {
@@ -226,6 +351,12 @@ function renderIssues(count) {
   const lines = doc.projects.flatMap((p, i) =>
     Object.entries(p._err).map(([f, m]) =>
       `<li>#${i + 1} ${p.title || p.slug || 'untitled'} — <b>${f}</b>: ${m}</li>`));
+  /* Social rows are listed too — otherwise Save goes grey with nothing on
+     screen explaining why, since that section is collapsible. */
+  (doc.social || []).forEach((s, i) => {
+    if (s._err) lines.push(
+      `<li>Social link #${i + 1}${s.platform ? ' (' + s.platform + ')' : ''} — <b>${s._err}</b></li>`);
+  });
   box.innerHTML = `<div class="issues"><b>${count} problem${count > 1 ? 's' : ''}
     to fix before saving</b><ul>${lines.join('')}</ul></div>`;
 }
@@ -309,6 +440,7 @@ function render() {
   const problems = validate();
   renderIssues(problems);
   $('save').disabled = !dirty || problems > 0;
+  renderSocial();
 
   const list = $('list');
   list.innerHTML = '';
@@ -532,6 +664,7 @@ function load(text, name, connected) {
   }
   doc = parsed;
   doc.categories = doc.categories || [];
+  doc.social = Array.isArray(doc.social) ? doc.social : [];
   dirty = false; openIdx = -1;
   $('add').disabled = false;
   $('reload').disabled = false;
@@ -611,6 +744,13 @@ $('reload').addEventListener('click', async () => {
   await fetchContent();
 });
 
+$('socadd').addEventListener('click', () => {
+  doc.social = doc.social || [];
+  doc.social.push({ platform: '', url: '' });
+  $('socbox').open = true;
+  markDirty(); render();
+});
+
 $('add').addEventListener('click', () => {
   doc.projects.unshift({
     slug: '', title: '', category: 'explainer', client: '',
@@ -631,6 +771,8 @@ $('save').addEventListener('click', async () => {
 
   const out = {
     categories: doc.categories,
+    social: doc.social.filter(s => s.platform && s.url && s.url.trim())
+                      .map(s => ({ platform: s.platform, url: s.url.trim() })),
     projects: doc.projects.map(p => { const c = { ...p }; delete c._err; return c; })
   };
   const text = JSON.stringify(out, null, 2) + '\n';

@@ -26,6 +26,24 @@
       "blurb": "Self-initiated pieces — technique tests, style frames, and things made to find out what happens."
     }
   ],
+  "social": [
+    {
+      "platform": "instagram",
+      "url": "https://instagram.com/"
+    },
+    {
+      "platform": "behance",
+      "url": "https://behance.net/"
+    },
+    {
+      "platform": "linkedin",
+      "url": "https://linkedin.com/in/"
+    },
+    {
+      "platform": "youtube",
+      "url": "https://youtube.com/"
+    }
+  ],
   "projects": [
     {
       "slug": "brand1",
