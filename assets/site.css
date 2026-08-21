@@ -76,11 +76,12 @@ header{position:fixed;top:0;left:0;right:0;z-index:50;
   -webkit-backdrop-filter:blur(16px) saturate(160%);
   backdrop-filter:blur(16px) saturate(160%);
   border-bottom-color:rgba(255,255,255,.12)}
-.mark{justify-self:start;display:inline-flex;align-items:center;gap:8px;
+.mark{justify-self:start;display:inline-flex;align-items:center;
   font-size:17px;font-weight:900;letter-spacing:-.035em;
   color:inherit;text-decoration:none}
-.mark-icon{width:28px;height:28px;display:block;flex:none;
-  border-radius:5px}
+/* "Putra" in a lighter weight against "Tegar" at the mark's full 900 — the
+   contrast is the wordmark now, so there's no separate icon glyph. */
+.mark-thin{font-weight:400}
 /* Its own grid column (the middle 'auto' track), flanked by two equal 1fr
    columns on header — that's what makes it sit at the bar's true center
    regardless of .mark and .mode having different widths. A flex sibling with
@@ -350,7 +351,6 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
      fit the three nav links + mode button on a 360px viewport. */
   header{column-gap:10px;height:56px;padding-top:0}
   .mark{font-size:15px}
-  .mark-icon{width:24px;height:24px}
   nav{gap:14px}
   nav a{font-size:12.5px}
   .mode{width:32px;height:32px;padding:0}
@@ -376,7 +376,6 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
   /* Very narrow phones: shrink the mark and nav so the header still fits on
      one row without wrapping or overflowing. */
   .mark{font-size:14px}
-  .mark-icon{width:22px;height:22px}
   nav{gap:10px}
   nav a{font-size:11.5px}
   .mode{width:30px;height:30px;padding:0}
