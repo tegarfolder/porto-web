@@ -92,7 +92,7 @@
       "seconds": 11,
       "format": "16:9",
       "span": 6,
-      "featured": false,
+      "featured": true,
       "role": "Design, Animation",
       "tools": "After Effects",
       "summary": "An Intro for travel TV show",
