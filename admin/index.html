@@ -43,7 +43,7 @@
   .phd .tools{margin-left:auto;display:flex;gap:6px;flex:none}
   .mini{background:none;border:1px solid var(--line);color:var(--dim);
     font:inherit;font-size:11px;font-weight:600;padding:5px 9px;cursor:pointer;
-    min-width:30px;min-height:30px}
+    min-width:30px;min-height:30px;border-radius:var(--r-md)}
   .mini:hover:not(:disabled){color:var(--fg);border-color:var(--dim)}
   .mini:disabled{opacity:.35;cursor:not-allowed}
   .mini.del:hover{color:var(--event);border-color:var(--event)}
@@ -71,7 +71,7 @@
     letter-spacing:-.01em;text-transform:none}
 
   .thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line-soft);
-    background:var(--art);margin-top:4px}
+    border-radius:var(--r-lg);background:var(--art);margin-top:4px}
   .thumb.hide{display:none}
 
   .socbox{border:1px solid var(--line);background:var(--card);
