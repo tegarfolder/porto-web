@@ -127,8 +127,8 @@ Add one object to the `projects` array:
   "role": "Design, animation",
   "tools": "After Effects",
   "summary": "A sentence or two about the brief and what you did.",
-  "video": "",
-  "embed": ""
+  "poster": "",
+  "blocks": []
 }
 ```
 
@@ -164,19 +164,66 @@ strongest piece first.
 | `role` | e.g. "Script, design, animation". |
 | `tools` | e.g. "After Effects, Cinema 4D". |
 | `summary` | One or two sentences on the project page. |
-| `video` | Direct URL to an MP4. Leave `""` if unused. |
-| `embed` | YouTube/Vimeo **embed** URL — `https://www.youtube.com/embed/ID` or `https://player.vimeo.com/video/ID`. A `watch?v=` link will not render in a frame. The admin panel converts share links for you. Leave `""` if unused. |
-| `poster` | Thumbnail still. Paths are **relative to the site root** (`assets/name.jpg`) or absolute URLs. Leave `""` and, if `embed` is a YouTube link, the card uses **YouTube's own thumbnail automatically** — nothing to upload. Falls back to the generated art only when there is neither. |
+| `poster` | Grid-card thumbnail override. Paths are **relative to the site root** (`assets/name.jpg`) or absolute URLs. Leave `""` and, if the first block is a YouTube video, the card uses **YouTube's own thumbnail automatically** — nothing to upload. Falls back to the generated art only when there is neither. |
+| `blocks` | The project page's content, in order — see "Content blocks" below. |
 
-Content paths (`video`, `poster`) are written **relative to the site root**, not
-to the page — the renderer resolves the correct depth automatically, so
-`"video": "assets/demo.mp4"` works on the home page, category pages, and the
-project page alike.
+Content paths (`poster`, and any `blocks` entry using a site-relative path) are
+written **relative to the site root**, not to the page — the renderer resolves
+the correct depth automatically. In practice every block URL should just be a
+full `https://` link (an R2 URL or a provider's embed link), which is passed
+through unchanged.
 
-If both `video` and `embed` are empty, the project page shows placeholder
-artwork and the label "Video not uploaded yet". `embed` wins if both are filled.
-A `poster` also wins over the generated card artwork, and doubles as the video's
-`poster` attribute.
+If `blocks` is empty, the project page shows placeholder artwork and the label
+"Video not uploaded yet". A `poster` wins over the generated card artwork, and
+doubles as a self-hosted video block's own `poster` attribute.
+
+### Content blocks
+
+A project's page is a **stack of content blocks** — video and image, in the
+order they're listed — not a single embed. This is what makes it a case study
+rather than a one-clip player: a hero clip, then a couple of stills, then a
+detail loop, each rendered full-width in sequence. Build the stack from the
+admin panel (**Add block** → pick a type → fill it in) rather than by hand;
+each entry looks like this:
+
+```json
+{
+  "type": "video",
+  "provider": "youtube",
+  "url": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  "caption": "",
+  "autoplay": false,
+  "muted": false,
+  "loop": true,
+  "controls": true
+}
+```
+
+| Field | Notes |
+| --- | --- |
+| `type` | `"video"` or `"image"`. |
+| `provider` | `"youtube"`, `"vimeo"`, `"mux"`, `"frameio"`, `"custom"` (any iframe-embeddable URL), or `"r2"` (self-hosted — the only provider images use too). |
+| `url` | Provider-specific — see the table below. |
+| `caption` | Optional line shown under the block, e.g. `"01 — Logo animation"`. |
+| `autoplay`, `muted`, `loop`, `controls` | Video only, and ignored for `frameio`/`custom` (no stable public param API to drive). **Autoplay forces `muted`** — browsers refuse unmuted autoplay outright, so the admin panel checks Muted automatically and locks it while Autoplay is on. |
+
+| Provider | `url` is… |
+| --- | --- |
+| `youtube` | Any share/watch link — the admin panel converts it to the `youtube.com/embed/ID` form on save. |
+| `vimeo` | Any share link — converted to `player.vimeo.com/video/ID`. |
+| `mux` | A bare Playback ID, or a full `player.mux.com/…` link. |
+| `frameio` | A share link with embedding allowed on it. |
+| `custom` | Any iframe `src` — the escape hatch for a provider with no special handling. |
+| `r2` (video) | A direct file URL, e.g. `https://media.putrategar.com/loop.mp4`. Optional sibling field `poster` sets the still shown before play. |
+| `r2` (image) | A direct file URL, e.g. `https://media.putrategar.com/still.jpg`. |
+
+**Every new video block — R2 included — defaults to sound-on, click-to-play,
+controls visible.** R2 isn't always b-roll; it's just as often the main piece,
+self-hosted instead of on YouTube/Vimeo, so there's no provider-tied default.
+For the **"minimalist" treatment** — a silent, looping, chrome-free clip, the
+style case-study sites use between the main pieces — check Autoplay, Loop, and
+uncheck Controls on that one block (Muted checks and locks itself once
+Autoplay is on). It's a combination you opt into per block, not a preset.
 
 ### Editing categories
 
@@ -310,15 +357,76 @@ free and takes about two minutes. *Sending* as that address needs an SMTP
 provider (Zoho Mail's free tier is the usual choice) — set it up only if replying
 from your personal Gmail address bothers you.
 
-### Video hosting
+### Media hosting — Cloudflare R2
 
-**Cloudflare Pages rejects any file over 25MB**, and `.gitignore` blocks `*.mp4`
-anyway, so video never ships with the site.
+**Cloudflare rejects any deployed file over 25MB**, and `.gitignore` blocks
+`*.mp4`/`*.mov` anyway, so video never ships as part of the site. Full videos —
+and optionally the heavier images, like the hero loop's poster — live on
+**Cloudflare R2** instead: 10GB free, and critically **zero egress fees**. With
+self-hosted video, bandwidth is what actually costs money elsewhere; R2 removes
+that cost entirely regardless of how much gets watched. (Verify the current
+free-tier numbers on Cloudflare's own pricing page before relying on them —
+limits change.)
 
-Put it on **Cloudflare R2** — 10GB free and, critically, **zero egress fees**.
-With self-hosted video, bandwidth is the cost that bites, not storage. Upload the
-file, copy its public URL, paste it into the `video` field. Long pieces can go to
-Vimeo via `embed` instead.
+No code changes are needed for any of this. `assetUrl()` in `assets/site.js`
+already passes any `https://` URL straight through untouched — an R2 content
+block just needs the URL pasted in via the admin panel, exactly like a
+YouTube embed URL.
+
+**1. Create the bucket**
+Dashboard → **R2 Object Storage** → **Create bucket**. Name it something like
+`putrategar-media`. Location: **Automatic**.
+
+**2. Give it a real domain, not `r2.dev`**
+The default `pub-xxxx.r2.dev` URL is explicitly rate-limited and not meant for
+production traffic. Since `putrategar.com` is already on Cloudflare: bucket →
+**Settings** → **Public access** → **Connect Domain** → enter something like
+`media.putrategar.com`. Cloudflare creates the DNS record and issues the
+certificate automatically — same mechanism as the site's own custom domain.
+
+**3. Turn on edge caching**
+This is the actual performance lever, and it's easy to skip by accident. R2
+doesn't cache at the edge by default — every request can hit the bucket
+directly. Dashboard → **Caching** → **Cache Rules** → create a rule matching
+`media.putrategar.com/*` → **Cache eligibility: Eligible for cache** → set
+**Edge TTL** to something long (a week or more works well, since filenames
+below are effectively static). Once warm, repeat requests are served from
+Cloudflare's edge, not from R2 — faster for visitors, and it keeps the bucket's
+own request count low.
+
+**4. Compress before uploading — this matters more than the free storage**
+R2 removes the *cost* of a heavy file; it doesn't make a heavy file fast to
+load. For hero loops and card backgrounds specifically:
+- **H.264 MP4** is the safe universal choice — WebM/AV1 compress better but
+  Safari support is inconsistent, and a background loop isn't worth a fallback
+  chain. Target the lowest bitrate that still looks clean at the size it's
+  actually displayed at (a hero loop rarely needs more than 1080p).
+- A 3–8 second loop, muted, heavily compressed, is usually under 3–5MB.
+  If a source export comes back at 40MB+, re-export at a lower bitrate before
+  uploading rather than relying on R2/cache to absorb it.
+- Poster stills: WebP over PNG/JPEG at equivalent quality, usually 30–50%
+  smaller.
+
+**5. Upload and wire it up**
+For this project's scale (a handful of files, added one project at a time),
+drag-and-drop in the R2 dashboard is genuinely the right tool — no need for
+`rclone` or the S3-compatible API unless uploads become frequent enough to
+script. After uploading, copy the object's public URL
+(`https://media.putrategar.com/<path>`) and paste it into an **R2** content
+block (video or image) in the admin panel (§6), or into the top-level
+`poster` field for a grid-card override.
+
+**6. Naming**
+Flat and predictable beats clever: `hero-loop.mp4`, `<project-slug>.mp4`,
+`<project-slug>-poster.webp`. Since the Edge TTL above caches aggressively,
+**changing a file's content without changing its filename** means visitors may
+keep seeing the old cached version for the TTL's duration — rename on
+replacement (`hero-loop-v2.mp4`) rather than overwriting in place, or purge the
+cache for that path after a swap.
+
+Vimeo (or Mux, or Frame.io) remains the better fit for long-form pieces — R2
+is for the video that needs to *be* the page (hero loops, minimalist b-roll
+loops between the main pieces), not a general video host.
 
 ### Before the first deploy
 
@@ -358,6 +466,12 @@ Rows can be reordered with ↑ / ↓ (array order is display order), copied with
 **Duplicate**, or removed with **Delete**. **Add project** puts a new blank entry
 at the top.
 
+Inside an open project, the **Content** section is where the case-study body
+lives (see "Content blocks" in §3): pick a type from the dropdown, click
+**+ Add block**, fill in its URL. Each block gets its own ↑ / ↓ / Delete, and
+video blocks (other than Frame.io/Custom) get Autoplay / Muted / Loop /
+Controls checkboxes.
+
 ### What it checks before saving
 
 Save stays disabled while anything is wrong, and a panel lists every problem:
@@ -366,15 +480,16 @@ Save stays disabled while anything is wrong, and a panel lists every problem:
 - A slug that is duplicated, or not lowercase-with-hyphens
 - A category outside the five valid ones
 - Runtime that is not a whole number above zero, or a year that is not four digits
-- A non-embeddable video URL. Paste any normal YouTube or Vimeo share link
-  (`watch?v=`, `youtu.be/`, `/shorts/`, `vimeo.com/123`) and it is **rewritten
-  to the embeddable form** when you leave the field, and again on save. A
-  `watch` page sends `X-Frame-Options: SAMEORIGIN`, so an iframe pointing at
-  one renders nothing at all — no error, just a blank box. Anything that
-  cannot be converted blocks the save
+- A content block with no URL, or — for YouTube/Vimeo blocks — a non-embeddable
+  one. Paste any normal share link (`watch?v=`, `youtu.be/`, `/shorts/`,
+  `vimeo.com/123`) and it is **rewritten to the embeddable form** when you
+  leave the field, and again on save. A `watch` page sends
+  `X-Frame-Options: SAMEORIGIN`, so an iframe pointing at one renders nothing
+  at all — no error, just a blank box. Anything that cannot be converted
+  blocks the save
 
-It also previews the poster image live and tells you if the path resolves to
-nothing.
+It also previews the grid-card poster image live and tells you if the path
+resolves to nothing.
 
 ### Browser support
 
@@ -437,7 +552,7 @@ browser must fetch and parse `site.css` before it even discovers the font.
 | Hero headline | Per-word rise from blur. An inline script in `index.html` wraps each word in a `.wd` span (before first paint, so the plain headline never flashes); each animates `wd-in` — 0.72s, up from `translateY(.62em)` and `blur(14px)` — on an 80ms stagger. Word-level rather than per-letter, so a word can never break across two lines. |
 | Hero background | Looping muted video, **full-bleed** — it breaks out of `.shell`'s 1440px cap with a `100vw` + `translateX(-50%)` centre-out, so it runs edge to edge on any screen while the text stays on the grid. `object-fit: cover` crops it. A `--scrim` overlay sits between video and text: the footage is unknown, so the scrim is what guarantees contrast rather than the frame. **The hero is a dark island in both themes** — `.hero.center` redefines `--fg`, `--dim`, `--dimmer`, `--ink`, `--line`, `--art` and the four accents for that subtree only, so the copy is white on a dark scrim even in light mode while the rest of the page follows the theme normally. Under `prefers-reduced-motion` the video pauses (not hidden) so its poster frame remains. |
 | Cards without a poster | 8 generated SVG frames that pointer position scrubs through. |
-| Card thumbnails | Preference order: explicit `poster` → YouTube still derived from `embed` → generated art. YouTube stills come from `img.youtube.com/vi/<id>/maxresdefault.jpg`, falling back to `mqdefault.jpg`. Only those two are true 16:9 — `hqdefault` and `sddefault` are 4:3 with black bars. Videos never uploaded in HD return either a 404 **or a 200 carrying a 120×90 grey placeholder**, so the fallback triggers on both. |
+| Card thumbnails | Preference order: explicit `poster` → YouTube still derived from the project's **first YouTube block** → generated art. YouTube stills come from `img.youtube.com/vi/<id>/maxresdefault.jpg`, falling back to `mqdefault.jpg`. Only those two are true 16:9 — `hqdefault` and `sddefault` are 4:3 with black bars. Videos never uploaded in HD return either a 404 **or a 200 carrying a 120×90 grey placeholder**, so the fallback triggers on both. |
 | Card shapes | Six ratios, defined once in `FORMATS` in `assets/site.js` (mirrored in `admin/index.html`). Each entry carries the CSS ratio for the box and a viewBox for the generated art, so placeholder artwork stays in proportion at any shape. |
 | Home-page grid | Packed "pinboard" layout (`layout: 'pins'`). Fixed column count per breakpoint — 4 / 3 / 2 / 1 — with each card given a row span matching its own height, so cards pack instead of aligning into ragged rows. Reading order stays left-to-right. |
 | Cards with a poster | Still image, gentle zoom on hover. |
@@ -526,11 +641,11 @@ happen and the sentence renders normally.
 | Theme toggle resets when navigating | `theme.js` isn't loading — it must be in `<head>` on every page, before the stylesheet renders. |
 | Clicking a card 404s | `slug` doesn't match, or you're viewing a stale copy of `projects.json` — hard-refresh with `Ctrl+Shift+R`. |
 | Hero area is an empty panel | `assets/hero1.mp4` is missing (§8.1). |
-| Project page shows a broken player | The `video` path points at a file that isn't there — check it resolves, and remember `.gitignore` excludes `*.mp4` (§8.1). |
+| Project page shows a broken block | An `r2` block's `url` points at a file that isn't there — check it resolves, and remember `.gitignore` excludes `*.mp4` (§8.1). |
 | Card shows generated art, not my still | `poster` is empty, or the path is wrong. The admin panel (§6) previews it and flags a bad path. |
 | Admin panel's Save button stays greyed out | Something failed validation — the panel above the list names every problem. |
 | Admin panel downloads a file instead of saving | Firefox or Safari. Use Chrome or Edge to write in place (§6). |
 | Admin panel asks for the file every time | The handle could not be stored — private/incognito window, or site data was cleared. |
-| Embedded video is a blank box, no error | A `watch?v=` or `youtu.be` link in `embed`. Those send `X-Frame-Options: SAMEORIGIN` and refuse to load in a frame; only `youtube.com/embed/ID` works. Re-save via the admin panel and it converts the link. |
+| Embedded video is a blank box, no error | A `watch?v=` or `youtu.be` link on a YouTube block. Those send `X-Frame-Options: SAMEORIGIN` and refuse to load in a frame; only `youtube.com/embed/ID` works. Re-save via the admin panel and it converts the link. |
 | Video plays but fullscreen is missing | The iframe needs `allow` and `allowfullscreen` — present on the project page; check any player you hand-wrote. |
 | Home cards overlap each other | The packed grid's row spans went stale and were not recomputed. Reload the page; report it if it survives a reload. |

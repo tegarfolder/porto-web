@@ -127,8 +127,10 @@ function art(kind, t, W, H) {
 function cardHTML(p, hrefBase, index = 99) {
   const shape = shapeOf(p.format), W = shape.w, H = shape.h;
   /* Card image, in order of preference: an explicit poster, then the YouTube
-     still derived from the embed, then a single generated illustration. */
-  const yt = p.poster ? null : ytThumbs(p.embed);
+     still derived from the project's first YouTube block, then a single
+     generated illustration. */
+  const firstYt = (p.blocks || []).find(b => b.type === 'video' && b.provider === 'youtube');
+  const yt = p.poster ? null : ytThumbs(firstYt && firstYt.url);
   /* The first cards are above the fold on every breakpoint; lazy-loading them
      delays the largest paint for no saving. */
   const eager = index < 2;

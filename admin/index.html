@@ -99,6 +99,25 @@
 
   .empty{border:1px dashed var(--line);padding:34px 20px;text-align:center;
     color:var(--dim);font-size:15px}
+
+  /* ---------- content blocks ---------- */
+  .blk{border:1px solid var(--line-soft);background:var(--ink);margin-bottom:10px}
+  .blk-hd{display:flex;align-items:center;gap:10px;padding:9px 11px;
+    border-bottom:1px solid var(--line-soft);background:var(--card)}
+  .blk-kind{font-size:11px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--acc)}
+  .blk-hd .tools{margin-left:auto;display:flex;gap:6px}
+  .blk-body{padding:12px 11px;display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+  .blk-body .f{grid-column:span 6}
+  .blk-body .f.w12{grid-column:span 12}
+  .blk-body .row-check{padding-top:0;grid-column:span 3}
+  .blk-add{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:2px}
+  .blk-add select{font:inherit;font-size:13.5px;background:var(--ink);color:var(--fg);
+    border:1px solid var(--line);padding:7px 9px;border-radius:0}
+  .blk-empty{border:1px dashed var(--line);padding:16px;text-align:center;
+    color:var(--dimmer);font-size:13px;margin-bottom:10px}
+  @media (max-width:560px){.blk-body .f,.blk-body .row-check{grid-column:span 12}}
+
   .issues{border:1px solid var(--event);padding:12px 14px;margin-bottom:16px;
     font-size:13.5px;line-height:1.6;color:var(--fg)}
   .issues b{color:var(--event)}
@@ -183,9 +202,11 @@ const CAN_FS = 'showOpenFilePicker' in window;
 /* ---------- embed URLs ----------
    A youtube.com/watch page sends X-Frame-Options: SAMEORIGIN, so an iframe
    pointing at one renders nothing at all — no error, just blank. Only the
-   /embed/ form is frameable. Paste any normal share link and toEmbed()
-   rewrites it; EMBED_OK is what validation insists on. */
-const EMBED_OK = /^https:\/\/(www\.)?(youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/|player\.vimeo\.com\/video\/)/;
+   /embed/ form (YouTube) or the player.vimeo.com form (Vimeo) is frameable.
+   Paste any normal share link and toYouTubeEmbed()/toVimeoEmbed() rewrite
+   it; the *_EMBED_OK regexes are what validation insists on. */
+const YT_EMBED_OK    = /^https:\/\/(www\.)?(youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/)/;
+const VIMEO_EMBED_OK = /^https:\/\/player\.vimeo\.com\/video\//;
 
 /* Mirrors ytThumbs() in assets/site.js — the admin page does not load it. */
 const YT_ID = /(?:youtube(?:-nocookie)?\.com\/(?:embed\/|watch\?(?:.*&)?v=|shorts\/|live\/)|youtu\.be\/)([\w-]{6,})/;
@@ -199,14 +220,47 @@ function ytThumbs(url) {
   };
 }
 
-function toEmbed(url) {
+function toYouTubeEmbed(url) {
   if (!url) return url;
   const u = url.trim();
-  let m = u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([\w-]{6,})/);
-  if (m) return 'https://www.youtube.com/embed/' + m[1];
-  m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  if (m) return 'https://player.vimeo.com/video/' + m[1];
-  return u;
+  const m = u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([\w-]{6,})/);
+  return m ? 'https://www.youtube.com/embed/' + m[1] : u;
+}
+function toVimeoEmbed(url) {
+  if (!url) return url;
+  const u = url.trim();
+  const m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  return m ? 'https://player.vimeo.com/video/' + m[1] : u;
+}
+
+/* ---------- content blocks ----------
+   A project's body is a stack of blocks — video or image, any provider —
+   rendered in order on the project page: the case-study layout. Kept
+   separate from the top-level fields (title/summary/category/…), which
+   still describe the project as a whole. */
+const BLOCK_KINDS = [
+  { key: 'video:r2',      label: 'Video — R2 (self-hosted)' },
+  { key: 'video:youtube', label: 'Video — YouTube' },
+  { key: 'video:vimeo',   label: 'Video — Vimeo' },
+  { key: 'video:mux',     label: 'Video — Mux' },
+  { key: 'video:frameio', label: 'Video — Frame.io' },
+  { key: 'video:custom',  label: 'Video — Custom embed URL' },
+  { key: 'image:r2',      label: 'Image — R2' }
+];
+
+/* Every provider — R2 included — defaults to a normal sound-on, click-to-play
+   player. R2 isn't always b-roll: it's just as often the main piece, hosted
+   there instead of on YouTube/Vimeo. The "minimalist" autoplay/muted/loop/
+   no-controls treatment is one checkbox flip away when a block IS meant as
+   an ambient loop — it's an option per block, not a default tied to provider. */
+function newBlock(kind) {
+  const [type, provider] = kind.split(':');
+  const b = { type, provider, url: '', caption: '' };
+  if (type === 'video') {
+    b.autoplay = false; b.muted = false; b.loop = false; b.controls = true;
+    if (provider === 'r2') b.poster = '';
+  }
+  return b;
 }
 
 let doc = null;      // whole parsed file, categories preserved
@@ -247,12 +301,23 @@ function validate() {
       p._err.year = 'Four-digit year';
     if (!FORMATS.includes(p.format)) p._err.format = 'Pick a format';
     if (!SPANS.includes(p.span)) p._err.span = 'Pick a width';
-    if (p.embed && p.embed.trim() && !EMBED_OK.test(p.embed.trim()))
-      p._err.embed = /youtube|youtu\.be|vimeo/i.test(p.embed)
-        ? 'Not the embeddable form — click out of the field and it will be converted'
-        : 'Must be a YouTube or Vimeo embed URL (a watch link will not load in a frame)';
+
+    p._blockErrCount = 0;
+    (p.blocks || []).forEach(b => {
+      b._err = '';
+      const u = b.url && b.url.trim();
+      if (!u) b._err = 'URL required';
+      else if (b.provider === 'youtube' && !YT_EMBED_OK.test(u))
+        b._err = 'Not the embeddable form — click out of the field and it will be converted';
+      else if (b.provider === 'vimeo' && !VIMEO_EMBED_OK.test(u))
+        b._err = 'Not the embeddable form — click out of the field and it will be converted';
+      else if ((b.provider === 'frameio' || b.provider === 'custom') && !/^https:\/\//.test(u))
+        b._err = 'Must start with https://';
+      if (b._err) p._blockErrCount++;
+    });
   });
-  const projectErrs = doc.projects.reduce((n, p) => n + Object.keys(p._err).length, 0);
+  const projectErrs = doc.projects.reduce((n, p) =>
+    n + Object.keys(p._err).length + (p._blockErrCount || 0), 0);
 
   /* Social rows: a row with neither field filled is just an empty slot the
      user hasn't finished — it gets dropped on save rather than blocking it.
@@ -348,9 +413,15 @@ function renderSocial() {
 function renderIssues(count) {
   const box = $('issues');
   if (!count) { box.innerHTML = ''; return; }
-  const lines = doc.projects.flatMap((p, i) =>
-    Object.entries(p._err).map(([f, m]) =>
-      `<li>#${i + 1} ${p.title || p.slug || 'untitled'} — <b>${f}</b>: ${m}</li>`));
+  const lines = doc.projects.flatMap((p, i) => {
+    const name = p.title || p.slug || 'untitled';
+    const fieldLines = Object.entries(p._err).map(([f, m]) =>
+      `<li>#${i + 1} ${name} — <b>${f}</b>: ${m}</li>`);
+    const blockLines = (p.blocks || []).flatMap((b, bi) => b._err
+      ? [`<li>#${i + 1} ${name} — <b>block ${bi + 1} (${b.provider})</b>: ${b._err}</li>`]
+      : []);
+    return fieldLines.concat(blockLines);
+  });
   /* Social rows are listed too — otherwise Save goes grey with nothing on
      screen explaining why, since that section is collapsible. */
   (doc.social || []).forEach((s, i) => {
@@ -433,6 +504,186 @@ function checkbox(p, key, label) {
   input.addEventListener('change', () => { p[key] = input.checked; markDirty(); });
   wrap.append(input, lab);
   return wrap;
+}
+
+/* ---------- content-block field builders ----------
+   Same shape as field()/checkbox() above, but operating on a block object
+   nested inside a project rather than the project itself. */
+function blockField(b, key, label, opts = {}) {
+  const wrap = document.createElement('div');
+  wrap.className = 'f' + (opts.wide ? ' w' + opts.wide : '');
+  const id = 'blk-' + key + '-' + Math.random().toString(36).slice(2, 7);
+  const lab = document.createElement('label');
+  lab.textContent = label; lab.htmlFor = id;
+  wrap.appendChild(lab);
+
+  const input = document.createElement('input');
+  input.type = 'text'; input.id = id;
+  if (opts.placeholder) input.placeholder = opts.placeholder;
+  input.value = b[key] ?? '';
+  wrap.appendChild(input);
+
+  if (opts.errText) {
+    wrap.classList.add('invalid');
+    const e = document.createElement('div');
+    e.className = 'err'; e.textContent = opts.errText;
+    wrap.appendChild(e);
+  } else if (opts.hint) {
+    const h = document.createElement('div');
+    h.className = 'hint'; h.textContent = opts.hint;
+    wrap.appendChild(h);
+  }
+
+  input.addEventListener('input', () => { b[key] = input.value; markDirty(); });
+  if (opts.normalize) {
+    input.addEventListener('change', () => {
+      const fixed = opts.normalize(input.value);
+      if (fixed !== input.value) { input.value = fixed; b[key] = fixed; }
+      markDirty(); render();
+    });
+  }
+  return wrap;
+}
+
+function blockCheck(b, key, label, disabled) {
+  const wrap = document.createElement('div');
+  wrap.className = 'row-check';
+  if (disabled) wrap.style.opacity = '.5';
+  const input = document.createElement('input');
+  input.type = 'checkbox'; input.checked = !!b[key]; input.disabled = !!disabled;
+  input.id = 'blk-' + key + '-' + Math.random().toString(36).slice(2, 7);
+  const lab = document.createElement('label');
+  lab.textContent = label; lab.htmlFor = input.id;
+  input.addEventListener('change', () => {
+    b[key] = input.checked;
+    /* Autoplay forces Muted — browsers refuse unmuted autoplay outright. */
+    if (key === 'autoplay' && input.checked) b.muted = true;
+    markDirty(); render();
+  });
+  wrap.append(input, lab);
+  return wrap;
+}
+
+const BLOCK_URL_LABEL = {
+  r2: { video: 'R2 video URL', image: 'R2 image URL' },
+  youtube: { video: 'YouTube URL' },
+  vimeo: { video: 'Vimeo URL' },
+  mux: { video: 'Mux Playback ID' },
+  frameio: { video: 'Frame.io share link' },
+  custom: { video: 'Embed URL (iframe src)' }
+};
+const BLOCK_URL_PLACEHOLDER = {
+  r2: 'https://media.putrategar.com/…',
+  youtube: 'Paste any YouTube link',
+  vimeo: 'Paste any Vimeo link',
+  mux: 'e.g. AbC123XyZ',
+  frameio: 'https://f.io/…',
+  custom: 'https://…'
+};
+
+function renderBlocks(p) {
+  const box = document.createElement('div');
+  box.className = 'f w12';
+  const n = (p.blocks || []).length;
+  const lab = document.createElement('label');
+  lab.textContent = 'Content' + (n ? ' — ' + n + ' block' + (n === 1 ? '' : 's') : '');
+  box.appendChild(lab);
+
+  if (!n) {
+    const empty = document.createElement('div');
+    empty.className = 'blk-empty';
+    empty.textContent = 'No content blocks yet — this project page will show ' +
+      'placeholder art until you add one below.';
+    box.appendChild(empty);
+  }
+
+  (p.blocks || []).forEach((b, bi) => {
+    const kindLabel = (BLOCK_KINDS.find(k => k.key === b.type + ':' + b.provider) || {})
+      .label || (b.provider + ' ' + b.type);
+
+    const blk = document.createElement('div');
+    blk.className = 'blk';
+
+    const hd = document.createElement('div');
+    hd.className = 'blk-hd';
+    hd.innerHTML = `<span class="idx">${String(bi + 1).padStart(2, '0')}</span>
+      <span class="blk-kind">${kindLabel.replace(/^(Video|Image) — /, '')}</span>`;
+    const tools = document.createElement('span');
+    tools.className = 'tools';
+    const mkb = (txt, title, fn, off) => {
+      const btn = document.createElement('button');
+      btn.className = 'mini'; btn.type = 'button'; btn.textContent = txt;
+      btn.title = title; btn.setAttribute('aria-label', title); btn.disabled = !!off;
+      btn.addEventListener('click', fn);
+      tools.appendChild(btn);
+      return btn;
+    };
+    mkb('↑', 'Move up', () => {
+      [p.blocks[bi - 1], p.blocks[bi]] = [p.blocks[bi], p.blocks[bi - 1]];
+      markDirty(); render();
+    }, bi === 0);
+    mkb('↓', 'Move down', () => {
+      [p.blocks[bi + 1], p.blocks[bi]] = [p.blocks[bi], p.blocks[bi + 1]];
+      markDirty(); render();
+    }, bi === p.blocks.length - 1);
+    mkb('Delete', 'Remove this block', () => {
+      p.blocks.splice(bi, 1); markDirty(); render();
+    }).classList.add('del');
+    hd.appendChild(tools);
+    blk.appendChild(hd);
+
+    const body = document.createElement('div');
+    body.className = 'blk-body';
+
+    const urlLabel = (BLOCK_URL_LABEL[b.provider] || {})[b.type] || 'URL';
+    const urlOpts = { wide: 12, placeholder: BLOCK_URL_PLACEHOLDER[b.provider] || '' };
+    if (b.provider === 'youtube') urlOpts.normalize = toYouTubeEmbed;
+    if (b.provider === 'vimeo') urlOpts.normalize = toVimeoEmbed;
+    if (b._err) urlOpts.errText = b._err;
+    body.appendChild(blockField(b, 'url', urlLabel, urlOpts));
+
+    if (b.type === 'video' && b.provider === 'r2') {
+      body.appendChild(blockField(b, 'poster', 'Poster (optional)', { wide: 12,
+        placeholder: 'https://media.putrategar.com/….jpg — shown before play' }));
+    }
+
+    if (b.type === 'video' && b.provider !== 'frameio' && b.provider !== 'custom') {
+      body.appendChild(blockCheck(b, 'autoplay', 'Autoplay'));
+      body.appendChild(blockCheck(b, 'muted', 'Muted', b.autoplay));
+      body.appendChild(blockCheck(b, 'loop', 'Loop'));
+      body.appendChild(blockCheck(b, 'controls', 'Controls'));
+      if (b.autoplay) {
+        const note = document.createElement('div');
+        note.className = 'hint'; note.style.gridColumn = 'span 12';
+        note.textContent = 'Autoplay requires sound off — browsers refuse it otherwise, so Muted is forced on.';
+        body.appendChild(note);
+      }
+    }
+
+    body.appendChild(blockField(b, 'caption', 'Caption (optional)', { wide: 12,
+      placeholder: 'Shown under this block, e.g. "01 — Logo animation"' }));
+
+    blk.appendChild(body);
+    box.appendChild(blk);
+  });
+
+  const add = document.createElement('div');
+  add.className = 'blk-add';
+  const sel = document.createElement('select');
+  sel.setAttribute('aria-label', 'Block type');
+  BLOCK_KINDS.forEach(k => sel.appendChild(new Option(k.label, k.key)));
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button'; addBtn.className = 'mini';
+  addBtn.textContent = '+ Add block';
+  addBtn.addEventListener('click', () => {
+    p.blocks = p.blocks || [];
+    p.blocks.push(newBlock(sel.value));
+    markDirty(); render();
+  });
+  add.append(sel, addBtn);
+  box.appendChild(add);
+
+  return box;
 }
 
 /* ---------- render ---------- */
@@ -561,7 +812,8 @@ function render() {
       prev.className = 'f w6';
       const plab = document.createElement('label');
       plab.textContent = 'Preview';
-      const yt = p.poster ? null : ytThumbs(p.embed);
+      const firstYt = (p.blocks || []).find(b => b.type === 'video' && b.provider === 'youtube');
+      const yt = p.poster ? null : ytThumbs(firstYt && firstYt.url);
       const img = document.createElement('img');
       img.className = 'thumb' + (p.poster || yt ? '' : ' hide');
       img.alt = '';
@@ -598,19 +850,7 @@ function render() {
         prev.appendChild(pin);
       }
       g.appendChild(prev);
-
-      g.append(
-        field(p, 'video', 'Video URL', {
-          wide: 6,
-          hint: 'Self-hosted file or an R2 URL. Large files must not go in the repo.'
-        }),
-        field(p, 'embed', 'Embed URL', {
-          wide: 6, placeholder: 'Paste any YouTube or Vimeo link',
-          normalize: toEmbed,
-          hint: 'Paste a normal share link — it is converted to the embeddable '
-              + 'form automatically. Takes priority over Video URL if both are filled.'
-        })
-      );
+      g.appendChild(renderBlocks(p));
       body.appendChild(g);
     }
     el.appendChild(body);
@@ -665,6 +905,23 @@ function load(text, name, connected) {
   doc = parsed;
   doc.categories = doc.categories || [];
   doc.social = Array.isArray(doc.social) ? doc.social : [];
+  /* Migrate any pre-"blocks" project (a single top-level embed/video field)
+     into the new content-block shape, so an older file on disk still opens
+     cleanly instead of losing its media. */
+  doc.projects.forEach(p => {
+    if (!Array.isArray(p.blocks)) {
+      p.blocks = [];
+      if (p.embed) p.blocks.push({
+        type: 'video', provider: /vimeo\.com/.test(p.embed) ? 'vimeo' : 'youtube',
+        url: p.embed, caption: '', autoplay: false, muted: false, loop: true, controls: true
+      });
+      if (p.video) p.blocks.push({
+        type: 'video', provider: 'r2', url: p.video, poster: '', caption: '',
+        autoplay: false, muted: false, loop: false, controls: true
+      });
+    }
+    delete p.embed; delete p.video;
+  });
   dirty = false; openIdx = -1;
   $('add').disabled = false;
   $('reload').disabled = false;
@@ -756,7 +1013,7 @@ $('add').addEventListener('click', () => {
     slug: '', title: '', category: 'explainer', client: '',
     year: new Date().getFullYear(), seconds: 30, format: '16:9',
     span: 6, featured: false, role: '', tools: '', summary: '',
-    video: '', embed: '', poster: ''
+    poster: '', blocks: []
   });
   openIdx = 0;
   markDirty(); render();
@@ -764,16 +1021,25 @@ $('add').addEventListener('click', () => {
 });
 
 $('save').addEventListener('click', async () => {
-  /* Backstop: normalise every embed here too, so a watch URL cannot reach the
-     file even if the field never lost focus before the click. */
-  doc.projects.forEach(p => { if (p.embed) p.embed = toEmbed(p.embed); });
+  /* Backstop: normalise every embed block URL here too, so a watch link
+     cannot reach the file even if the field never lost focus before the
+     click. */
+  doc.projects.forEach(p => (p.blocks || []).forEach(b => {
+    if (b.provider === 'youtube' && b.url) b.url = toYouTubeEmbed(b.url);
+    if (b.provider === 'vimeo' && b.url) b.url = toVimeoEmbed(b.url);
+  }));
   if (validate() > 0) { render(); return; }
 
   const out = {
     categories: doc.categories,
     social: doc.social.filter(s => s.platform && s.url && s.url.trim())
                       .map(s => ({ platform: s.platform, url: s.url.trim() })),
-    projects: doc.projects.map(p => { const c = { ...p }; delete c._err; return c; })
+    projects: doc.projects.map(p => {
+      const c = { ...p };
+      delete c._err; delete c._blockErrCount;
+      c.blocks = (c.blocks || []).map(b => { const bc = { ...b }; delete bc._err; return bc; });
+      return c;
+    })
   };
   const text = JSON.stringify(out, null, 2) + '\n';
 

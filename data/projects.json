@@ -62,9 +62,19 @@
       "role": "Design, 3D Modeling, Animation",
       "tools": "",
       "summary": "",
-      "video": "",
-      "embed": "https://www.youtube.com/embed/jCzRzFXdlpg",
-      "poster": ""
+      "poster": "",
+      "blocks": [
+        {
+          "type": "video",
+          "provider": "youtube",
+          "url": "https://www.youtube.com/embed/jCzRzFXdlpg",
+          "caption": "",
+          "autoplay": false,
+          "muted": false,
+          "loop": true,
+          "controls": true
+        }
+      ]
     },
     {
       "slug": "event1",
@@ -79,9 +89,19 @@
       "role": "Layout, Animation",
       "tools": "Blender",
       "summary": "Intro video for the Anugerah Desa Nyawiji Migunani event! We brought dynamic movement and minimalist colors to make this project simple but impactful.",
-      "video": "",
-      "embed": "https://www.youtube.com/embed/Iu8wv_RQxDQ",
-      "poster": ""
+      "poster": "",
+      "blocks": [
+        {
+          "type": "video",
+          "provider": "youtube",
+          "url": "https://www.youtube.com/embed/Iu8wv_RQxDQ",
+          "caption": "",
+          "autoplay": false,
+          "muted": false,
+          "loop": true,
+          "controls": true
+        }
+      ]
     },
     {
       "slug": "travie",
@@ -96,9 +116,19 @@
       "role": "Design, Animation",
       "tools": "After Effects",
       "summary": "An Intro for travel TV show",
-      "video": "",
-      "embed": "https://www.youtube.com/embed/F8V7gy8jOnU",
-      "poster": ""
+      "poster": "",
+      "blocks": [
+        {
+          "type": "video",
+          "provider": "youtube",
+          "url": "https://www.youtube.com/embed/F8V7gy8jOnU",
+          "caption": "",
+          "autoplay": false,
+          "muted": false,
+          "loop": true,
+          "controls": true
+        }
+      ]
     },
     {
       "slug": "distory",
@@ -113,9 +143,19 @@
       "role": "Design, Animation",
       "tools": "Adobe Illustrator, After Effects",
       "summary": "A vertical cut for launch day. One object, one rotation, one temperature curve.",
-      "video": "",
-      "embed": "https://www.youtube.com/embed/yAa8SkJLWwc",
-      "poster": ""
+      "poster": "",
+      "blocks": [
+        {
+          "type": "video",
+          "provider": "youtube",
+          "url": "https://www.youtube.com/embed/yAa8SkJLWwc",
+          "caption": "",
+          "autoplay": false,
+          "muted": false,
+          "loop": true,
+          "controls": true
+        }
+      ]
     },
     {
       "slug": "onda",
@@ -130,9 +170,8 @@
       "role": "Motion system, guidelines",
       "tools": "After Effects, Figma",
       "summary": "A motion language for a wordmark that had none — entry, exit, and the three transitions the team is allowed to use.",
-      "video": "",
-      "embed": "",
-      "poster": ""
+      "poster": "",
+      "blocks": []
     },
     {
       "slug": "sift",
@@ -147,9 +186,19 @@
       "role": "Script, storyboard, animation",
       "tools": "After Effects",
       "summary": "Onboarding film cut to sit inside the product, not in front of it.",
-      "video": "",
-      "embed": "https://www.youtube.com/embed/zEAmijqLGy0",
-      "poster": ""
+      "poster": "",
+      "blocks": [
+        {
+          "type": "video",
+          "provider": "youtube",
+          "url": "https://www.youtube.com/embed/zEAmijqLGy0",
+          "caption": "",
+          "autoplay": false,
+          "muted": false,
+          "loop": true,
+          "controls": true
+        }
+      ]
     },
     {
       "slug": "tandem-cards",
@@ -164,9 +213,8 @@
       "role": "Design, animation",
       "tools": "After Effects, Figma",
       "summary": "Interface film for a card issuer. Real screens, retimed so each state holds long enough to read.",
-      "video": "",
-      "embed": "",
-      "poster": ""
+      "poster": "",
+      "blocks": []
     },
     {
       "slug": "grain-study",
@@ -181,9 +229,8 @@
       "role": "Design, animation",
       "tools": "After Effects",
       "summary": "A loop testing how far film grain can carry a flat vector composition.",
-      "video": "",
-      "embed": "",
-      "poster": ""
+      "poster": "",
+      "blocks": []
     },
     {
       "slug": "perch",
@@ -198,9 +245,8 @@
       "role": "Motion system",
       "tools": "Cinema 4D, After Effects",
       "summary": "Identity in motion for a property platform — how the mark lands, and what it does when it has to wait.",
-      "video": "",
-      "embed": "",
-      "poster": ""
+      "poster": "",
+      "blocks": []
     }
   ]
 }

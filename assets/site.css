@@ -238,12 +238,18 @@ nav a[aria-current="page"]{color:var(--fg)}
   font-variant-numeric:tabular-nums;letter-spacing:.1em}
 
 /* ---------- project page ---------- */
-/* overflow:hidden + radius clips every variant this box can hold — the
-   iframe embed, a self-hosted <video>, the poster-only <img>, and the
-   "video not uploaded yet" placeholder — without rounding each one. */
-.player{position:relative;background:var(--art);border:1px solid var(--line-soft);
-  border-radius:var(--r-lg);overflow:hidden;margin-bottom:26px}
-.player video,.player iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
+/* A case study is a stack of content blocks (video/image, any provider) in
+   the order set in the admin panel, not one single embed. Each block clips
+   its own content — iframe, self-hosted <video>, or <img> — the same way
+   .player used to; the stack just repeats that box. */
+.blocks{margin-bottom:26px}
+.block-item{margin-bottom:22px}
+.block-item:last-child{margin-bottom:0}
+.block{position:relative;background:var(--art);border:1px solid var(--line-soft);
+  border-radius:var(--r-lg);overflow:hidden}
+.block video,.block iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
+.block img{width:100%;display:block}
+.block-cap{padding-top:8px;color:var(--dimmer);font-size:12px;letter-spacing:.02em}
 .pmeta{display:grid;grid-template-columns:repeat(12,1fr);
   gap:30px clamp(16px,1.6vw,28px);padding-bottom:64px}
 .pmeta .body{grid-column:span 7}
