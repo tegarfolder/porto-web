@@ -57,7 +57,7 @@
       "year": 2024,
       "seconds": 30,
       "format": "16:9",
-      "span": 6,
+      "span": 8,
       "featured": true,
       "role": "Design, 3D Modeling, Animation",
       "tools": "",
@@ -73,6 +73,17 @@
           "muted": false,
           "loop": true,
           "controls": true
+        },
+        {
+          "type": "video",
+          "provider": "r2",
+          "url": "https://media.putrategar.com/Airing%20Now%20TV.mp4",
+          "caption": "",
+          "autoplay": false,
+          "muted": false,
+          "loop": true,
+          "controls": false,
+          "poster": ""
         }
       ]
     },
