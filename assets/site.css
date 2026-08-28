@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;800;900&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
 
 /* Light is the studio's default and wins on first load regardless of the
    viewer's OS setting. Dark is opt-in via the header toggle, and the choice
@@ -11,7 +11,7 @@
   --explainer:#8A6A00; --product:#136D7B; --event:#A82F60; --brand:#5040A8;
   --exploration:#14713F;
   --art-op:.92; --grain:.26;
-  --sans:"Inter Tight",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --sans:"General Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --gut:clamp(16px,2vw,28px);
   /* Two radii, not a scale of ten: --r-lg rounds media surfaces (thumbnails,
      the video player), --r-md rounds controls (buttons, icon links). Same
@@ -83,9 +83,9 @@ header{position:fixed;top:0;left:0;right:0;z-index:50;
   backdrop-filter:blur(16px) saturate(160%);
   border-bottom-color:rgba(255,255,255,.12)}
 .mark{justify-self:start;display:inline-flex;align-items:center;
-  font-size:17px;font-weight:900;letter-spacing:-.035em;
+  font-size:17px;font-weight:700;letter-spacing:-.035em;
   color:inherit;text-decoration:none}
-/* "Putra" in a lighter weight against "Tegar" at the mark's full 900 — the
+/* "Putra" in a lighter weight against "Tegar" at the mark's full weight — the
    contrast is the wordmark now, so there's no separate icon glyph. */
 .mark-thin{font-weight:400}
 /* Its own grid column (the middle 'auto' track), flanked by two equal 1fr
@@ -151,8 +151,8 @@ nav a[aria-current="page"]{color:var(--fg)}
    last word landing ~1.3s in. Split at word boundaries rather than per letter
    so a word can never break across two lines. */
 .lede{position:relative;display:block}
-.lede h1{font-weight:800;line-height:1.02;letter-spacing:-.035em;
-  font-size:clamp(26px,7vw,64px);max-width:19ch;margin:0 auto;
+.lede h1{font-weight:700;line-height:1.02;letter-spacing:-.035em;
+  font-size:clamp(24px,6.2vw,56px);max-width:19ch;margin:0 auto;
   text-wrap:balance}
 .lede h1 .wd{display:inline-block;
   animation:wd-in .72s cubic-bezier(.22,.74,.24,1) both}
@@ -190,7 +190,7 @@ nav a[aria-current="page"]{color:var(--fg)}
 .crumb{display:flex;gap:9px;align-items:center;padding-bottom:16px}
 .crumb a{color:var(--dimmer);text-decoration:none}
 .crumb a:hover{color:var(--fg)}
-.ptitle{font-weight:900;text-transform:uppercase;line-height:.86;
+.ptitle{font-weight:700;text-transform:uppercase;line-height:.86;
   font-size:clamp(40px,8vw,104px);letter-spacing:-.05em}
 .pblurb{font-size:clamp(17px,2vw,24px);font-weight:400;line-height:1.28;
   letter-spacing:-.022em;max-width:38ch;color:var(--dim);padding-top:20px}
@@ -198,6 +198,14 @@ nav a[aria-current="page"]{color:var(--fg)}
 /* ---------- work grid ---------- */
 .grid-head{display:flex;justify-content:space-between;align-items:baseline;
   padding:22px 0 20px;gap:20px;flex-wrap:wrap}
+/* Home page only — a fuller headline + subhead above the featured grid,
+   instead of the plain "label + count" row .grid-head carries on the
+   works/category pages. Kept as its own class so those pages are untouched. */
+.rw-head{padding:clamp(28px,4vh,48px) 0 clamp(18px,2.6vh,28px)}
+.rw-head h2{font-size:clamp(28px,3.6vw,42px);font-weight:700;line-height:1.04;
+  letter-spacing:-.03em;text-transform:uppercase;color:var(--fg)}
+.rw-head p{font-size:15.5px;line-height:1.58;color:var(--dim);max-width:50ch;
+  padding-top:12px}
 .grid{display:grid;grid-template-columns:repeat(12,1fr);
   gap:clamp(22px,2.4vw,40px) clamp(16px,1.6vw,28px);padding-bottom:84px}
 .card{grid-column:span 6;text-decoration:none;color:var(--acc);display:block;outline:none}
@@ -265,7 +273,7 @@ nav a[aria-current="page"]{color:var(--fg)}
 .nextrow{display:flex;justify-content:space-between;align-items:baseline;
   gap:20px;padding:24px 0 72px;border-top:1px solid var(--line-soft);flex-wrap:wrap}
 .nextrow a{color:var(--fg);text-decoration:none;font-size:clamp(20px,2.6vw,32px);
-  font-weight:800;letter-spacing:-.035em;text-transform:uppercase}
+  font-weight:700;letter-spacing:-.035em;text-transform:uppercase}
 .nextrow a:hover{color:var(--acc)}
 
 /* ---------- services / about ---------- */
@@ -273,7 +281,7 @@ nav a[aria-current="page"]{color:var(--fg)}
   gap:clamp(26px,3vw,46px) clamp(16px,1.6vw,28px);padding-bottom:72px}
 .svc{grid-column:span 6;border-top:1px solid var(--line);padding-top:18px;
   display:flex;flex-direction:column;gap:10px}
-.svc h2{font-size:clamp(21px,2.4vw,30px);font-weight:800;letter-spacing:-.038em;
+.svc h2{font-size:clamp(21px,2.4vw,30px);font-weight:700;letter-spacing:-.038em;
   text-transform:uppercase;color:var(--acc)}
 .svc p{color:var(--dim);font-size:15.5px;line-height:1.62;max-width:46ch}
 .svc .lab{padding-top:2px}
@@ -299,7 +307,7 @@ nav a[aria-current="page"]{color:var(--fg)}
   gap:30px clamp(16px,1.6vw,28px);padding:54px 0 26px;border-top:1px solid var(--line-soft)}
 .close .l{grid-column:span 5}
 .close .r{grid-column:8 / span 5}
-.close h2{font-size:clamp(26px,3vw,38px);font-weight:800;line-height:1;
+.close h2{font-size:clamp(26px,3vw,38px);font-weight:700;line-height:1;
   letter-spacing:-.042em;text-transform:uppercase;margin-bottom:18px}
 .close p{color:var(--dim);font-size:15.5px;line-height:1.62;max-width:44ch}
 .mailto{color:var(--fg);text-decoration:none;font-weight:500;
@@ -315,7 +323,7 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
    16:9 and 4:5 cards share a row. Row spans are set by layoutPins() in
    site.js. Reading order stays left-to-right, unlike CSS multi-column. */
 .grid.pins{grid-template-columns:repeat(4,1fr);
-  align-items:start;row-gap:0;column-gap:clamp(12px,1.4vw,20px);
+  align-items:start;row-gap:0;column-gap:clamp(8px,1vw,14px);
   padding-bottom:64px}
 /* The 1px row unit only applies once layoutPins() has set every span — the
    .packed class is its signal. Without it (JS blocked or failed) the grid
@@ -324,15 +332,35 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
 .grid.pins.packed{grid-auto-rows:1px}
 /* Vertical spacing is the card's own margin, not row-gap: a row-gap would be
    counted inside every span and leave dead space under the taller cards.
-   With 1px rows the span math is exact. */
-.grid.pins .card{margin-bottom:clamp(16px,2vw,26px)}
+   With 1px rows the span math is exact. Tight on purpose — bento, not a
+   catalogue list. */
+.grid.pins .card{margin-bottom:clamp(8px,1vw,14px)}
 .grid.pins .card,
 .grid.pins .card.w8,
 .grid.pins .card.w4{grid-column:auto}
-.grid.pins .meta{padding-top:8px}
-.grid.pins .meta h3{font-size:14px;letter-spacing:-.02em}
-.grid.pins .tc{font-size:12.5px}
-.grid.pins .cat,.grid.pins .fmt{font-size:9.5px;letter-spacing:.12em}
+
+/* Title/category/format move off the page and onto the image itself — a
+   scrim + overlay on hover, rather than a text block underneath. Because
+   .meta/.under leave normal flow, the card's flow height becomes just the
+   image's height, which is what makes layoutPins()'s packing read tight. */
+.grid.pins .card{position:relative}
+.grid.pins .frame::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(10,10,14,.86) 0%,rgba(10,10,14,.5) 40%,transparent 70%);
+  opacity:0;transition:opacity .25s}
+.grid.pins .card:hover .frame::after,
+.grid.pins .card:focus-visible .frame::after{opacity:1}
+.grid.pins .meta,.grid.pins .under{position:absolute;left:16px;right:16px;
+  margin:0;padding:0;opacity:0;transform:translateY(6px);pointer-events:none;
+  transition:opacity .22s,transform .22s}
+.grid.pins .meta{bottom:32px}
+.grid.pins .meta h3{font-size:14px;letter-spacing:-.02em;color:#fff}
+.grid.pins .tc{font-size:12.5px;color:rgba(255,255,255,.78)}
+.grid.pins .under{bottom:14px}
+.grid.pins .cat{font-size:9.5px;letter-spacing:.12em;color:#fff}
+.grid.pins .fmt{font-size:9.5px;letter-spacing:.12em;color:rgba(255,255,255,.65)}
+.grid.pins .card:hover .meta,.grid.pins .card:focus-visible .meta,
+.grid.pins .card:hover .under,.grid.pins .card:focus-visible .under{
+  opacity:1;transform:translateY(0)}
 /* column count per breakpoint — kept with the section it belongs to */
 @media (max-width:1199px){.grid.pins{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:860px){.grid.pins{grid-template-columns:repeat(2,1fr)}}

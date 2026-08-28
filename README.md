@@ -571,11 +571,16 @@ passes WCAG AA contrast in both.
 > sync — if they drift, one theme ends up rendering its text on the other
 > theme's background.
 
-**Typeface** is Inter Tight, loaded from Google Fonts via `@import` at the top of
+**Typeface** is General Sans (Fontshare), loaded via `@import` at the top of
 `site.css`. It needs an internet connection; offline it falls back to the system
 sans-serif and looks noticeably different. Self-hosting the font is a later
 improvement — `@import` is also the slowest way to load a webfont, since the
 browser must fetch and parse `site.css` before it even discovers the font.
+
+General Sans only ships weights 400/500/600/700 — there is no 800 or 900. Every
+`font-weight` in `site.css` (and the one inline in `services/index.html`) is
+capped at `700` for exactly that reason; if you ever swap in a typeface that
+does have heavier cuts, those are the declarations to raise back up.
 
 ### Motion
 
