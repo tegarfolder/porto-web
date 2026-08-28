@@ -472,6 +472,38 @@ lives (see "Content blocks" in §3): pick a type from the dropdown, click
 video blocks (other than Frame.io/Custom) get Autoplay / Muted / Loop /
 Controls checkboxes.
 
+### Publishing a new piece — start to finish
+
+This is the loop for a real project, R2 upload through to a committed change.
+One-time bucket/domain/cache setup is §5; this is what repeats every time.
+
+1. **Export and compress the file(s)** — see "Compress before uploading" in
+   §5. A loop should be a few MB; a still should be WebP.
+2. **Upload to R2** — dashboard → **R2 Object Storage** → your bucket →
+   **Objects** → drag the file(s) in.
+3. **Copy the object's public URL** — `https://media.putrategar.com/<filename>`
+   (your custom domain, never the rate-limited `r2.dev` one — §5).
+4. **Open `/admin/`**, click the project to expand it (or **Add project** for
+   a new one).
+5. Fill in the top-level fields — title, category, client, year, runtime,
+   role, tools, summary.
+6. Under **Content**, pick a type from the dropdown — **Video — R2** or
+   **Image — R2** for something you just uploaded, or YouTube/Vimeo/Mux/
+   Frame.io/Custom for something hosted elsewhere — and click **+ Add block**.
+7. Paste the URL from step 3 into the block. For a video block, set
+   Autoplay / Muted / Loop / Controls to taste (see "Content blocks" in §3
+   for what each does, and the "minimalist" muted-loop combination).
+8. Repeat 6–7 for every clip/still in the case study, **in the order they
+   should appear on the page** — reorder any block afterwards with its ↑ / ↓.
+9. **Save.** The very first save ever asks which file to write — choose
+   `data/projects.json`; every save after that is one click.
+10. Commit in VS Code as usual (§4).
+
+A **grid-card thumbnail** is separate from the case-study content: leave the
+top-level `poster` field empty and, if the first block is a YouTube video, the
+card uses YouTube's own still automatically. For anything else, paste a
+still's R2 URL (or any image URL) into `poster` to set one explicitly.
+
 ### What it checks before saving
 
 Save stays disabled while anything is wrong, and a panel lists every problem:
