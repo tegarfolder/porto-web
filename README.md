@@ -66,13 +66,15 @@ You should see, on the home page:
 
 - A centred headline whose words rise into place out of a blur, one after
   another left to right (the last word lands about 1.4s in)
-- 4 project cards below it
-- The label "Selected work — 4 pieces, 4:05 total"
+- A "Recent Works" heading, then a row of bento-style tiles — however many
+  content blocks are currently marked `featured` (§3), up to 8. Each tile's
+  title only shows on hover/focus; at rest they're plain images.
 
 The hero video panel will be empty until `assets/hero1.mp4` exists — see §8.
 
-If the count says "loading" forever, the server isn't serving `data/projects.json`
-— confirm you started the server from the project root, not a parent folder.
+If `/works/` shows "loading" forever instead of a piece count, the server
+isn't serving `data/projects.json` — confirm you started the server from the
+project root, not a parent folder.
 
 ---
 
@@ -119,12 +121,10 @@ Add one object to the `projects` array:
   "title": "Acme Launch",
   "category": "product",
   "client": "Acme",
-  "year": 2026,
-  "seconds": 47,
   "format": "16:9",
   "span": 6,
   "featured": false,
-  "role": "Design, animation",
+  "tags": "product, launch",
   "tools": "After Effects",
   "summary": "A sentence or two about the brief and what you did.",
   "poster": "",
@@ -137,7 +137,7 @@ One entry automatically produces all of this:
 - A card on `/works/`
 - A card on its category page
 - Its own page at `/works/project/?p=acme-launch`
-- Updated counts ("8 pieces, 6:19 total" and the per-category tallies)
+- An updated piece count on `/works/` and the per-category tallies
 
 ### Remove a project
 
@@ -156,15 +156,13 @@ strongest piece first.
 | `title` | Shown on the card and as the page heading. |
 | `category` | Must be exactly `explainer`, `product`, `event`, `brand`, or `exploration`. A typo hides the piece from its category page. |
 | `client` | Shown in the project specs. |
-| `year` | Number, not a string. |
-| `seconds` | Runtime in seconds. Sets the displayed timecode **and** the length of the duration bar, which is scaled against your longest piece. |
 | `format` | Card and still aspect ratio. One of `21:9` (cinematic), `16:9` (landscape), `4:3` (standard), `1:1` (square), `4:5` (portrait), `9:16` (vertical). |
 | `span` | Grid width on `/works/`: `8` wide, `6` half, `4` narrow. Ignored on phones, and irrelevant to the home page (its bento layout doesn't use `span`/`format` at all — see below). **`span` sets the width and `format` sets the height**, so a tall ratio in a wide slot makes a huge card — `9:16` at span 8 is about 802×1426px. The admin panel shows the resulting size and warns past 900px. |
 | `featured` | Not currently used by anything rendered. What the home page shows is controlled per **content block**, not per project — see `featured` under "Content blocks" below. Left in place rather than stripped from existing data; harmless either way. |
-| `role` | e.g. "Script, design, animation". |
+| `tags` | Shown as "Hashtags" in the admin panel. Comma-separated, e.g. `"json, interactive, sport"` — rendered on the project page as `#json #interactive #sport` chips. |
 | `tools` | e.g. "After Effects, Cinema 4D". |
-| `summary` | One or two sentences on the project page. |
-| `poster` | Grid-card thumbnail override. Paths are **relative to the site root** (`assets/name.jpg`) or absolute URLs. Leave `""` and, if the first block is a YouTube video, the card uses **YouTube's own thumbnail automatically** — nothing to upload. Falls back to the generated art only when there is neither. |
+| `summary` | Shown as "Overview" in the admin panel. One or two sentences on the project page. |
+| `poster` | Shown as **Thumbnail** in the admin panel. Grid-card override — see "Card thumbnails" below for the full resolution order. Paths are **relative to the site root** (`assets/name.jpg`) or absolute URLs. An image (JPEG/PNG/WebP/GIF) shows as a still; a video (WebM/MP4/MOV, by file extension) plays muted and looping instead — a moving thumbnail. Must be hosted on R2 if it's a video; not committed to the repo. |
 | `blocks` | The project page's content, in order — see "Content blocks" below. |
 
 Content paths (`poster`, and any `blocks` entry using a site-relative path) are
@@ -177,6 +175,23 @@ If `blocks` is empty, the project page shows placeholder artwork and the label
 "Video not uploaded yet". A `poster` wins over the generated card artwork, and
 doubles as a self-hosted video block's own `poster` attribute.
 
+### Card thumbnails
+
+The `/works/` and category-page **grid card** for a project resolves its
+thumbnail in this order:
+
+1. The top-level `poster` field, if set (image or video, per the table above).
+2. Otherwise, the **first block with `useAsThumbnail: true`** (admin panel:
+   "Use as project thumbnail", under Content) — its own file if it's an
+   image, its own `poster` still if it has one, a YouTube still if it's a
+   YouTube block with neither, or — for a self-hosted R2 video with no
+   still — the video file itself, played as a moving thumbnail.
+3. Otherwise, generated placeholder art.
+
+This is deliberately explicit rather than automatic: nothing becomes a card's
+thumbnail just because it happens to be the first block. Pick which one (if
+any) should represent the project on the grid.
+
 ### Content blocks
 
 A project's page is a **stack of content blocks** — video and image, in the
@@ -185,6 +200,27 @@ rather than a one-clip player: a hero clip, then a couple of stills, then a
 detail loop, each rendered full-width in sequence. Build the stack from the
 admin panel (**Add block** → pick a type → fill it in) rather than by hand;
 each entry looks like this:
+
+**Page layout:** `#proj` caps out at 860px and centres itself — narrower than
+the site's usual 1440px `.shell`, with visible margin on both sides at any
+wider viewport, rather than running edge to edge like the rest of the site.
+Above the block stack, `.pmeta` lists Description, Category, Hashtags, and
+Tools, in that order, as stacked labelled rows (Category and each hashtag/tool
+as its own pill) — `client` still exists in the data but isn't shown here.
+A row is simply omitted when its value is empty, so an untagged
+project doesn't show a bare "Tags" label over nothing.
+
+**Aspect ratio:** an `image` block or an `r2` video block fits its own file's
+real dimensions automatically — a 1:1 square, a 9:16 vertical clip, whatever
+it actually is, full width, no cropping and no forced 16:9. This is genuine
+browser-level detection (the element's own intrinsic size), not a guess, so
+it needs no field to set. An iframe embed (`youtube`/`vimeo`/`mux`/`frameio`/
+`custom`) stays fixed at 16:9 — a cross-origin iframe's *content* ratio isn't
+something the page outside it can read at all, so there's nothing to detect
+there; if a source is meaningfully non-16:9 (a vertical Short, say), it'll be
+letterboxed within that fixed box. This only affects the project page's block
+stack — grid-card and bento thumbnails keep their existing fixed/cropped
+sizing (`format`/`span`, and `object-fit: cover`) unchanged.
 
 ```json
 {
@@ -197,7 +233,8 @@ each entry looks like this:
   "muted": false,
   "loop": true,
   "controls": true,
-  "featured": false
+  "featured": false,
+  "useAsThumbnail": false
 }
 ```
 
@@ -206,10 +243,11 @@ each entry looks like this:
 | `type` | `"video"` or `"image"`. |
 | `provider` | `"youtube"`, `"vimeo"`, `"mux"`, `"frameio"`, `"custom"` (any iframe-embeddable URL), or `"r2"` (self-hosted — the only provider images use too). |
 | `url` | Provider-specific — see the table below. |
-| `poster` | Video only, every provider. Optional still shown before play (self-hosted) and, more importantly, used as this block's thumbnail if it's `featured` (below). Leave empty on a `youtube` block and the YouTube still is used automatically; leave empty on any other provider with no `poster` and no way to auto-derive one, and the block falls back to generated art on the home page. |
-| `caption` | Optional line shown under the block, e.g. `"01 — Logo animation"`. |
+| `poster` | Video only, every provider. Optional still shown before play (self-hosted), and also what this block contributes as a project thumbnail if `useAsThumbnail` is on (below) and it's needed. Leave empty on a `youtube` block and the YouTube still is used automatically instead. |
+| `caption` | Optional line shown under the block, e.g. `"01, Logo animation"`. |
 | `autoplay`, `muted`, `loop`, `controls` | Video only, and ignored for `frameio`/`custom` (no stable public param API to drive). **Autoplay forces `muted`** — browsers refuse unmuted autoplay outright, so the admin panel checks Muted automatically and locks it while Autoplay is on. |
-| `featured` | `true` puts this block on the **home page's bento grid** — see below. Video or image, either can be featured. |
+| `featured` | `true` puts this block on the **home page's bento grid** — see "Home page — the bento grid" below. Video or image, either can be featured. Independent of `useAsThumbnail` (below) — a block can do either, both, or neither. |
+| `useAsThumbnail` | `true` makes this block the source for the project's **grid-card thumbnail** on `/works/` and category pages, when the top-level `poster` field is empty — see "Card thumbnails" above. Independent of `featured`. |
 
 | Provider | `url` is… |
 | --- | --- |
@@ -251,6 +289,11 @@ in a wide cell, a 21:9 frame in a tall one, both just fill the box.
 A block with no derivable thumbnail (no `poster` set, and not a YouTube block)
 falls back to the same generated placeholder art the project cards use
 elsewhere.
+
+Each tile is a plain image at rest; hovering (or keyboard focus) reveals the
+project's title and its `tags` (§3's Hashtags field) as `#tag` chips over a
+dark scrim. A project with no tags set just shows the title alone — no empty
+row.
 
 ### Editing categories
 
@@ -493,12 +536,20 @@ Rows can be reordered with ↑ / ↓ (array order is display order), copied with
 **Duplicate**, or removed with **Delete**. **Add project** puts a new blank entry
 at the top.
 
-Inside an open project, the **Content** section is where the case-study body
-lives (see "Content blocks" in §3): pick a type from the dropdown, click
-**+ Add block**, fill in its URL. Each block gets its own ↑ / ↓ / Delete, a
-**Show in Recent Works** checkbox (this is what puts it on the home page's
-bento grid — see "Home page — the bento grid" in §3), and video blocks (other
-than Frame.io/Custom) also get Autoplay / Muted / Loop / Controls checkboxes.
+Opening a project splits it into two tabs:
+
+- **Project Setting** — Title, Slug, Category, Format, Card width, Client,
+  Hashtags, Tools, Overview (the project-page summary), and Thumbnail (the
+  grid-card override — image or video, see "Card thumbnails" in §3), with a
+  live preview underneath.
+- **Content** — the case-study body (see "Content blocks" in §3): pick a
+  type from the dropdown, click **+ Add block**, fill in its URL. Each block
+  gets its own ↑ / ↓ / Delete, a **Show in Recent Works** checkbox (puts it
+  on the home page's bento grid — "Home page — the bento grid" in §3), a
+  **Use as project thumbnail** checkbox (supplies the grid-card thumbnail
+  when Project Setting's Thumbnail is empty — the two are independent), and
+  video blocks (other than Frame.io/Custom) also get Autoplay / Muted / Loop
+  / Controls checkboxes.
 
 ### Publishing a new piece — start to finish
 
@@ -513,29 +564,33 @@ One-time bucket/domain/cache setup is §5; this is what repeats every time.
    (your custom domain, never the rate-limited `r2.dev` one — §5).
 4. **Open `/admin/`**, click the project to expand it (or **Add project** for
    a new one).
-5. Fill in the top-level fields — title, category, client, year, runtime,
-   role, tools, summary.
-6. Under **Content**, pick a type from the dropdown — **Video — R2** or
-   **Image — R2** for something you just uploaded, or YouTube/Vimeo/Mux/
-   Frame.io/Custom for something hosted elsewhere — and click **+ Add block**.
+5. On the **Project Setting** tab, fill in title, category, client, hashtags,
+   tools, Overview. Leave Thumbnail empty for now — step 8 covers it.
+6. Switch to the **Content** tab, pick a type from the dropdown — **Video:
+   R2** or **Image: R2** for something you just uploaded, or YouTube/Vimeo/
+   Mux/Frame.io/Custom for something hosted elsewhere — and click **+ Add
+   block**.
 7. Paste the URL from step 3 into the block. For a video block, set
    Autoplay / Muted / Loop / Controls to taste (see "Content blocks" in §3
    for what each does, and the "minimalist" muted-loop combination).
-8. Want it on the home page? Check **Show in Recent Works** on whichever
-   block(s) should appear there — one, several, even every block in the
-   project. Set `poster` on it first if it isn't a YouTube block, so it has
-   something to show (see "Home page — the bento grid" in §3).
+8. Want it on the home page? Check **Show in Recent Works**. Want it to *be*
+   the project's grid-card thumbnail on `/works/`? Check **Use as project
+   thumbnail** instead (or as well — they're independent). Either way, give
+   the block a `poster` first if it isn't a YouTube block, so there's
+   something to show.
 9. Repeat 6–8 for every clip/still in the case study, **in the order they
    should appear on the page** — reorder any block afterwards with its ↑ / ↓.
 10. **Save.** The very first save ever asks which file to write — choose
     `data/projects.json`; every save after that is one click.
 11. Commit in VS Code as usual (§4).
 
-Two different thumbnails, easy to conflate: the `/works/` **grid-card**
-thumbnail comes from the top-level `poster` field (or, if that's empty, the
-project's first YouTube block automatically); the **home page bento** tile
-comes from whichever block(s) have `featured` checked, each using its own
-`poster`/thumbnail independently. Setting one does not set the other.
+Two different thumbnails, easy to conflate — see "Card thumbnails" and "Home
+page — the bento grid" in §3 for the full resolution order of each: the
+`/works/` **grid-card** thumbnail comes from Project Setting's Thumbnail
+field, or failing that a block with **Use as project thumbnail** checked; the
+**home page bento** tile comes from whichever block(s) have **Show in Recent
+Works** checked, each using its own thumbnail independently. The two
+checkboxes don't affect each other.
 
 ### What it checks before saving
 
@@ -544,7 +599,6 @@ Save stays disabled while anything is wrong, and a panel lists every problem:
 - Missing slug or title
 - A slug that is duplicated, or not lowercase-with-hyphens
 - A category outside the five valid ones
-- Runtime that is not a whole number above zero, or a year that is not four digits
 - A content block with no URL, or — for YouTube/Vimeo blocks — a non-embeddable
   one. Paste any normal share link (`watch?v=`, `youtu.be/`, `/shorts/`,
   `vimeo.com/123`) and it is **rewritten to the embeddable form** when you
@@ -622,7 +676,7 @@ does have heavier cuts, those are the declarations to raise back up.
 | Hero headline | Per-word rise from blur. An inline script in `index.html` wraps each word in a `.wd` span (before first paint, so the plain headline never flashes); each animates `wd-in` — 0.72s, up from `translateY(.62em)` and `blur(14px)` — on an 80ms stagger. Word-level rather than per-letter, so a word can never break across two lines. |
 | Hero background | Looping muted video, **full-bleed** — it breaks out of `.shell`'s 1440px cap with a `100vw` + `translateX(-50%)` centre-out, so it runs edge to edge on any screen while the text stays on the grid. `object-fit: cover` crops it. A `--scrim` overlay sits between video and text: the footage is unknown, so the scrim is what guarantees contrast rather than the frame. **The hero is a dark island in both themes** — `.hero.center` redefines `--fg`, `--dim`, `--dimmer`, `--ink`, `--line`, `--art` and the four accents for that subtree only, so the copy is white on a dark scrim even in light mode while the rest of the page follows the theme normally. Under `prefers-reduced-motion` the video pauses (not hidden) so its poster frame remains. |
 | Cards without a poster | 8 generated SVG frames that pointer position scrubs through. |
-| Card thumbnails | Preference order: explicit `poster` → YouTube still derived from the project's **first YouTube block** → generated art. YouTube stills come from `img.youtube.com/vi/<id>/maxresdefault.jpg`, falling back to `mqdefault.jpg`. Only those two are true 16:9 — `hqdefault` and `sddefault` are 4:3 with black bars. Videos never uploaded in HD return either a 404 **or a 200 carrying a 120×90 grey placeholder**, so the fallback triggers on both. |
+| Card thumbnails | Resolution order documented in "Card thumbnails" in §3. YouTube stills come from `img.youtube.com/vi/<id>/maxresdefault.jpg`, falling back to `mqdefault.jpg`. Only those two are true 16:9 — `hqdefault` and `sddefault` are 4:3 with black bars. Videos never uploaded in HD return either a 404 **or a 200 carrying a 120×90 grey placeholder**, so the fallback triggers on both. |
 | Card shapes | Six ratios, defined once in `FORMATS` in `assets/site.js` (mirrored in `admin/index.html`). Each entry carries the CSS ratio for the box and a viewBox for the generated art, so placeholder artwork stays in proportion at any shape. |
 | Home-page grid | Fixed 8-cell bento template (`.bento`), not a masonry — see "Home page — the bento grid" in §3. `renderBento()` in `site.js` pulls `featured` **blocks**, not projects, so needs no layout math at render time, unlike the works/category pages' packed grid below. |
 | Works/category grid | `.grid.pins` — a packed "pinboard" layout, fixed column count per breakpoint (4 / 3 / 2 / 1), each card given a row span matching its own height so cards pack instead of leaving ragged gaps. Currently unused (the home page moved to the bento grid above) but left intact in case a future page wants a masonry layout again. |
@@ -660,9 +714,9 @@ happen and the sentence renders normally.
    summary about reconciliation software.
 
 3. **Partly inconsistent escaping.** The project page now escapes the player's
-   `src`, `title` and `alt`, but still interpolates `summary`, `client`, `year`,
-   `format`, `role` and `tools` straight into `innerHTML`, while `cardHTML()`
-   escapes everything. Harmless while you write the JSON yourself; a real hole
+   `src`, `title`, `alt`, and each hashtag chip, but still interpolates
+   `summary`, `client`, `format` and `tools` straight into `innerHTML`, while
+   `cardHTML()` escapes everything. Harmless while you write the JSON yourself; a real hole
    if that file ever comes from somewhere else.
 
 4. **No favicon** — every page load logs a 404.
@@ -672,8 +726,8 @@ happen and the sentence renders normally.
 
 ### Deliberate trade-offs
 
-7. **All content is placeholder** apart from the first entry. Client names,
-   summaries and runtimes are invented.
+7. **All content is placeholder** apart from the first entry. Client names
+   and summaries are invented.
 
 8. **`hello@putrategar.studio` is a guess.** Replace it — it appears on the home,
    works, services and about pages.
@@ -713,7 +767,7 @@ happen and the sentence renders normally.
 | Clicking a card 404s | `slug` doesn't match, or you're viewing a stale copy of `projects.json` — hard-refresh with `Ctrl+Shift+R`. |
 | Hero area is an empty panel | `assets/hero1.mp4` is missing (§8.1). |
 | Project page shows a broken block | An `r2` block's `url` points at a file that isn't there — check it resolves, and remember `.gitignore` excludes `*.mp4` (§8.1). |
-| Card shows generated art, not my still | `poster` is empty, or the path is wrong. The admin panel (§6) previews it and flags a bad path. |
+| Card shows generated art, not my still | `poster` is empty and no block has `useAsThumbnail` on, or the path is wrong. The admin panel (§6) previews it and flags a bad path. |
 | Admin panel's Save button stays greyed out | Something failed validation — the panel above the list names every problem. |
 | Admin panel downloads a file instead of saving | Firefox or Safari. Use Chrome or Edge to write in place (§6). |
 | Admin panel asks for the file every time | The handle could not be stored — private/incognito window, or site data was cleared. |

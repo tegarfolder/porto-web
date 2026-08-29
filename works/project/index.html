@@ -133,6 +133,32 @@
       return `<div class="block-item"><div class="block">${inner}</div>${cap}</div>`;
     }
 
+    /* Accepts either typing style: comma-separated ("json, interactive") or
+       space-separated with the # already typed ("#json #interactive"), or
+       any mix — split on commas and/or whitespace, then strip any leading #
+       so it's never doubled when this line adds its own. */
+    const tags = (p.tags || '').split(/[,\s]+/).map(s => s.replace(/^#+/, '').trim()).filter(Boolean);
+    const tagsHTML = tags.map(t => `<span class="tagchip">#${esc(t)}</span>`).join(' ');
+    const toolsList = (p.tools || '').split(',').map(s => s.trim()).filter(Boolean);
+    const toolsHTML = toolsList.map(t => `<span class="pill">${esc(t)}</span>`).join(' ');
+
+    /* Meta section: Description and Tools each get their own full-width row;
+       Category and Hashtags share one row, side by side, since Category is
+       always present but often short enough to sit next to the tag list
+       rather than claim a whole row of its own. Any row/column with nothing
+       in it is simply omitted, never shown as a label over nothing. */
+    const metaParts = [];
+    if (p.summary) metaParts.push(
+      `<div class="pmeta-row"><span class="lab">Description</span><p>${p.summary}</p></div>`);
+    metaParts.push(
+      `<div class="pmeta-row pmeta-pair">
+        <div class="pmeta-col"><span class="lab">Category</span><span class="pill">${cat}</span></div>
+        ${tagsHTML ? `<div class="pmeta-col"><span class="lab">Hashtags</span>${tagsHTML}</div>` : ''}
+      </div>`);
+    if (toolsHTML) metaParts.push(
+      `<div class="pmeta-row"><span class="lab">Tools</span>${toolsHTML}</div>`);
+    const metaHTML = metaParts.join('');
+
     const blocksHTML = (p.blocks && p.blocks.length)
       ? p.blocks.map(renderBlock).join('')
       : `<div class="block-item"><div class="block" style="aspect-ratio:16/9;position:relative;color:var(--acc)">
@@ -148,19 +174,8 @@
           &rsaquo; <a href="../${p.category}/">${cat}</a></div>
         <h1 class="ptitle">${p.title}</h1>
       </section>
+      <div class="pmeta">${metaHTML}</div>
       <div class="blocks">${blocksHTML}</div>
-      <div class="pmeta">
-        <div class="body"><p>${p.summary}</p></div>
-        <div class="specs">
-          <dl>
-            <dt>Client</dt><dd>${p.client}</dd>
-            <dt>Mode</dt><dd style="color:var(--acc)">${cat}</dd>
-            <dt>Year</dt><dd>${p.year}</dd>
-            <dt>Role</dt><dd>${p.role}</dd>
-            <dt>Tools</dt><dd>${p.tools}</dd>
-          </dl>
-        </div>
-      </div>
       <div class="nextrow">
         <span class="lab">Next</span>
         <a href="./?p=${next.slug}">${next.title}</a>

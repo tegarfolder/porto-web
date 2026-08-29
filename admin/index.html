@@ -26,9 +26,10 @@
   .intro{max-width:60ch;color:var(--dim);font-size:15px;line-height:1.6;
     margin-bottom:26px}
   .intro code{font-size:13.5px;background:var(--card);padding:2px 6px;
-    border:1px solid var(--line-soft)}
+    border:1px solid var(--line-soft);border-radius:var(--r-md)}
 
-  .proj{border:1px solid var(--line);margin-bottom:14px;background:var(--card)}
+  .proj{border:1px solid var(--line);margin-bottom:14px;background:var(--card);
+    border-radius:var(--r-lg);overflow:hidden}
   .proj.bad{border-color:var(--event)}
   .phd{display:flex;align-items:center;gap:12px;padding:12px 14px;
     cursor:pointer;user-select:none}
@@ -38,7 +39,8 @@
   .pname{font-weight:600;font-size:15.5px;letter-spacing:-.02em;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .chip{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
-    color:var(--acc);border:1px solid currentColor;padding:3px 7px;flex:none}
+    color:var(--acc);border:1px solid currentColor;padding:3px 7px;flex:none;
+    border-radius:999px}
   .warn{font-size:11px;color:var(--event);font-weight:600;flex:none}
   .phd .tools{margin-left:auto;display:flex;gap:6px;flex:none}
   .mini{background:none;border:1px solid var(--line);color:var(--dim);
@@ -58,7 +60,7 @@
     text-transform:uppercase;color:var(--dimmer)}
   .f input,.f select,.f textarea{font:inherit;font-size:14px;
     background:var(--ink);color:var(--fg);border:1px solid var(--line);
-    padding:9px 10px;border-radius:0;width:100%}
+    padding:9px 10px;border-radius:var(--r-md);width:100%}
   .f textarea{min-height:74px;resize:vertical;line-height:1.5}
   .f input:focus,.f select:focus,.f textarea:focus{outline:2px solid var(--acc);
     outline-offset:-1px;border-color:var(--acc)}
@@ -75,7 +77,7 @@
   .thumb.hide{display:none}
 
   .socbox{border:1px solid var(--line);background:var(--card);
-    margin-bottom:22px;padding:0 14px}
+    margin-bottom:22px;padding:0 14px;border-radius:var(--r-lg)}
   .socbox summary{cursor:pointer;padding:13px 0;font-weight:600;font-size:15px;
     letter-spacing:-.015em;user-select:none}
   .socbox[open] summary{border-bottom:1px solid var(--line-soft);
@@ -87,21 +89,32 @@
   .socrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;
     flex-wrap:wrap}
   .socrow .icon{width:32px;height:32px;flex:none;display:grid;
-    place-items:center;border:1px solid var(--line);color:var(--dim)}
+    place-items:center;border:1px solid var(--line);color:var(--dim);
+    border-radius:var(--r-md)}
   .socrow .icon svg{width:15px;height:15px;fill:currentColor;display:block}
   .socrow select{flex:0 0 150px}
   .socrow input{flex:1 1 240px;min-width:0}
   .socrow select,.socrow input{font:inherit;font-size:13.5px;
     background:var(--ink);color:var(--fg);border:1px solid var(--line);
-    padding:7px 9px;border-radius:0}
+    padding:7px 9px;border-radius:var(--r-md)}
   .socrow.invalid input{border-color:var(--event)}
   .socbox > button{margin:6px 0 16px}
 
   .empty{border:1px dashed var(--line);padding:34px 20px;text-align:center;
-    color:var(--dim);font-size:15px}
+    color:var(--dim);font-size:15px;border-radius:var(--r-lg)}
+
+  /* ---------- project setting / content tabs ---------- */
+  .tabs{display:flex;gap:6px;padding:14px 14px 0}
+  .tab{background:none;border:1px solid var(--line);color:var(--dim);
+    font:inherit;font-size:12.5px;font-weight:600;padding:8px 14px;
+    cursor:pointer;border-radius:var(--r-md);transition:color .15s,border-color .15s}
+  .tab:hover{color:var(--fg);border-color:var(--dim)}
+  .tab.active{background:var(--fg);color:var(--ink);border-color:var(--fg)}
+  .tabs + .grid-f{margin-top:14px}
 
   /* ---------- content blocks ---------- */
-  .blk{border:1px solid var(--line-soft);background:var(--ink);margin-bottom:10px}
+  .blk{border:1px solid var(--line-soft);background:var(--ink);margin-bottom:10px;
+    border-radius:var(--r-md);overflow:hidden}
   .blk-hd{display:flex;align-items:center;gap:10px;padding:9px 11px;
     border-bottom:1px solid var(--line-soft);background:var(--card)}
   .blk-kind{font-size:11px;font-weight:700;letter-spacing:.1em;
@@ -113,13 +126,13 @@
   .blk-body .row-check{padding-top:0;grid-column:span 3}
   .blk-add{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:2px}
   .blk-add select{font:inherit;font-size:13.5px;background:var(--ink);color:var(--fg);
-    border:1px solid var(--line);padding:7px 9px;border-radius:0}
+    border:1px solid var(--line);padding:7px 9px;border-radius:var(--r-md)}
   .blk-empty{border:1px dashed var(--line);padding:16px;text-align:center;
-    color:var(--dimmer);font-size:13px;margin-bottom:10px}
+    color:var(--dimmer);font-size:13px;margin-bottom:10px;border-radius:var(--r-md)}
   @media (max-width:560px){.blk-body .f,.blk-body .row-check{grid-column:span 12}}
 
   .issues{border:1px solid var(--event);padding:12px 14px;margin-bottom:16px;
-    font-size:13.5px;line-height:1.6;color:var(--fg)}
+    font-size:13.5px;line-height:1.6;color:var(--fg);border-radius:var(--r-md)}
   .issues b{color:var(--event)}
   .issues ul{margin:6px 0 0 18px}
 
@@ -155,8 +168,8 @@
   </div>
 
   <p class="intro" id="intro">
-    Edits <code>data/projects.json</code> directly on disk — no server, no account,
-    nothing uploaded. Content loads on its own; edit, save, then commit in VS Code
+    Edits <code>data/projects.json</code> directly on disk (no server, no account,
+    nothing uploaded). Content loads on its own; edit, save, then commit in VS Code
     as usual. <strong>Choose file&hellip;</strong> is only needed if the automatic
     load fails, or to point at a different copy.
   </p>
@@ -186,12 +199,12 @@ const CATS   = ['explainer', 'product', 'event', 'brand', 'exploration'];
 /* Keep in step with FORMATS in assets/site.js. Ordered widest to tallest. */
 const FORMATS = ['21:9', '16:9', '4:3', '1:1', '4:5', '9:16'];
 const FORMAT_LABEL = {
-  '21:9': '21:9 — cinematic',
-  '16:9': '16:9 — landscape',
-  '4:3':  '4:3 — standard',
-  '1:1':  '1:1 — square',
-  '4:5':  '4:5 — portrait',
-  '9:16': '9:16 — vertical'
+  '21:9': '21:9 (cinematic)',
+  '16:9': '16:9 (landscape)',
+  '4:3':  '4:3 (standard)',
+  '1:1':  '1:1 (square)',
+  '4:5':  '4:5 (portrait)',
+  '9:16': '9:16 (vertical)'
 };
 /* height ÷ width, for the "how tall will this card be" hint */
 const FORMAT_RATIO = { '21:9': 9/21, '16:9': 9/16, '4:3': 3/4,
@@ -220,6 +233,32 @@ function ytThumbs(url) {
   };
 }
 
+/* A "poster" path ending in a video extension gets played (muted, looping)
+   instead of shown as a still — the moving-thumbnail option. Mirrors the
+   same check in cardHTML() (assets/site.js). */
+const isVideoPath = s => /\.(webm|mp4|mov)(\?|#|$)/i.test(String(s || ''));
+
+/* Card-thumbnail resolution — mirrors cardHTML() in assets/site.js: an
+   explicit project-level `poster` always wins; otherwise the first block
+   marked "Use as project thumbnail" supplies one (its own file if it's an
+   image, its own poster still if it has one, a YouTube still if it's a
+   YouTube block, or — for a self-hosted R2 video with no still — the video
+   file itself, played as a moving thumbnail). No match at all falls back to
+   generated art (handled by the caller, since that's drawn, not a URL). */
+function deriveThumb(p) {
+  if (p.poster) return { src: p.poster };
+  const b = (p.blocks || []).find(x => x.useAsThumbnail);
+  if (!b) return null;
+  if (b.type === 'image') return b.url ? { src: b.url } : null;
+  if (b.poster) return { src: b.poster };
+  if (b.provider === 'youtube') {
+    const yt = ytThumbs(b.url);
+    return yt ? { src: yt.best, fallback: yt.fallback, viaYouTube: true } : null;
+  }
+  if (b.provider === 'r2' && b.url) return { src: b.url };
+  return null;
+}
+
 function toYouTubeEmbed(url) {
   if (!url) return url;
   const u = url.trim();
@@ -239,13 +278,13 @@ function toVimeoEmbed(url) {
    separate from the top-level fields (title/summary/category/…), which
    still describe the project as a whole. */
 const BLOCK_KINDS = [
-  { key: 'video:r2',      label: 'Video — R2 (self-hosted)' },
-  { key: 'video:youtube', label: 'Video — YouTube' },
-  { key: 'video:vimeo',   label: 'Video — Vimeo' },
-  { key: 'video:mux',     label: 'Video — Mux' },
-  { key: 'video:frameio', label: 'Video — Frame.io' },
-  { key: 'video:custom',  label: 'Video — Custom embed URL' },
-  { key: 'image:r2',      label: 'Image — R2' }
+  { key: 'video:r2',      label: 'Video: R2 (self-hosted)' },
+  { key: 'video:youtube', label: 'Video: YouTube' },
+  { key: 'video:vimeo',   label: 'Video: Vimeo' },
+  { key: 'video:mux',     label: 'Video: Mux' },
+  { key: 'video:frameio', label: 'Video: Frame.io' },
+  { key: 'video:custom',  label: 'Video: Custom embed URL' },
+  { key: 'image:r2',      label: 'Image: R2' }
 ];
 
 /* Every provider — R2 included — defaults to a normal sound-on, click-to-play
@@ -255,7 +294,7 @@ const BLOCK_KINDS = [
    an ambient loop — it's an option per block, not a default tied to provider. */
 function newBlock(kind) {
   const [type, provider] = kind.split(':');
-  const b = { type, provider, url: '', caption: '', featured: false };
+  const b = { type, provider, url: '', caption: '', featured: false, useAsThumbnail: false };
   if (type === 'video') {
     b.autoplay = false; b.muted = false; b.loop = false; b.controls = true;
     b.poster = '';
@@ -267,9 +306,9 @@ let doc = null;      // whole parsed file, categories preserved
 let handle = null;   // FileSystemFileHandle when available
 let dirty = false;
 let openIdx = -1;    // which project is expanded
+let openTab = 'setting'; // 'setting' | 'content' — which side of that project is showing
 
 const $ = id => document.getElementById(id);
-const tc = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 
 /* ---------- status ---------- */
 function setStatus(text, state) {
@@ -295,10 +334,6 @@ function validate() {
 
     if (!p.title || !p.title.trim()) p._err.title = 'Required';
     if (!CATS.includes(p.category)) p._err.category = 'Pick a category';
-    if (!Number.isInteger(p.seconds) || p.seconds <= 0)
-      p._err.seconds = 'Whole number above 0';
-    if (!Number.isInteger(p.year) || p.year < 1990 || p.year > 2100)
-      p._err.year = 'Four-digit year';
     if (!FORMATS.includes(p.format)) p._err.format = 'Pick a format';
     if (!SPANS.includes(p.span)) p._err.span = 'Pick a width';
 
@@ -308,9 +343,9 @@ function validate() {
       const u = b.url && b.url.trim();
       if (!u) b._err = 'URL required';
       else if (b.provider === 'youtube' && !YT_EMBED_OK.test(u))
-        b._err = 'Not the embeddable form — click out of the field and it will be converted';
+        b._err = 'Not the embeddable form (click out of the field and it will be converted)';
       else if (b.provider === 'vimeo' && !VIMEO_EMBED_OK.test(u))
-        b._err = 'Not the embeddable form — click out of the field and it will be converted';
+        b._err = 'Not the embeddable form (click out of the field and it will be converted)';
       else if ((b.provider === 'frameio' || b.provider === 'custom') && !/^https:\/\//.test(u))
         b._err = 'Must start with https://';
       if (b._err) p._blockErrCount++;
@@ -345,7 +380,7 @@ function renderSocial() {
   const list = doc.social || [];
 
   $('soccount').textContent = list.length
-    ? '— ' + list.length + (list.length === 1 ? ' link' : ' links') : '— none yet';
+    ? '(' + list.length + (list.length === 1 ? ' link)' : ' links)') : '(none yet)';
 
   list.forEach((s, i) => {
     const row = document.createElement('div');
@@ -416,9 +451,9 @@ function renderIssues(count) {
   const lines = doc.projects.flatMap((p, i) => {
     const name = p.title || p.slug || 'untitled';
     const fieldLines = Object.entries(p._err).map(([f, m]) =>
-      `<li>#${i + 1} ${name} — <b>${f}</b>: ${m}</li>`);
+      `<li>#${i + 1} ${name} &middot; <b>${f}</b>: ${m}</li>`);
     const blockLines = (p.blocks || []).flatMap((b, bi) => b._err
-      ? [`<li>#${i + 1} ${name} — <b>block ${bi + 1} (${b.provider})</b>: ${b._err}</li>`]
+      ? [`<li>#${i + 1} ${name} &middot; <b>block ${bi + 1} (${b.provider})</b>: ${b._err}</li>`]
       : []);
     return fieldLines.concat(blockLines);
   });
@@ -426,7 +461,7 @@ function renderIssues(count) {
      screen explaining why, since that section is collapsible. */
   (doc.social || []).forEach((s, i) => {
     if (s._err) lines.push(
-      `<li>Social link #${i + 1}${s.platform ? ' (' + s.platform + ')' : ''} — <b>${s._err}</b></li>`);
+      `<li>Social link #${i + 1}${s.platform ? ' (' + s.platform + ')' : ''} &middot; <b>${s._err}</b></li>`);
   });
   box.innerHTML = `<div class="issues"><b>${count} problem${count > 1 ? 's' : ''}
     to fix before saving</b><ul>${lines.join('')}</ul></div>`;
@@ -591,16 +626,15 @@ const BLOCK_URL_PLACEHOLDER = {
 function renderBlocks(p) {
   const box = document.createElement('div');
   box.className = 'f w12';
-  const n = (p.blocks || []).length;
   const lab = document.createElement('label');
-  lab.textContent = 'Content' + (n ? ' — ' + n + ' block' + (n === 1 ? '' : 's') : '');
+  lab.textContent = 'Blocks (display order)';
   box.appendChild(lab);
 
-  if (!n) {
+  if (!(p.blocks || []).length) {
     const empty = document.createElement('div');
     empty.className = 'blk-empty';
-    empty.textContent = 'No content blocks yet — this project page will show ' +
-      'placeholder art until you add one below.';
+    empty.textContent = 'No content blocks yet (this project page will show '
+      + 'placeholder art until you add one below).';
     box.appendChild(empty);
   }
 
@@ -614,7 +648,7 @@ function renderBlocks(p) {
     const hd = document.createElement('div');
     hd.className = 'blk-hd';
     hd.innerHTML = `<span class="idx">${String(bi + 1).padStart(2, '0')}</span>
-      <span class="blk-kind">${kindLabel.replace(/^(Video|Image) — /, '')}</span>`;
+      <span class="blk-kind">${kindLabel.replace(/^(Video|Image): /, '')}</span>`;
     const tools = document.createElement('span');
     tools.className = 'tools';
     const mkb = (txt, title, fn, off) => {
@@ -653,7 +687,7 @@ function renderBlocks(p) {
       body.appendChild(blockField(b, 'poster', 'Poster (optional)', { wide: 12,
         placeholder: b.provider === 'youtube'
           ? 'Leave blank to use the YouTube thumbnail automatically'
-          : 'https://media.putrategar.com/….jpg — shown before play / as the Recent Works thumbnail' }));
+          : 'https://media.putrategar.com/….jpg (shown before play, and as the Recent Works thumbnail)' }));
     }
 
     if (b.type === 'video' && b.provider !== 'frameio' && b.provider !== 'custom') {
@@ -664,20 +698,23 @@ function renderBlocks(p) {
       if (b.autoplay) {
         const note = document.createElement('div');
         note.className = 'hint'; note.style.gridColumn = 'span 12';
-        note.textContent = 'Autoplay requires sound off — browsers refuse it otherwise, so Muted is forced on.';
+        note.textContent = 'Autoplay requires sound off (browsers refuse it otherwise), so Muted is forced on.';
         body.appendChild(note);
       }
     }
 
     body.appendChild(blockField(b, 'caption', 'Caption (optional)', { wide: 12,
-      placeholder: 'Shown under this block, e.g. "01 — Logo animation"' }));
+      placeholder: 'Shown under this block, e.g. "01, Logo animation"' }));
 
     body.appendChild(blockCheck(b, 'featured', 'Show in Recent Works (home page)'));
+    body.appendChild(blockCheck(b, 'useAsThumbnail', 'Use as project thumbnail'));
     {
       const note = document.createElement('div');
       note.className = 'hint'; note.style.gridColumn = 'span 12';
-      note.textContent = 'The home page pulls individual blocks, not whole projects — ' +
-        'two blocks from the same project can both appear there.';
+      note.textContent = 'Recent Works pulls individual blocks, not whole projects '
+        + '(two blocks from the same project can both appear there). Project thumbnail '
+        + 'is separate: only used when Project Setting’s Thumbnail field is empty, and '
+        + 'only the first block marked for it counts.';
       body.appendChild(note);
     }
 
@@ -738,6 +775,7 @@ function render() {
     hd.addEventListener('click', ev => {
       if (ev.target.closest('.tools')) return;
       openIdx = (openIdx === i ? -1 : i);
+      openTab = 'setting';
       render();
     });
 
@@ -770,8 +808,8 @@ function render() {
       openIdx = i + 1; markDirty(); render();
     });
     mk('Delete', 'Delete this project', () => {
-      if (!confirm(`Delete "${p.title || p.slug}"? This cannot be undone here — ` +
-                   `you can still discard the change with git.`)) return;
+      if (!confirm(`Delete "${p.title || p.slug}"? This cannot be undone here ` +
+                   `(you can still discard the change with git).`)) return;
       doc.projects.splice(i, 1);
       openIdx = -1; markDirty(); render();
     }).classList.add('del');
@@ -782,92 +820,119 @@ function render() {
     const body = document.createElement('div');
     body.className = 'body-f';
     if (i === openIdx) {
+      const tabs = document.createElement('div');
+      tabs.className = 'tabs';
+      const mkTab = (key, label) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'tab' + (openTab === key ? ' active' : '');
+        b.textContent = label;
+        b.addEventListener('click', () => { openTab = key; render(); });
+        tabs.appendChild(b);
+      };
+      mkTab('setting', 'Project Setting');
+      mkTab('content', 'Content' + ((p.blocks || []).length ? ' (' + p.blocks.length + ')' : ''));
+      body.appendChild(tabs);
+
       const g = document.createElement('div');
       g.className = 'grid-f';
-      g.append(
-        field(p, 'title', 'Title', { wide: 6, rerender: true }),
-        field(p, 'slug', 'Slug (URL)', { wide: 6, hint: 'Used in the address. Changing it breaks existing links.' }),
-        field(p, 'category', 'Category', { options: CATS, rerender: true }),
-        field(p, 'format', 'Format', {
-          options: FORMATS, labels: FORMAT_LABEL, rerender: true,
-          hint: 'Aspect ratio of the card and the still.'
-        }),
-        field(p, 'span', 'Card width', {
-          options: SPANS, numericOption: true, rerender: true,
-          labels: { 4: '4 — narrow', 6: '6 — half', 8: '8 — wide' },
-          /* On the works page span sets the width and format sets the height,
-             so a tall ratio in a wide slot produces a monstrous card. The home
-             page is unaffected — its packed grid has fixed columns. */
-          hint: (() => {
-            const w = { 4: 391, 6: 597, 8: 802 }[p.span];
-            const r = FORMAT_RATIO[p.format];
-            if (!w || !r) return 'Width on the works page. Ignored on phones.';
-            const h = Math.round(w * r);
-            return (h > 900 ? '⚠ ' : '') +
-              `≈ ${w}×${h}px on the works page` +
-              (h > 900 ? ' — very tall, consider a narrower width' : '');
-          })()
-        }),
-        field(p, 'seconds', 'Runtime (seconds)', {
-          number: true,
-          hint: Number.isInteger(p.seconds) && p.seconds > 0 ? 'Shows as ' + tc(p.seconds) : ''
-        }),
-        field(p, 'client', 'Client', { wide: 6 }),
-        field(p, 'year', 'Year', { number: true }),
-        field(p, 'role', 'Role', { wide: 6, placeholder: 'Script, design, animation' }),
-        field(p, 'tools', 'Tools', { wide: 6, placeholder: 'After Effects, Blender' }),
-        field(p, 'summary', 'Summary', { wide: 12, textarea: true }),
-        field(p, 'poster', 'Poster image', {
-          wide: 6, placeholder: 'assets/posters/acme.jpg',
-          rerender: true,
-          hint: 'Path from the site root, or a full URL. Without one the card shows generated art.'
-        })
-      );
 
-      /* live poster preview */
-      const prev = document.createElement('div');
-      prev.className = 'f w6';
-      const plab = document.createElement('label');
-      plab.textContent = 'Preview';
-      const firstYt = (p.blocks || []).find(b => b.type === 'video' && b.provider === 'youtube');
-      const yt = p.poster ? null : ytThumbs(firstYt && firstYt.url);
-      const img = document.createElement('img');
-      img.className = 'thumb' + (p.poster || yt ? '' : ' hide');
-      img.alt = '';
-      if (p.poster) {
-        img.src = /^(https?:)?\/\//.test(p.poster) || p.poster[0] === '/'
-          ? p.poster : '../' + p.poster;
-      } else if (yt) {
-        img.src = yt.best;
-        img.addEventListener('error', () => { img.src = yt.fallback; }, { once: true });
+      if (openTab === 'setting') {
+        g.append(
+          field(p, 'title', 'Title', { wide: 6, rerender: true }),
+          field(p, 'slug', 'Slug (URL)', { wide: 6, hint: 'Used in the address. Changing it breaks existing links.' }),
+          field(p, 'category', 'Category', { options: CATS, rerender: true }),
+          field(p, 'format', 'Format', {
+            options: FORMATS, labels: FORMAT_LABEL, rerender: true,
+            hint: 'Aspect ratio of the card and the still.'
+          }),
+          field(p, 'span', 'Card width', {
+            options: SPANS, numericOption: true, rerender: true,
+            labels: { 4: '4 (narrow)', 6: '6 (half)', 8: '8 (wide)' },
+            /* On the works page span sets the width and format sets the
+               height, so a tall ratio in a wide slot produces a monstrous
+               card. The home page is unaffected (its bento uses a fixed
+               template, not span/format). */
+            hint: (() => {
+              const w = { 4: 391, 6: 597, 8: 802 }[p.span];
+              const r = FORMAT_RATIO[p.format];
+              if (!w || !r) return 'Width on the works page. Ignored on phones.';
+              const h = Math.round(w * r);
+              return (h > 900 ? '⚠ ' : '') +
+                `≈ ${w}×${h}px on the works page` +
+                (h > 900 ? ' (very tall, consider a narrower width)' : '');
+            })()
+          }),
+          field(p, 'client', 'Client', { wide: 6 }),
+          field(p, 'tags', 'Hashtags', {
+            wide: 6, placeholder: 'json, interactive, sport',
+            hint: 'Comma- or space-separated, # optional either way. Shown on the project page as #json #interactive #sport.'
+          }),
+          field(p, 'tools', 'Tools', { wide: 6, placeholder: 'After Effects, Blender' }),
+          field(p, 'summary', 'Overview', { wide: 12, textarea: true }),
+          field(p, 'poster', 'Thumbnail', {
+            wide: 6, placeholder: 'https://media.putrategar.com/thumb.webp',
+            rerender: true,
+            hint: 'Image (JPEG/PNG/WebP/GIF) or video (WebM, for a moving, '
+                + 'muted, looping thumbnail). Must be hosted on R2, not the '
+                + 'repo. Leave empty to use Content’s "Use as project '
+                + 'thumbnail" block instead.'
+          })
+        );
+
+        /* live thumbnail preview */
+        const prev = document.createElement('div');
+        prev.className = 'f w6';
+        const plab = document.createElement('label');
+        plab.textContent = 'Preview';
+        const thumb = deriveThumb(p);
+        const isVid = thumb && isVideoPath(thumb.src);
+        const media = isVid ? document.createElement('video') : document.createElement('img');
+        media.className = 'thumb' + (thumb ? '' : ' hide');
+        if (isVid) {
+          media.autoplay = true; media.muted = true; media.loop = true;
+          media.playsInline = true; media.controls = false;
+        } else {
+          media.alt = '';
+        }
+        if (thumb) {
+          const prop = isVid ? 'src' : 'src';
+          media[prop] = /^(https?:)?\/\//.test(thumb.src) || thumb.src[0] === '/'
+            ? thumb.src : '../' + thumb.src;
+          if (!isVid && thumb.fallback) {
+            media.addEventListener('error', () => { media.src = thumb.fallback; }, { once: true });
+          }
+        }
+        const pmsg = document.createElement('div');
+        pmsg.className = 'hint';
+        pmsg.textContent = p.poster ? ''
+          : thumb ? (thumb.viaYouTube
+              ? 'Using that block’s YouTube thumbnail automatically (no upload needed).'
+              : 'Using that block’s content as the thumbnail (marked "Use as project thumbnail" under Content).')
+          : 'No thumbnail set (generated art will be used).';
+        if (p.poster && !isVid) {
+          media.addEventListener('error', () => {
+            media.classList.add('hide');
+            pmsg.textContent = 'Not found at that URL. Double-check it against R2.';
+            pmsg.style.color = 'var(--event)';
+          });
+        }
+        prev.append(plab, media, pmsg);
+        /* Pin the derived URL into the field, for when you want it fixed
+           rather than following whatever that block becomes later. */
+        if (thumb && !p.poster) {
+          const pin = document.createElement('button');
+          pin.type = 'button'; pin.className = 'mini';
+          pin.textContent = 'Pin this URL into Thumbnail';
+          pin.style.marginTop = '8px'; pin.style.alignSelf = 'flex-start';
+          pin.addEventListener('click', () => {
+            p.poster = thumb.src; markDirty(); render();
+          });
+          prev.appendChild(pin);
+        }
+        g.appendChild(prev);
+      } else {
+        g.appendChild(renderBlocks(p));
       }
-      const pmsg = document.createElement('div');
-      pmsg.className = 'hint';
-      pmsg.textContent = p.poster ? ''
-        : yt ? 'Using the YouTube thumbnail automatically — no upload needed.'
-             : 'No poster — generated art will be used.';
-      if (p.poster) {
-        img.addEventListener('error', () => {
-          img.classList.add('hide');
-          pmsg.textContent = 'Not found at that path. Check it against the assets folder.';
-          pmsg.style.color = 'var(--event)';
-        });
-      }
-      prev.append(plab, img, pmsg);
-      /* Pin the derived URL into the field, for when you want it fixed rather
-         than following whatever the video's thumbnail becomes later. */
-      if (yt) {
-        const pin = document.createElement('button');
-        pin.type = 'button'; pin.className = 'mini';
-        pin.textContent = 'Pin this URL into Poster';
-        pin.style.marginTop = '8px'; pin.style.alignSelf = 'flex-start';
-        pin.addEventListener('click', () => {
-          p.poster = yt.best; markDirty(); render();
-        });
-        prev.appendChild(pin);
-      }
-      g.appendChild(prev);
-      g.appendChild(renderBlocks(p));
       body.appendChild(g);
     }
     el.appendChild(body);
@@ -916,7 +981,7 @@ function load(text, name, connected) {
     return false;
   }
   if (!parsed || !Array.isArray(parsed.projects)) {
-    alert('That JSON has no "projects" array — is it the right file?');
+    alert('That JSON has no "projects" array. Is it the right file?');
     return false;
   }
   doc = parsed;
@@ -944,7 +1009,7 @@ function load(text, name, connected) {
   $('add').disabled = false;
   $('reload').disabled = false;
   $('save').disabled = true;
-  setStatus(doc.projects.length + ' projects — ' +
+  setStatus(doc.projects.length + ' projects from ' +
     (connected ? name : name + ' (read-only until the first save)'), 'saved');
   render();
   return true;
@@ -1029,9 +1094,8 @@ $('socadd').addEventListener('click', () => {
 $('add').addEventListener('click', () => {
   doc.projects.unshift({
     slug: '', title: '', category: 'explainer', client: '',
-    year: new Date().getFullYear(), seconds: 30, format: '16:9',
-    span: 6, featured: false, role: '', tools: '', summary: '',
-    poster: '', blocks: []
+    format: '16:9', span: 6, featured: false, tags: '', tools: '',
+    summary: '', poster: '', blocks: []
   });
   openIdx = 0;
   markDirty(); render();
@@ -1075,7 +1139,7 @@ $('save').addEventListener('click', async () => {
       await w.write(text);
       await w.close();
       dirty = false;
-      setStatus('Saved — commit it in VS Code', 'saved');
+      setStatus('Saved, commit it in VS Code', 'saved');
       $('save').disabled = true;
     } catch (e) {
       alert('Could not write the file: ' + e.message);
@@ -1089,9 +1153,34 @@ $('save').addEventListener('click', async () => {
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   dirty = false;
-  setStatus('Downloaded — replace data/projects.json with it', 'saved');
+  setStatus('Downloaded (replace data/projects.json with it)', 'saved');
   $('save').disabled = true;
 });
+
+/* Mirrors initTheme() in assets/site.js — the admin page does not load it
+   (see the FORMATS/YT_ID/ytThumbs duplication above for why), so the click
+   handler that actually makes the header's mode button do anything has to
+   live here too. theme.js only does the silent pre-paint restore. */
+(function initTheme() {
+  const root = document.documentElement;
+  const btn = $('mode');
+  if (!btn) return;
+  const isDark = () => root.getAttribute('data-theme') === 'dark';
+  const SUN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+  const MOON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  const sync = () => {
+    const d = isDark();
+    btn.innerHTML = d ? SUN : MOON;
+    btn.setAttribute('aria-label', d ? 'Switch to light mode' : 'Switch to dark mode');
+  };
+  btn.addEventListener('click', () => {
+    const next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('pt-theme', next); } catch (e) {}
+    sync();
+  });
+  sync();
+})();
 
 boot();
 

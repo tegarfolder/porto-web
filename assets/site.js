@@ -34,7 +34,30 @@ function ytThumbs(url) {
   };
 }
 
-const tc  = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+/* A poster/thumbnail path ending in a video extension plays (muted, looping)
+   instead of showing as a still — the moving-thumbnail option. */
+const isVideoPath = s => /\.(webm|mp4|mov)(\?|#|$)/i.test(String(s || ''));
+
+/* Card-thumbnail resolution: an explicit project-level `poster` always wins;
+   otherwise the first block marked "Use as project thumbnail" in the admin
+   panel supplies one — its own file if it's an image, its own poster still
+   if it has one, a YouTube still if it's a YouTube block, or (for a
+   self-hosted R2 video with no still) the video file itself, played as a
+   moving thumbnail. No match falls back to generated art. */
+function deriveThumb(p) {
+  if (p.poster) return { src: p.poster };
+  const b = (p.blocks || []).find(x => x.useAsThumbnail);
+  if (!b) return null;
+  if (b.type === 'image') return b.url ? { src: b.url } : null;
+  if (b.poster) return { src: b.poster };
+  if (b.provider === 'youtube') {
+    const yt = ytThumbs(b.url);
+    return yt ? { src: yt.best, fallback: yt.fallback } : null;
+  }
+  if (b.provider === 'r2' && b.url) return { src: b.url };
+  return null;
+}
+
 const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -126,27 +149,23 @@ function art(kind, t, W, H) {
 /* ---------- cards ---------- */
 function cardHTML(p, hrefBase, index = 99) {
   const shape = shapeOf(p.format), W = shape.w, H = shape.h;
-  /* Card image, in order of preference: an explicit poster, then the YouTube
-     still derived from the project's first YouTube block, then a single
-     generated illustration. */
-  const firstYt = (p.blocks || []).find(b => b.type === 'video' && b.provider === 'youtube');
-  const yt = p.poster ? null : ytThumbs(firstYt && firstYt.url);
+  const thumb = deriveThumb(p);
   /* The first cards are above the fold on every breakpoint; lazy-loading them
      delays the largest paint for no saving. */
   const eager = index < 2;
   const loadAttr = eager
     ? 'loading="eager"' + (index === 0 ? ' fetchpriority="high"' : '')
     : 'loading="lazy"';
-  const media = p.poster
-    ? `<img class="poster" src="${esc(assetUrl(p.poster))}" alt="" ${loadAttr}>`
-    : yt
-    ? `<img class="poster" src="${esc(yt.best)}" data-fallback="${esc(yt.fallback)}" alt="" ${loadAttr}>`
-    : `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${art(p.category, 1, W, H)}</svg>`;
+  const media = !thumb
+    ? `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${art(p.category, 1, W, H)}</svg>`
+    : isVideoPath(thumb.src)
+    ? `<video class="poster" src="${esc(assetUrl(thumb.src))}" autoplay muted loop playsinline preload="metadata"></video>`
+    : `<img class="poster" src="${esc(assetUrl(thumb.src))}"${thumb.fallback ? ` data-fallback="${esc(thumb.fallback)}"` : ''} alt="" ${loadAttr}>`;
   const cat = p.category[0].toUpperCase() + p.category.slice(1);
   return `<a class="card w${p.span} c-${p.category}" href="${hrefBase}?p=${p.slug}"
-    aria-label="${esc(p.title)} — ${cat}, ${tc(p.seconds)}">
+    aria-label="${esc(p.title)} — ${cat}">
     <div class="frame" style="aspect-ratio:${shape.css}">${media}</div>
-    <div class="meta"><h3>${esc(p.title)}</h3><span class="tc">${tc(p.seconds)}</span></div>
+    <div class="meta"><h3>${esc(p.title)}</h3></div>
     <div class="under"><span class="cat">${cat}</span><span class="fmt">${p.format}</span></div>
   </a>`;
 }
@@ -248,8 +267,7 @@ async function renderGrid({ filter = null, limit = null, hrefBase = 'project/',
 
     const count = document.getElementById('count');
     if (count) {
-      const total = list.reduce((a, p) => a + p.seconds, 0);
-      count.textContent = `${list.length} ${list.length === 1 ? 'piece' : 'pieces'}, ${tc(total)} total`;
+      count.textContent = `${list.length} ${list.length === 1 ? 'piece' : 'pieces'}`;
     }
     wireCards(el);
     watchPins(el);
@@ -275,6 +293,9 @@ function bentoThumb(p, b) {
 function bentoCellHTML(p, b, hrefBase, index) {
   const cat = p.category[0].toUpperCase() + p.category.slice(1);
   const thumb = bentoThumb(p, b);
+  /* Accepts comma- or space-separated tags, with or without a leading # —
+     see the matching comment in works/project/index.html. */
+  const tags = (p.tags || '').split(/[,\s]+/).map(s => s.replace(/^#+/, '').trim()).filter(Boolean);
   const eager = index < 2;
   const loadAttr = eager
     ? 'loading="eager"' + (index === 0 ? ' fetchpriority="high"' : '')
@@ -282,11 +303,12 @@ function bentoCellHTML(p, b, hrefBase, index) {
   const media = thumb
     ? `<img class="poster" src="${esc(thumb.src)}"${thumb.yt ? ` data-fallback="${esc(thumb.yt.fallback)}"` : ''} alt="" ${loadAttr}>`
     : `<svg viewBox="0 0 160 90" preserveAspectRatio="none" aria-hidden="true">${art(p.category, 1, 160, 90)}</svg>`;
+  const tagsHTML = tags.map(t => `<span class="tagchip">#${esc(t)}</span>`).join(' ');
   return `<a class="cell c-${p.category}" href="${hrefBase}?p=${p.slug}"
     aria-label="${esc(p.title)} — ${cat}">
     <div class="media">${media}</div>
     <div class="meta"><h3>${esc(p.title)}</h3></div>
-    <div class="under"><span class="cat">${cat}</span></div>
+    <div class="under">${tagsHTML}</div>
   </a>`;
 }
 
