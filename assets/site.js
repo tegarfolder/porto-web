@@ -256,6 +256,57 @@ async function renderGrid({ filter = null, limit = null, hrefBase = 'project/',
   } catch (e) { fail(el, e); }
 }
 
+/* ---------- home page bento ----------
+   Unlike renderGrid(), this pulls individual content blocks, not whole
+   projects — a project with two blocks marked "Show in Recent Works" can put
+   both on the home page. Cells fill a fixed template in order (see .bento in
+   site.css); any blocks beyond the template's cell count are simply not
+   shown, and a shorter list just leaves the template's later cells empty. */
+function bentoThumb(p, b) {
+  if (b.type === 'image') return { src: assetUrl(b.url), yt: null };
+  if (b.poster) return { src: assetUrl(b.poster), yt: null };
+  if (b.provider === 'youtube') {
+    const yt = ytThumbs(b.url);
+    if (yt) return { src: yt.best, yt };
+  }
+  return null; // no still available — falls back to generated art
+}
+
+function bentoCellHTML(p, b, hrefBase, index) {
+  const cat = p.category[0].toUpperCase() + p.category.slice(1);
+  const thumb = bentoThumb(p, b);
+  const eager = index < 2;
+  const loadAttr = eager
+    ? 'loading="eager"' + (index === 0 ? ' fetchpriority="high"' : '')
+    : 'loading="lazy"';
+  const media = thumb
+    ? `<img class="poster" src="${esc(thumb.src)}"${thumb.yt ? ` data-fallback="${esc(thumb.yt.fallback)}"` : ''} alt="" ${loadAttr}>`
+    : `<svg viewBox="0 0 160 90" preserveAspectRatio="none" aria-hidden="true">${art(p.category, 1, 160, 90)}</svg>`;
+  return `<a class="cell c-${p.category}" href="${hrefBase}?p=${p.slug}"
+    aria-label="${esc(p.title)} — ${cat}">
+    <div class="media">${media}</div>
+    <div class="meta"><h3>${esc(p.title)}</h3></div>
+    <div class="under"><span class="cat">${cat}</span></div>
+  </a>`;
+}
+
+/* Renders into #bento. cellCount must match the number of sized slots the
+   .bento CSS template defines — see the nth-child rules in site.css. */
+async function renderBento({ hrefBase = 'project/', cellCount = 8 } = {}) {
+  const el = document.getElementById('bento');
+  if (!el) return;
+  try {
+    const d = await data();
+    const items = [];
+    d.projects.forEach(p => (p.blocks || []).forEach(b => {
+      if (b.featured) items.push({ p, b });
+    }));
+    const list = items.slice(0, cellCount);
+    el.innerHTML = list.map(({ p, b }, i) => bentoCellHTML(p, b, hrefBase, i)).join('');
+    wireCards(el);
+  } catch (e) { fail(el, e); }
+}
+
 /* ---------- hero background ----------
    An autoplaying loop is exactly what prefers-reduced-motion exists to
    suppress. Pausing rather than hiding keeps the poster frame on screen, so

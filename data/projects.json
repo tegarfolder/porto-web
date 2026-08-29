@@ -72,7 +72,8 @@
           "autoplay": false,
           "muted": false,
           "loop": true,
-          "controls": true
+          "controls": true,
+          "featured": true
         },
         {
           "type": "video",
@@ -83,7 +84,8 @@
           "muted": false,
           "loop": true,
           "controls": false,
-          "poster": ""
+          "poster": "",
+          "featured": true
         }
       ]
     },
@@ -110,7 +112,8 @@
           "autoplay": false,
           "muted": false,
           "loop": true,
-          "controls": true
+          "controls": true,
+          "featured": true
         }
       ]
     },
@@ -137,7 +140,8 @@
           "autoplay": false,
           "muted": false,
           "loop": true,
-          "controls": true
+          "controls": true,
+          "featured": true
         }
       ]
     },
@@ -164,25 +168,63 @@
           "autoplay": false,
           "muted": false,
           "loop": true,
-          "controls": true
+          "controls": true,
+          "featured": true
         }
       ]
     },
     {
       "slug": "onda",
-      "title": "Onda",
-      "category": "brand",
+      "title": "Testing",
+      "category": "exploration",
       "client": "Onda",
       "year": 2025,
       "seconds": 58,
-      "format": "21:9",
+      "format": "16:9",
       "span": 8,
       "featured": true,
       "role": "Motion system, guidelines",
       "tools": "After Effects, Figma",
       "summary": "A motion language for a wordmark that had none — entry, exit, and the three transitions the team is allowed to use.",
       "poster": "",
-      "blocks": []
+      "blocks": [
+        {
+          "type": "video",
+          "provider": "r2",
+          "url": "https://media.putrategar.com/test_16_9.webm",
+          "caption": "",
+          "featured": true,
+          "autoplay": false,
+          "muted": false,
+          "loop": false,
+          "controls": true,
+          "poster": ""
+        },
+        {
+          "type": "video",
+          "provider": "r2",
+          "url": "https://media.putrategar.com/test_square.webm",
+          "caption": "",
+          "featured": true,
+          "autoplay": false,
+          "muted": false,
+          "loop": false,
+          "controls": true,
+          "poster": ""
+        },
+        {
+          "type": "video",
+          "provider": "r2",
+          "url": "https://media.putrategar.com/test_vertical.webm",
+          "caption": "",
+          "featured": true,
+          "autoplay": false,
+          "muted": false,
+          "loop": false,
+          "controls": false,
+          "poster": ""
+        }
+      ]
     },
     {
       "slug": "sift",

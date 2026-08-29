@@ -255,10 +255,10 @@ const BLOCK_KINDS = [
    an ambient loop — it's an option per block, not a default tied to provider. */
 function newBlock(kind) {
   const [type, provider] = kind.split(':');
-  const b = { type, provider, url: '', caption: '' };
+  const b = { type, provider, url: '', caption: '', featured: false };
   if (type === 'video') {
     b.autoplay = false; b.muted = false; b.loop = false; b.controls = true;
-    if (provider === 'r2') b.poster = '';
+    b.poster = '';
   }
   return b;
 }
@@ -480,7 +480,12 @@ function field(p, key, label, opts = {}) {
     if (opts.options && opts.numericOption) v = parseInt(v, 10);
     p[key] = v;
     markDirty();
-    if (opts.rerender) render();
+    /* render() rebuilds #list's innerHTML, which destroys and recreates this
+       very input — fine for a <select>/number spinner (one interaction sets
+       the whole value), but on a free-typed text field it drops keyboard
+       focus after every character. Text fields defer their rerender to
+       'change' below instead. */
+    if (opts.rerender && (opts.options || opts.number)) render();
   });
   /* Rewrite on commit rather than per keystroke, so it doesn't fight typing. */
   if (opts.normalize) {
@@ -489,6 +494,8 @@ function field(p, key, label, opts = {}) {
       if (fixed !== input.value) { input.value = fixed; p[key] = fixed; markDirty(); }
       render();
     });
+  } else if (opts.rerender && !opts.options && !opts.number) {
+    input.addEventListener('change', () => render());
   }
   return wrap;
 }
@@ -642,9 +649,11 @@ function renderBlocks(p) {
     if (b._err) urlOpts.errText = b._err;
     body.appendChild(blockField(b, 'url', urlLabel, urlOpts));
 
-    if (b.type === 'video' && b.provider === 'r2') {
+    if (b.type === 'video') {
       body.appendChild(blockField(b, 'poster', 'Poster (optional)', { wide: 12,
-        placeholder: 'https://media.putrategar.com/….jpg — shown before play' }));
+        placeholder: b.provider === 'youtube'
+          ? 'Leave blank to use the YouTube thumbnail automatically'
+          : 'https://media.putrategar.com/….jpg — shown before play / as the Recent Works thumbnail' }));
     }
 
     if (b.type === 'video' && b.provider !== 'frameio' && b.provider !== 'custom') {
@@ -662,6 +671,15 @@ function renderBlocks(p) {
 
     body.appendChild(blockField(b, 'caption', 'Caption (optional)', { wide: 12,
       placeholder: 'Shown under this block, e.g. "01 — Logo animation"' }));
+
+    body.appendChild(blockCheck(b, 'featured', 'Show in Recent Works (home page)'));
+    {
+      const note = document.createElement('div');
+      note.className = 'hint'; note.style.gridColumn = 'span 12';
+      note.textContent = 'The home page pulls individual blocks, not whole projects — ' +
+        'two blocks from the same project can both appear there.';
+      body.appendChild(note);
+    }
 
     blk.appendChild(body);
     box.appendChild(blk);
@@ -796,7 +814,6 @@ function render() {
         }),
         field(p, 'client', 'Client', { wide: 6 }),
         field(p, 'year', 'Year', { number: true }),
-        checkbox(p, 'featured', 'Featured on the home page'),
         field(p, 'role', 'Role', { wide: 6, placeholder: 'Script, design, animation' }),
         field(p, 'tools', 'Tools', { wide: 6, placeholder: 'After Effects, Blender' }),
         field(p, 'summary', 'Summary', { wide: 12, textarea: true }),
@@ -913,10 +930,11 @@ function load(text, name, connected) {
       p.blocks = [];
       if (p.embed) p.blocks.push({
         type: 'video', provider: /vimeo\.com/.test(p.embed) ? 'vimeo' : 'youtube',
-        url: p.embed, caption: '', autoplay: false, muted: false, loop: true, controls: true
+        url: p.embed, poster: '', caption: '', featured: false,
+        autoplay: false, muted: false, loop: true, controls: true
       });
       if (p.video) p.blocks.push({
-        type: 'video', provider: 'r2', url: p.video, poster: '', caption: '',
+        type: 'video', provider: 'r2', url: p.video, poster: '', caption: '', featured: false,
         autoplay: false, muted: false, loop: false, controls: true
       });
     }

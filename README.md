@@ -159,8 +159,8 @@ strongest piece first.
 | `year` | Number, not a string. |
 | `seconds` | Runtime in seconds. Sets the displayed timecode **and** the length of the duration bar, which is scaled against your longest piece. |
 | `format` | Card and still aspect ratio. One of `21:9` (cinematic), `16:9` (landscape), `4:3` (standard), `1:1` (square), `4:5` (portrait), `9:16` (vertical). |
-| `span` | Grid width on `/works/`: `8` wide, `6` half, `4` narrow. Ignored on phones, and ignored entirely on the home page (its packed grid uses fixed columns). **`span` sets the width and `format` sets the height**, so a tall ratio in a wide slot makes a huge card — `9:16` at span 8 is about 802×1426px. The admin panel shows the resulting size and warns past 900px. |
-| `featured` | `true` makes it eligible for the home page, which shows the first 4 featured pieces. |
+| `span` | Grid width on `/works/`: `8` wide, `6` half, `4` narrow. Ignored on phones, and irrelevant to the home page (its bento layout doesn't use `span`/`format` at all — see below). **`span` sets the width and `format` sets the height**, so a tall ratio in a wide slot makes a huge card — `9:16` at span 8 is about 802×1426px. The admin panel shows the resulting size and warns past 900px. |
+| `featured` | Not currently used by anything rendered. What the home page shows is controlled per **content block**, not per project — see `featured` under "Content blocks" below. Left in place rather than stripped from existing data; harmless either way. |
 | `role` | e.g. "Script, design, animation". |
 | `tools` | e.g. "After Effects, Cinema 4D". |
 | `summary` | One or two sentences on the project page. |
@@ -191,11 +191,13 @@ each entry looks like this:
   "type": "video",
   "provider": "youtube",
   "url": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  "poster": "",
   "caption": "",
   "autoplay": false,
   "muted": false,
   "loop": true,
-  "controls": true
+  "controls": true,
+  "featured": false
 }
 ```
 
@@ -204,8 +206,10 @@ each entry looks like this:
 | `type` | `"video"` or `"image"`. |
 | `provider` | `"youtube"`, `"vimeo"`, `"mux"`, `"frameio"`, `"custom"` (any iframe-embeddable URL), or `"r2"` (self-hosted — the only provider images use too). |
 | `url` | Provider-specific — see the table below. |
+| `poster` | Video only, every provider. Optional still shown before play (self-hosted) and, more importantly, used as this block's thumbnail if it's `featured` (below). Leave empty on a `youtube` block and the YouTube still is used automatically; leave empty on any other provider with no `poster` and no way to auto-derive one, and the block falls back to generated art on the home page. |
 | `caption` | Optional line shown under the block, e.g. `"01 — Logo animation"`. |
 | `autoplay`, `muted`, `loop`, `controls` | Video only, and ignored for `frameio`/`custom` (no stable public param API to drive). **Autoplay forces `muted`** — browsers refuse unmuted autoplay outright, so the admin panel checks Muted automatically and locks it while Autoplay is on. |
+| `featured` | `true` puts this block on the **home page's bento grid** — see below. Video or image, either can be featured. |
 
 | Provider | `url` is… |
 | --- | --- |
@@ -214,7 +218,7 @@ each entry looks like this:
 | `mux` | A bare Playback ID, or a full `player.mux.com/…` link. |
 | `frameio` | A share link with embedding allowed on it. |
 | `custom` | Any iframe `src` — the escape hatch for a provider with no special handling. |
-| `r2` (video) | A direct file URL, e.g. `https://media.putrategar.com/loop.mp4`. Optional sibling field `poster` sets the still shown before play. |
+| `r2` (video) | A direct file URL, e.g. `https://media.putrategar.com/loop.mp4`. |
 | `r2` (image) | A direct file URL, e.g. `https://media.putrategar.com/still.jpg`. |
 
 **Every new video block — R2 included — defaults to sound-on, click-to-play,
@@ -224,6 +228,29 @@ For the **"minimalist" treatment** — a silent, looping, chrome-free clip, the
 style case-study sites use between the main pieces — check Autoplay, Loop, and
 uncheck Controls on that one block (Muted checks and locks itself once
 Autoplay is on). It's a combination you opt into per block, not a preset.
+
+### Home page — the bento grid
+
+The home page's featured section pulls individual **content blocks**, not
+whole projects — check `featured` on a block (any project, any type) in the
+admin panel and it appears there. This means two blocks from the *same*
+project can both show up on the home page, e.g. a YouTube cut and a self-hosted
+detail loop, each as its own tile.
+
+The layout is a **fixed 8-cell template** (`.bento` in `site.css`, one tall
+hero cell, one tall secondary cell, two small cells stacked beside them, and
+four equal cells in a row underneath) — not a masonry that grows with however
+much content exists. `featured` blocks fill it in the order their projects
+appear in `data/projects.json`, then their own block order within that
+project; the **9th featured block onward is simply not shown**. Fewer than 8
+just leaves the template's later cells empty (nothing renders in them, no
+visible gap). Whatever image lands in a cell is cropped (`object-fit: cover`)
+to fill it regardless of the source's native aspect ratio — a portrait still
+in a wide cell, a 21:9 frame in a tall one, both just fill the box.
+
+A block with no derivable thumbnail (no `poster` set, and not a YouTube block)
+falls back to the same generated placeholder art the project cards use
+elsewhere.
 
 ### Editing categories
 
@@ -468,9 +495,10 @@ at the top.
 
 Inside an open project, the **Content** section is where the case-study body
 lives (see "Content blocks" in §3): pick a type from the dropdown, click
-**+ Add block**, fill in its URL. Each block gets its own ↑ / ↓ / Delete, and
-video blocks (other than Frame.io/Custom) get Autoplay / Muted / Loop /
-Controls checkboxes.
+**+ Add block**, fill in its URL. Each block gets its own ↑ / ↓ / Delete, a
+**Show in Recent Works** checkbox (this is what puts it on the home page's
+bento grid — see "Home page — the bento grid" in §3), and video blocks (other
+than Frame.io/Custom) also get Autoplay / Muted / Loop / Controls checkboxes.
 
 ### Publishing a new piece — start to finish
 
@@ -493,16 +521,21 @@ One-time bucket/domain/cache setup is §5; this is what repeats every time.
 7. Paste the URL from step 3 into the block. For a video block, set
    Autoplay / Muted / Loop / Controls to taste (see "Content blocks" in §3
    for what each does, and the "minimalist" muted-loop combination).
-8. Repeat 6–7 for every clip/still in the case study, **in the order they
+8. Want it on the home page? Check **Show in Recent Works** on whichever
+   block(s) should appear there — one, several, even every block in the
+   project. Set `poster` on it first if it isn't a YouTube block, so it has
+   something to show (see "Home page — the bento grid" in §3).
+9. Repeat 6–8 for every clip/still in the case study, **in the order they
    should appear on the page** — reorder any block afterwards with its ↑ / ↓.
-9. **Save.** The very first save ever asks which file to write — choose
-   `data/projects.json`; every save after that is one click.
-10. Commit in VS Code as usual (§4).
+10. **Save.** The very first save ever asks which file to write — choose
+    `data/projects.json`; every save after that is one click.
+11. Commit in VS Code as usual (§4).
 
-A **grid-card thumbnail** is separate from the case-study content: leave the
-top-level `poster` field empty and, if the first block is a YouTube video, the
-card uses YouTube's own still automatically. For anything else, paste a
-still's R2 URL (or any image URL) into `poster` to set one explicitly.
+Two different thumbnails, easy to conflate: the `/works/` **grid-card**
+thumbnail comes from the top-level `poster` field (or, if that's empty, the
+project's first YouTube block automatically); the **home page bento** tile
+comes from whichever block(s) have `featured` checked, each using its own
+`poster`/thumbnail independently. Setting one does not set the other.
 
 ### What it checks before saving
 
@@ -591,7 +624,8 @@ does have heavier cuts, those are the declarations to raise back up.
 | Cards without a poster | 8 generated SVG frames that pointer position scrubs through. |
 | Card thumbnails | Preference order: explicit `poster` → YouTube still derived from the project's **first YouTube block** → generated art. YouTube stills come from `img.youtube.com/vi/<id>/maxresdefault.jpg`, falling back to `mqdefault.jpg`. Only those two are true 16:9 — `hqdefault` and `sddefault` are 4:3 with black bars. Videos never uploaded in HD return either a 404 **or a 200 carrying a 120×90 grey placeholder**, so the fallback triggers on both. |
 | Card shapes | Six ratios, defined once in `FORMATS` in `assets/site.js` (mirrored in `admin/index.html`). Each entry carries the CSS ratio for the box and a viewBox for the generated art, so placeholder artwork stays in proportion at any shape. |
-| Home-page grid | Packed "pinboard" layout (`layout: 'pins'`). Fixed column count per breakpoint — 4 / 3 / 2 / 1 — with each card given a row span matching its own height, so cards pack instead of aligning into ragged rows. Reading order stays left-to-right. |
+| Home-page grid | Fixed 8-cell bento template (`.bento`), not a masonry — see "Home page — the bento grid" in §3. `renderBento()` in `site.js` pulls `featured` **blocks**, not projects, so needs no layout math at render time, unlike the works/category pages' packed grid below. |
+| Works/category grid | `.grid.pins` — a packed "pinboard" layout, fixed column count per breakpoint (4 / 3 / 2 / 1), each card given a row span matching its own height so cards pack instead of leaving ragged gaps. Currently unused (the home page moved to the bento grid above) but left intact in case a future page wants a masonry layout again. |
 | Cards with a poster | Still image, gentle zoom on hover. |
 | Touch devices | No hover, so each card plays its build once as it scrolls into view. |
 
@@ -685,4 +719,5 @@ happen and the sentence renders normally.
 | Admin panel asks for the file every time | The handle could not be stored — private/incognito window, or site data was cleared. |
 | Embedded video is a blank box, no error | A `watch?v=` or `youtu.be` link on a YouTube block. Those send `X-Frame-Options: SAMEORIGIN` and refuse to load in a frame; only `youtube.com/embed/ID` works. Re-save via the admin panel and it converts the link. |
 | Video plays but fullscreen is missing | The iframe needs `allow` and `allowfullscreen` — present on the project page; check any player you hand-wrote. |
-| Home cards overlap each other | The packed grid's row spans went stale and were not recomputed. Reload the page; report it if it survives a reload. |
+| Home page bento is missing a piece I expect | That block's `featured` checkbox isn't on (§3), or it's the 9th+ featured block found in `data/projects.json` order — the template only has 8 cells. |
+| Home page bento tile shows generic art, not my thumbnail | The block has no `poster` and isn't a YouTube block, so there's nothing to auto-derive a still from — set `poster` on it (§3, §6). |
