@@ -222,6 +222,18 @@ letterboxed within that fixed box. This only affects the project page's block
 stack — grid-card and bento thumbnails keep their existing fixed/cropped
 sizing (`format`/`span`, and `object-fit: cover`) unchanged.
 
+**Lightbox:** hovering a block reveals a small expand button in its corner
+(always visible on touch, since there's no hover there); clicking it opens
+that block full-screen with a close button, click-outside, and Escape all
+dismissing it. The actual `<video>`/`<img>`/`<iframe>` element is *moved*
+into the overlay rather than cloned, so a playing/looping video keeps
+playing uninterrupted, just bigger — a clone would start over from a new,
+independent element instead. Deliberately not a whole-block click target:
+that would fight a video's own play/pause controls, and a click inside a
+cross-origin iframe (YouTube, Vimeo, etc.) can't be detected from the page
+at all, so the expand button is the only thing that reliably works for
+every block type.
+
 ```json
 {
   "type": "video",

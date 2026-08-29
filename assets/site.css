@@ -246,24 +246,40 @@ nav a[aria-current="page"]{color:var(--fg)}
 /* ---------- project page ---------- */
 /* Narrower than the site's usual 1440px shell, and centred within it — a
    reading column with visible margin on both sides, not edge-to-edge, for
-   the meta rows and the content-block stack alike. Doesn't touch .shell
-   itself (still full width for every other page), and #proj only exists on
-   this page, so nothing else is affected. */
-#proj{max-width:860px;margin:0 auto}
+   the meta rows and the content-block stack alike (video/image blocks
+   included — this is one shared width for the whole page, not just text).
+   Doesn't touch .shell itself (still full width for every other page), and
+   #proj only exists on this page, so nothing else is affected.
+   To adjust: raise this number for a wider column (less margin), lower it
+   for a narrower one (more margin) — it's the only value that controls it. */
+#proj{max-width:660px;margin:0 auto}
+/* .ptitle's shared clamp(40px,8vw,104px) tops out at 104px on any wide
+   monitor (1300px+ viewport) — too big at this page's narrower column.
+   Scoped to #proj only, so Works/About/Services/category-page headlines
+   (which also use .ptitle) are untouched. */
+#proj .ptitle{font-size:clamp(32px,6vw,60px)}
 
 /* Description, a Category+Hashtags row, and Tools — stacked labelled rows
    above the content, each just skipped when its value is empty — this is
    what makes it read like a spec sheet rather than a two-column layout. */
 .pmeta{display:flex;flex-direction:column;gap:22px;padding-bottom:38px}
-.pmeta-row{display:flex;flex-direction:column;gap:9px}
+/* align-items:flex-start — without it, a column flex container's default
+   stretch makes each row's content (pills included) fill the full width.
+   Only visible on Tools/Description, whose row spans the whole column;
+   Category/Hashtags happen to look fine already only because their shared
+   parent (.pmeta-col) is itself content-width, not because this was set. */
+.pmeta-row{display:flex;flex-direction:column;gap:9px;align-items:flex-start}
 .pmeta-row p{font-size:16px;line-height:1.6;color:var(--fg);max-width:60ch}
 /* Category + Hashtags share a row, each keeping its own label-above-content
    column, rather than each claiming a full row like Description/Tools. */
 .pmeta-row.pmeta-pair{flex-direction:row;flex-wrap:wrap;gap:36px}
-.pmeta-col{display:flex;flex-direction:column;gap:9px}
+.pmeta-col{display:flex;flex-direction:column;gap:9px;align-items:flex-start}
 .pill{display:inline-flex;align-items:center;font-size:12.5px;font-weight:600;
   color:var(--fg);background:var(--card);border:1px solid var(--line);
   border-radius:999px;padding:5px 13px;margin:0 6px 6px 0;letter-spacing:.01em}
+/* Hashtags only — Category/Tools stay at .pill's default 600. General Sans
+   ships 400/500/600/700 (see README §7), so 400 is as thin as it gets. */
+.pill.pill-thin{font-weight:400}
 
 /* A case study is a stack of content blocks (video/image, any provider) in
    the order set in the admin panel, not one single embed. Each block clips
@@ -284,6 +300,41 @@ nav a[aria-current="page"]{color:var(--fg)}
 .block iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
 .block video,.block img{width:100%;height:auto;display:block}
 .block-cap{padding-top:8px;color:var(--dimmer);font-size:12px;letter-spacing:.02em}
+
+/* Hover-revealed corner button — a separate hit target from the media
+   itself, not the whole block, so it never fights a video's own play/pause
+   controls (and works for an iframe's contents, which a plain "click
+   anywhere on the block" listener couldn't detect at all — see the JS). */
+.block-expand{position:absolute;top:12px;right:12px;width:34px;height:34px;
+  border-radius:50%;border:none;background:rgba(10,10,14,.6);color:#fff;
+  display:grid;place-items:center;cursor:pointer;opacity:0;
+  transition:opacity .2s,background .2s}
+.block-expand:hover{background:rgba(10,10,14,.85)}
+.block:hover .block-expand,.block-expand:focus-visible{opacity:1}
+.block-expand:focus-visible{outline:2px solid #fff;outline-offset:2px}
+/* Touch has no hover to reveal it on — keep it visible outright there. */
+@media (hover:none){.block-expand{opacity:1}}
+
+/* ---------- content-block lightbox ---------- */
+.lightbox{position:fixed;inset:0;z-index:200;display:none;
+  align-items:center;justify-content:center;padding:clamp(20px,5vw,64px);
+  background:rgba(6,6,8,.94)}
+.lightbox.open{display:flex}
+.lightbox-content{max-width:1400px;max-height:100%;width:100%}
+.lightbox-content video,.lightbox-content img,.lightbox-content iframe{
+  width:100%;max-height:calc(100vh - clamp(40px,10vw,128px));
+  display:block;border:0;border-radius:var(--r-lg);margin:0 auto;background:#000}
+.lightbox-content video,.lightbox-content img{height:auto}
+/* Unlike video/img, an iframe has no intrinsic size to size itself by —
+   .block iframe's aspect-ratio no longer applies once moved out of .block,
+   so it needs restating here or it collapses to the browser's ~150px
+   fallback height instead of scaling with width. */
+.lightbox-content iframe{aspect-ratio:16/9;height:auto}
+.lightbox-close{position:absolute;top:20px;right:20px;width:42px;height:42px;
+  border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);
+  color:#fff;font-size:22px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.lightbox-close:hover{background:rgba(255,255,255,.18)}
+.lightbox-close:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .specs dl{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;
   font-size:13.5px;align-items:baseline}
 .specs dt{color:var(--dimmer);font-size:11px;font-weight:500;
@@ -371,9 +422,12 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
   opacity:0;transition:opacity .25s}
 .grid.pins .card:hover .frame::after,
 .grid.pins .card:focus-visible .frame::after{opacity:1}
+/* z-index:1 — same fix as .bento's identical pattern: without it, the
+   ::after scrim (a pseudo-element, painted after real children by default)
+   renders over this text instead of behind it. */
 .grid.pins .meta,.grid.pins .under{position:absolute;left:16px;right:16px;
   margin:0;padding:0;opacity:0;transform:translateY(6px);pointer-events:none;
-  transition:opacity .22s,transform .22s}
+  z-index:1;transition:opacity .22s,transform .22s}
 .grid.pins .meta{bottom:32px}
 .grid.pins .meta h3{font-size:14px;letter-spacing:-.02em;color:#fff}
 .grid.pins .under{bottom:14px}
@@ -414,8 +468,12 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
   background:linear-gradient(to top,rgba(10,10,14,.86) 0%,rgba(10,10,14,.5) 40%,transparent 70%);
   opacity:0;transition:opacity .25s}
 .bento .cell:hover::after,.bento .cell:focus-visible::after{opacity:1}
+/* z-index:1 is load-bearing — ::after is a pseudo-element, which paints
+   after (on top of) real DOM children like these when nothing has an
+   explicit stacking order. Without this, the scrim rendered over the text
+   instead of behind it, dimming white to a muddy gray in both themes. */
 .bento .meta,.bento .under{position:absolute;left:16px;right:16px;margin:0;padding:0;
-  opacity:0;transform:translateY(6px);pointer-events:none;
+  opacity:0;transform:translateY(6px);pointer-events:none;z-index:1;
   transition:opacity .22s,transform .22s}
 .bento .meta{bottom:32px}
 .bento .meta h3{font-size:15px;font-weight:600;letter-spacing:-.02em;color:#fff}

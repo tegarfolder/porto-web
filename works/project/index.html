@@ -34,8 +34,55 @@
   </footer>
 
 </div>
+<!-- Outside .shell on purpose — a modal overlay belongs at the document
+     root, not inside a max-width wrapper it needs to cover regardless of. -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" type="button" aria-label="Close preview">&times;</button>
+  <div class="lightbox-content" id="lightboxContent"></div>
+</div>
 <script src="../../assets/site.js" data-root="../../"></script>
 <script>
+/* ---------- content-block lightbox ----------
+   Moves the clicked block's actual media node into the overlay rather than
+   cloning it — reparenting a <video>/<iframe> preserves its playback state
+   (an autoplaying loop just keeps looping, seamlessly bigger), where
+   cloning would create a second, independent element starting from zero. */
+(function setupLightbox() {
+  const box = document.getElementById('lightbox');
+  const content = document.getElementById('lightboxContent');
+  let homeParent = null, homeNext = null, active = null;
+
+  function close() {
+    if (!active) return;
+    homeParent.insertBefore(active, homeNext);
+    box.classList.remove('open');
+    document.body.style.overflow = '';
+    active = null;
+  }
+  function open(media) {
+    if (active) close();
+    homeParent = media.parentElement;
+    homeNext = media.nextSibling;
+    active = media;
+    content.appendChild(media);
+    box.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  box.addEventListener('click', e => { if (e.target === box) close(); });
+  box.querySelector('.lightbox-close').addEventListener('click', close);
+  addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+  /* Delegated, so it keeps working after el.innerHTML replaces the blocks —
+     no need to re-wire listeners on every render. */
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.block-expand');
+    if (!btn) return;
+    const media = btn.previousElementSibling;
+    if (media) open(media);
+  });
+})();
+
 (async function () {
   const el = document.getElementById('proj');
   const slug = new URLSearchParams(location.search).get('p');
@@ -97,6 +144,7 @@
       return 'https://player.mux.com/' + id + (q.toString() ? '?' + q : '');
     };
     const IFRAME_ALLOW = 'autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    const EXPAND_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
 
     function renderBlock(b) {
       let inner = '';
@@ -130,7 +178,14 @@
       }
       if (!inner) return '';
       const cap = b.caption ? `<p class="block-cap">${esc(b.caption)}</p>` : '';
-      return `<div class="block-item"><div class="block">${inner}</div>${cap}</div>`;
+      /* The expand button is a separate hit target from the media itself —
+         making the whole block clickable would fight a video's own native
+         play/pause controls, and clicks inside a cross-origin iframe (a
+         YouTube/Vimeo/etc. embed) can't be detected from this page at all,
+         so a plain "click the block" handler wouldn't even work for those. */
+      return `<div class="block-item"><div class="block">${inner}
+        <button class="block-expand" type="button" aria-label="View larger">${EXPAND_ICON}</button>
+      </div>${cap}</div>`;
     }
 
     /* Accepts either typing style: comma-separated ("json, interactive") or
@@ -138,7 +193,10 @@
        any mix — split on commas and/or whitespace, then strip any leading #
        so it's never doubled when this line adds its own. */
     const tags = (p.tags || '').split(/[,\s]+/).map(s => s.replace(/^#+/, '').trim()).filter(Boolean);
-    const tagsHTML = tags.map(t => `<span class="tagchip">#${esc(t)}</span>`).join(' ');
+    /* .pill, not .tagchip — neutral, matching Category/Tools on this page.
+       .tagchip (category-accent colored) is still what the home page's
+       bento hover uses, deliberately, in a different white-on-scrim context. */
+    const tagsHTML = tags.map(t => `<span class="pill pill-thin">#${esc(t)}</span>`).join(' ');
     const toolsList = (p.tools || '').split(',').map(s => s.trim()).filter(Boolean);
     const toolsHTML = toolsList.map(t => `<span class="pill">${esc(t)}</span>`).join(' ');
 
