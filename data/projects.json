@@ -1,6 +1,6 @@
 {
   "hero": {
-    "video": "",
+    "video": "https://media.putrategar.com/hero.webm",
     "poster": ""
   },
   "categories": [
@@ -54,23 +54,23 @@
   ],
   "projects": [
     {
-      "slug": "brand1",
+      "slug": "1-usai-merdeka",
       "title": "Usai Merdeka Documentary",
       "category": "brand",
       "client": "MMTC Archives",
-      "tags": "",
+      "tags": "#documentary #explainer",
       "format": "16:9",
       "span": 8,
       "featured": true,
-      "tools": "",
-      "summary": "",
+      "tools": "After Effects, Blender 3D",
+      "summary": "Usai Merdeka blends raw human storytelling with data-driven motion graphics to explore the tension between working-class survival and environmental sustainability in limestone mining.",
       "poster": "",
       "blocks": [
         {
           "type": "video",
           "provider": "youtube",
           "url": "https://www.youtube.com/embed/jCzRzFXdlpg",
-          "caption": "",
+          "caption": "Intro Sequence",
           "autoplay": false,
           "muted": false,
           "loop": true,
@@ -81,14 +81,40 @@
         {
           "type": "video",
           "provider": "r2",
-          "url": "https://media.putrategar.com/Airing%20Now%20TV.mp4",
-          "caption": "",
-          "autoplay": false,
-          "muted": false,
+          "url": "https://media.putrategar.com/1-usai-merdeka/Maps-Showcase.webm",
+          "caption": "DataMaps Visualization",
+          "autoplay": true,
+          "muted": true,
           "loop": true,
           "controls": false,
           "poster": "",
-          "featured": true
+          "featured": false
+        },
+        {
+          "type": "video",
+          "provider": "r2",
+          "url": "https://media.putrategar.com/1-usai-merdeka/Infographic-Showcase.webm",
+          "caption": "Infographic Animation",
+          "featured": false,
+          "useAsThumbnail": false,
+          "autoplay": true,
+          "muted": true,
+          "loop": true,
+          "controls": false,
+          "poster": ""
+        },
+        {
+          "type": "video",
+          "provider": "r2",
+          "url": "https://media.putrategar.com/1-usai-merdeka/Combine-Showcase.webm",
+          "caption": "Visual Effects",
+          "featured": false,
+          "useAsThumbnail": false,
+          "autoplay": true,
+          "muted": true,
+          "loop": true,
+          "controls": false,
+          "poster": ""
         }
       ]
     },
