@@ -176,6 +176,25 @@
 
   <div id="issues"></div>
 
+  <details class="socbox" id="herobox">
+    <summary>Hero background</summary>
+    <p class="sochelp">The looping muted video behind the home page headline.
+    Leave both empty to keep the local fallback file already in
+    <code>index.html</code>.</p>
+    <div class="grid-f" style="margin-bottom:14px">
+      <div class="f w6">
+        <label for="heroVideo">Video URL</label>
+        <input type="text" id="heroVideo" placeholder="https://media.putrategar.com/hero-loop.webm">
+        <div class="hint">Must be hosted on R2, not the repo. Autoplays muted, looping, no controls (same behaviour as now — only the source changes).</div>
+      </div>
+      <div class="f w6">
+        <label for="heroPoster">Poster URL (optional)</label>
+        <input type="text" id="heroPoster" placeholder="https://media.putrategar.com/hero-poster.jpg">
+        <div class="hint">Shown before the video loads, and instead of it entirely if the visitor has "reduce motion" enabled.</div>
+      </div>
+    </div>
+  </details>
+
   <details class="socbox" id="socbox">
     <summary>Social links <span class="soccount" id="soccount"></span></summary>
     <p class="sochelp">Shown as an icon row on the About page, in this order.
@@ -987,6 +1006,9 @@ function load(text, name, connected) {
   doc = parsed;
   doc.categories = doc.categories || [];
   doc.social = Array.isArray(doc.social) ? doc.social : [];
+  doc.hero = (doc.hero && typeof doc.hero === 'object') ? doc.hero : { video: '', poster: '' };
+  $('heroVideo').value = doc.hero.video || '';
+  $('heroPoster').value = doc.hero.poster || '';
   /* Migrate any pre-"blocks" project (a single top-level embed/video field)
      into the new content-block shape, so an older file on disk still opens
      cleanly instead of losing its media. */
@@ -1091,6 +1113,13 @@ $('socadd').addEventListener('click', () => {
   markDirty(); render();
 });
 
+$('heroVideo').addEventListener('input', () => {
+  doc.hero.video = $('heroVideo').value; markDirty();
+});
+$('heroPoster').addEventListener('input', () => {
+  doc.hero.poster = $('heroPoster').value; markDirty();
+});
+
 $('add').addEventListener('click', () => {
   doc.projects.unshift({
     slug: '', title: '', category: 'explainer', client: '',
@@ -1113,6 +1142,7 @@ $('save').addEventListener('click', async () => {
   if (validate() > 0) { render(); return; }
 
   const out = {
+    hero: { video: (doc.hero.video || '').trim(), poster: (doc.hero.poster || '').trim() },
     categories: doc.categories,
     social: doc.social.filter(s => s.platform && s.url && s.url.trim())
                       .map(s => ({ platform: s.platform, url: s.url.trim() })),

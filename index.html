@@ -23,8 +23,10 @@
   </header>
 
   <section class="hero center">
-    <!-- Showreel slot. Drop in when the loop exists:
-         <video src="…" autoplay muted loop playsinline poster="…"></video> -->
+    <!-- src/poster below are only the no-JS/first-paint fallback. initHero()
+         in assets/site.js overwrites both from data.hero (admin panel →
+         Hero background) once the R2 URL there loads — set it there, not
+         here, unless you're changing the fallback itself. -->
     <div class="hero-bg" aria-hidden="true">
       <video src="assets/hero.webm" autoplay muted loop playsinline poster="assets/hero1.png"></video>
     </div>

@@ -313,6 +313,29 @@ Category names and descriptions live in the `categories` array at the top of the
 same file. Changing a category **slug** also means renaming its folder under
 `works/` and updating the links — don't rename slugs casually.
 
+### Hero background
+
+The home page's looping background video is set from the admin panel's
+**Hero background** section (top of the page, above the project list) —
+`data/projects.json`'s top-level `hero.video`/`hero.poster`, not something
+you touch in `index.html`. Same requirement as any other video on this site:
+must be R2-hosted, not committed to the repo.
+
+```json
+"hero": {
+  "video": "https://media.putrategar.com/hero-loop.webm",
+  "poster": "https://media.putrategar.com/hero-poster.jpg"
+}
+```
+
+`index.html` still has a local `src`/`poster` directly on the `<video>` tag —
+that's the fallback for the moment before `initHero()` (`assets/site.js`)
+fetches `data/projects.json` and overwrites both, and for the rare visitor
+with JavaScript disabled. Leave `hero.video` empty in the admin panel and
+that local fallback just keeps showing indefinitely. Playback behavior
+(autoplay, muted, looping, no controls) is unchanged either way — only the
+source swaps.
+
 ### JSON gotchas
 
 JSON is strict. These will break the file and blank the work grid:

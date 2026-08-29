@@ -330,12 +330,20 @@ async function renderBento({ hrefBase = 'project/', cellCount = 8 } = {}) {
 }
 
 /* ---------- hero background ----------
-   An autoplaying loop is exactly what prefers-reduced-motion exists to
-   suppress. Pausing rather than hiding keeps the poster frame on screen, so
-   the hero still has an image. */
-function initHero() {
+   The video tag in index.html ships with a local src/poster as a no-JS
+   fallback; this swaps in the admin-set R2 URL (data.hero) once it loads,
+   same autoplay/muted/loop/no-controls behaviour either way — only the
+   source changes. An autoplaying loop is exactly what prefers-reduced-motion
+   exists to suppress. Pausing rather than hiding keeps the poster frame on
+   screen, so the hero still has an image. */
+async function initHero() {
   const v = document.querySelector('.hero-bg video');
   if (!v) return;
+  try {
+    const d = await data();
+    if (d.hero && d.hero.video) v.src = assetUrl(d.hero.video);
+    if (d.hero && d.hero.poster) v.poster = assetUrl(d.hero.poster);
+  } catch (e) { /* keep the HTML's own local fallback src/poster */ }
   const still = matchMedia('(prefers-reduced-motion:reduce)');
   const apply = () => {
     if (still.matches) { v.autoplay = false; v.pause(); }
