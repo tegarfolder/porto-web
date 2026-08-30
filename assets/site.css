@@ -201,11 +201,25 @@ nav a[aria-current="page"]{color:var(--fg)}
 /* Home page only — a fuller headline + subhead above the featured grid,
    instead of the plain "label + count" row .grid-head carries on the
    works/category pages. Kept as its own class so those pages are untouched. */
-.rw-head{padding:clamp(28px,4vh,48px) 0 clamp(18px,2.6vh,28px)}
+/* Flex row: headline + sub on the left, the "see all" arrow button on the
+   right. The button replaces the old .nextrow "See all works" text link that
+   sat below the grid — same destination, less scrolling. */
+.rw-head{display:flex;justify-content:space-between;align-items:flex-start;
+  gap:20px;padding:clamp(28px,4vh,48px) 0 clamp(18px,2.6vh,28px)}
+.rw-head-txt{min-width:0}
 .rw-head h2{font-size:clamp(28px,3.6vw,42px);font-weight:700;line-height:1.04;
   letter-spacing:-.03em;text-transform:uppercase;color:var(--fg)}
 .rw-head p{font-size:15.5px;line-height:1.58;color:var(--dim);max-width:50ch;
   padding-top:12px}
+/* Square icon button — same radius/lift gesture as .btn and .soc so it reads
+   as part of the same control family. */
+.rw-all{display:inline-flex;align-items:center;justify-content:center;
+  width:46px;height:46px;flex:none;border:1px solid var(--line);
+  border-radius:var(--r-md);color:var(--fg);text-decoration:none;
+  transition:border-color .2s,color .2s,transform .2s}
+.rw-all:hover,.rw-all:focus-visible{border-color:var(--fg);transform:translateY(-2px)}
+.rw-all:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.rw-all svg{display:block}
 .grid{display:grid;grid-template-columns:repeat(12,1fr);
   gap:clamp(22px,2.4vw,40px) clamp(16px,1.6vw,28px);padding-bottom:84px}
 .card{grid-column:span 6;text-decoration:none;color:var(--acc);display:block;outline:none}

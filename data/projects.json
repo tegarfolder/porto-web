@@ -64,7 +64,7 @@
       "featured": true,
       "tools": "After Effects, Blender 3D",
       "summary": "Usai Merdeka blends raw human storytelling with data-driven motion graphics to explore the tension between working-class survival and environmental sustainability in limestone mining.",
-      "poster": "",
+      "poster": "https://media.putrategar.com/1-usai-merdeka/thumb.webp",
       "blocks": [
         {
           "type": "video",
@@ -76,7 +76,8 @@
           "loop": true,
           "controls": true,
           "featured": true,
-          "useAsThumbnail": true
+          "useAsThumbnail": false,
+          "poster": "https://media.putrategar.com/1-usai-merdeka/thumb.webp"
         },
         {
           "type": "video",
@@ -110,6 +111,57 @@
           "caption": "Visual Effects",
           "featured": false,
           "useAsThumbnail": false,
+          "autoplay": true,
+          "muted": true,
+          "loop": true,
+          "controls": false,
+          "poster": ""
+        }
+      ]
+    },
+    {
+      "slug": "test1",
+      "title": "Testing",
+      "category": "exploration",
+      "client": "Onda",
+      "tags": "#test #json",
+      "format": "16:9",
+      "span": 8,
+      "featured": true,
+      "tools": "After Effects, Figma",
+      "summary": "A motion language for a wordmark that had none — entry, exit, and the three transitions the team is allowed to use.",
+      "poster": "",
+      "blocks": [
+        {
+          "type": "video",
+          "provider": "r2",
+          "url": "https://media.putrategar.com/test_16_9.webm",
+          "caption": "",
+          "featured": true,
+          "autoplay": true,
+          "muted": true,
+          "loop": true,
+          "controls": true,
+          "poster": ""
+        },
+        {
+          "type": "video",
+          "provider": "r2",
+          "url": "https://media.putrategar.com/test_square.webm",
+          "caption": "",
+          "featured": true,
+          "autoplay": true,
+          "muted": true,
+          "loop": true,
+          "controls": true,
+          "poster": ""
+        },
+        {
+          "type": "video",
+          "provider": "r2",
+          "url": "https://media.putrategar.com/test_vertical.webm",
+          "caption": "",
+          "featured": true,
           "autoplay": true,
           "muted": true,
           "loop": true,
@@ -196,57 +248,6 @@
           "controls": true,
           "featured": true,
           "useAsThumbnail": true
-        }
-      ]
-    },
-    {
-      "slug": "onda",
-      "title": "Testing",
-      "category": "exploration",
-      "client": "Onda",
-      "tags": "#test #json",
-      "format": "16:9",
-      "span": 8,
-      "featured": true,
-      "tools": "After Effects, Figma",
-      "summary": "A motion language for a wordmark that had none — entry, exit, and the three transitions the team is allowed to use.",
-      "poster": "",
-      "blocks": [
-        {
-          "type": "video",
-          "provider": "r2",
-          "url": "https://media.putrategar.com/test_16_9.webm",
-          "caption": "",
-          "featured": true,
-          "autoplay": true,
-          "muted": true,
-          "loop": true,
-          "controls": true,
-          "poster": ""
-        },
-        {
-          "type": "video",
-          "provider": "r2",
-          "url": "https://media.putrategar.com/test_square.webm",
-          "caption": "",
-          "featured": true,
-          "autoplay": true,
-          "muted": true,
-          "loop": true,
-          "controls": true,
-          "poster": ""
-        },
-        {
-          "type": "video",
-          "provider": "r2",
-          "url": "https://media.putrategar.com/test_vertical.webm",
-          "caption": "",
-          "featured": true,
-          "autoplay": true,
-          "muted": true,
-          "loop": true,
-          "controls": false,
-          "poster": ""
         }
       ]
     },
