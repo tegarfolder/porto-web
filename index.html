@@ -23,6 +23,11 @@
     <button class="mode" id="mode" type="button" aria-label="Switch to dark mode"></button>
   </header>
 
+  <!-- .hero-pin is exactly 2x the hero's own height (see assets/site.css) —
+       that "spare" height is what lets the hero (position:sticky inside it)
+       stay pinned at the top of the viewport for one full screen's worth of
+       scroll before it runs out of room and scrolls away normally. -->
+  <div class="hero-pin">
   <section class="hero center">
     <!-- src/poster below are only the no-JS/first-paint fallback. initHero()
          in assets/site.js overwrites both from data.hero (admin panel →
@@ -36,7 +41,7 @@
       <!-- <span class="lab">Motion graphics &mdash; Jakarta &middot; Remote</span> -->
       <div class="lede">
         <!-- <h1>We animate the part people keep not getting.</h1> -->
-        <h1>Static is boring, your&nbsp;brand&nbsp;deserves&nbsp;to&nbsp;move.</h1>
+        <h1>Shaping the&nbsp;way&nbsp;brands&nbsp;move</h1>
         <p>Explainer, product, event, and brand films. Script and storyboard
         first, animation second.</p>
       </div>
@@ -89,7 +94,13 @@
       -->
     </div>
   </section>
+  </div>
 
+  <!-- .hero-cover is what actually does the covering: pulled up over the
+       second half of .hero-pin (margin-top:-100vh) with its own opaque
+       background and a higher z-index, so it visually slides up the screen
+       and over the still-pinned hero as you scroll through that stretch. -->
+  <div class="hero-cover">
   <div class="rule"></div>
 
   <section>
@@ -104,6 +115,7 @@
     </div>
     <div class="bento" id="bento"></div>
   </section>
+  </div>
 
   <section class="close">
     <div class="l">

@@ -52,7 +52,11 @@ body{background:var(--ink);color:var(--fg);font-family:var(--sans);
    running to reveal it. */
 html.pt-init .shell>:not(header){opacity:0;transform:translateY(14px);
   transition:opacity .38s cubic-bezier(.22,.61,.36,1),transform .38s cubic-bezier(.22,.61,.36,1)}
-html.pt-init.pt-in .shell>:not(header){opacity:1;transform:translateY(0)}
+/* transform:none, not translateY(0) — a specified non-none transform value
+   (even an identity one) still makes this element a containing block for
+   any position:fixed/sticky descendant, breaking things like the sticky
+   hero pin below it. none is the one value that doesn't. */
+html.pt-init.pt-in .shell>:not(header){opacity:1;transform:none}
 html.pt-init.pt-out .shell>:not(header){opacity:0;transform:translateY(-10px);transition-duration:.2s}
 /* Fixed glass nav sits on top of the hero footage. Body gets top padding
    equal to the header height so non-hero pages clear the fixed bar; body's
@@ -128,13 +132,44 @@ nav a[aria-current="page"]{color:var(--fg)}
    the screen, under the fixed glass nav. The nav height is added to the
    hero's top padding so the copy keeps its original vertical position. */
 .hero{padding:calc(64px + clamp(56px,10vh,112px)) 0 clamp(36px,5vh,56px)}
-.hero.center{text-align:center;position:relative;
+/* ---- scroll cover: hero stays pinned, the next section slides up over it ----
+   The two numbers that matter are HERO_H (the hero's own height — the
+   visible 720/1080 proportion) and .hero-pin's height, which MUST be
+   2 × HERO_H, not just "100vh" — here's why. .hero-cover is a normal,
+   non-sticky block: it moves exactly 1px for every 1px scrolled, no more.
+   For it to fully close the gap over the hero (a distance of one whole
+   HERO_H, from sitting right below the hero up to fully covering it) by the
+   time the hero runs out of room to stick, the *scrollable distance while
+   the hero is still stuck* has to equal that same HERO_H — otherwise the
+   hero releases and starts scrolling away while .hero-cover has only
+   travelled part of the way, leaving a visible sliver of hero at the top of
+   the screen (the actual bug this replaced). The stuck-scroll distance is
+   .hero-pin's height minus the hero's own height, so setting .hero-pin to
+   2 × HERO_H makes that distance equal to HERO_H exactly — the two numbers
+   that need to match, match. .hero-cover's negative margin follows the same
+   logic: -HERO_H pulls it from right after .hero-pin up to sitting flush
+   under the hero at scroll 0 (the static 720/360 split, no gap), and it
+   naturally reaches y:0 — fully covering the hero — right as the hero's
+   stuck range runs out. dvh (with a vh fallback for older browsers) rather
+   than vh, because vh is notoriously unreliable on mobile once the browser
+   chrome collapses. To change the split, edit HERO_H below and keep
+   .hero-pin (2×) and .hero-cover's margin (1×, negative) in sync by hand —
+   CSS has no variables in calc() across separate rules without a custom
+   property, so this can't be a single source of truth without introducing
+   one. */
+.hero-pin{position:relative;height:133.334vh;height:133.334dvh} /* 2 × HERO_H */
+.hero.center{text-align:center;position:sticky;top:0;
+  display:flex;flex-direction:column;justify-content:center;
+  height:66.667vh;height:66.667dvh; /* HERO_H — 720/1080 */
   /* Top and bottom share one clamp(), so the breathing room above the
      headline matches the room below the buttons exactly. The +64px on top
      is not decorative spacing — it's the fixed header's own height, reserved
      so the headline never sits behind the translucent bar; it doesn't count
-     against the visual gap the two sides are being kept equal on. */
-  padding:calc(64px + clamp(56px,9vh,108px)) 0 clamp(56px,9vh,108px);
+     against the visual gap the two sides are being kept equal on. Height is
+     now fixed (above) rather than content-driven, so this padding no longer
+     has to also produce the vertical centering by itself — the flex rule
+     above does that — it just reserves the header-clearance margin. */
+  padding:calc(64px + clamp(40px,7vh,88px)) 0 clamp(40px,7vh,88px);
   /* The hero is a dark island in BOTH themes. Footage reads better against a
      dark ground, and the copy sits on the scrim rather than on the page — so
      these tokens are redefined for this subtree only. Everything inside reads
@@ -150,6 +185,19 @@ nav a[aria-current="page"]{color:var(--fg)}
   --explainer:#E8C547; --product:#56C5D0; --event:#E0609B; --brand:#8B7BE8;
   --exploration:#5ED08C;
   color:var(--fg)}
+/* -HERO_H — keep in sync with .hero.center's height and .hero-pin's 2×
+   above by hand (see the comment on .hero-pin). */
+.hero-cover{position:relative;z-index:1;margin-top:-66.667vh;margin-top:-66.667dvh}
+/* .hero-cover itself stays inside .shell's max-width/padding like any other
+   section — only its background needs to run edge to edge to actually mask
+   the full-bleed hero video underneath (same reasoning as .hero-bg below);
+   a background on .hero-cover directly would leave the video visible in the
+   gutters on wide screens. var(--ink) here resolves to the PAGE's own ink
+   token (light or dark mode, whichever is active), not the hero's
+   locally-scoped override above — this sits outside the hero's subtree, so
+   it picks up the normal theme colour, matching the page it's rejoining. */
+.hero-cover::before{content:"";position:absolute;top:0;bottom:0;left:50%;
+  transform:translateX(-50%);width:100vw;z-index:-1;background:var(--ink)}
 /* Full-bleed: breaks out of .shell's max-width so the video runs edge to edge.
    100vw counts the scrollbar, so it overhangs a few px each side — invisible,
    because the video is cropped anyway and body's overflow-x:hidden stops it
@@ -168,7 +216,7 @@ nav a[aria-current="page"]{color:var(--fg)}
    last word landing ~1.3s in. Split at word boundaries rather than per letter
    so a word can never break across two lines. */
 .lede{position:relative;display:block}
-.lede h1{font-weight:700;line-height:1.02;letter-spacing:-.035em;
+.lede h1{font-weight:400;line-height:1.02;letter-spacing:-.035em;
   font-size:clamp(24px,6.2vw,56px);max-width:19ch;margin:0 auto;
   text-wrap:balance}
 .lede h1 .wd{display:inline-block;
@@ -608,7 +656,7 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
   /* Same shared clamp() as the base rule — only the header-clearance
      constant changes (56px mobile bar vs 64px desktop), so top and bottom
      stay equal on phones too. */
-  .hero.center{padding-top:calc(56px + clamp(56px,9vh,108px))}
+  .hero.center{padding-top:calc(56px + clamp(40px,7vh,88px))}
   .hero.center .inner{padding:0 4px}
   .lede p{font-size:15px;max-width:40ch}
   footer{flex-direction:column;gap:8px;padding-bottom:36px}
