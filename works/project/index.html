@@ -93,7 +93,7 @@
   try {
     const d = await data();
     const p = d.projects.find(x => x.slug === slug);
-    if (!p) {
+    if (!p || p.hidden) {
       el.innerHTML = `<section class="phead">
         <div class="crumb lab"><a href="../../">Home</a> &rsaquo; <a href="../">Works</a></div>
         <h1 class="ptitle">Not found</h1>
@@ -104,8 +104,9 @@
     document.title = p.title + ' — Putra Tegar';
     document.body.className = 'c-' + p.category;
 
-    const i = d.projects.indexOf(p);
-    const next = d.projects[(i + 1) % d.projects.length];
+    const visible = d.projects.filter(x => !x.hidden);
+    const i = visible.indexOf(p);
+    const next = visible[(i + 1) % visible.length];
     const cat = p.category[0].toUpperCase() + p.category.slice(1);
 
     /* Playback params are built here rather than stored raw in projects.json —

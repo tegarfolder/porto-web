@@ -265,7 +265,7 @@ async function renderGrid({ filter = null, limit = null, hrefBase = 'project/',
   if (layout === 'pins') el.classList.add('pins');
   try {
     const d = await data();
-    let list = d.projects;
+    let list = d.projects.filter(p => !p.hidden);
     if (filter) list = list.filter(p => p.category === filter);
     if (limit)  list = list.filter(p => p.featured).slice(0, limit);
     el.innerHTML = list.map((p, i) => cardHTML(p, hrefBase, i)).join('');
@@ -321,9 +321,9 @@ async function renderBento({ hrefBase = 'project/', cellCount = 8 } = {}) {
   try {
     const d = await data();
     const items = [];
-    d.projects.forEach(p => (p.blocks || []).forEach(b => {
+    d.projects.forEach(p => { if (p.hidden) return; (p.blocks || []).forEach(b => {
       if (b.featured) items.push({ p, b });
-    }));
+    }); });
     const list = items.slice(0, cellCount);
     el.innerHTML = list.map(({ p, b }, i) => bentoCellHTML(p, b, hrefBase, i)).join('');
     wireCards(el);
