@@ -20,7 +20,9 @@
       <a href="services/">Services</a>
       <a href="about/">About</a>
     </nav>
-    <button class="mode" id="mode" type="button" aria-label="Switch to dark mode"></button>
+    <div class="nav-end">
+      <button class="mode" id="mode" type="button" aria-label="Switch to dark mode"></button>
+    </div>
   </header>
 
   <!-- .hero-pin is exactly 2x the hero's own height (see assets/site.css) —
@@ -42,8 +44,7 @@
       <div class="lede">
         <!-- <h1>We animate the part people keep not getting.</h1> -->
         <h1>Shaping the&nbsp;way&nbsp;brands&nbsp;move</h1>
-        <p>Explainer, product, event, and brand films. Script and storyboard
-        first, animation second.</p>
+        <p>Product, Explainer, Event and Brand Needs.</p>
       </div>
       <script>
       /* Wrap each word of the hero headline in a span for the rise-from-blur
@@ -80,8 +81,17 @@
       })();
       </script>
       <div class="cta">
-        <a class="btn solid" href="works/">See All Works</a>
-        <a class="btn" href="mailto:hello@putrategar.com">Start a project</a>
+        <a class="abtn group" href="works/">
+          <span class="abtn-spin"></span>
+          <span class="abtn-bg"></span>
+          <span class="abtn-inner">
+            <span class="abtn-text">See All Works</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="abtn-arrow">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </span>
+        </a>
       </div>
       <!-- Category quick-links hidden from the home page.
       <div class="disc">
