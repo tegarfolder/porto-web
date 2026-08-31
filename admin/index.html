@@ -8,9 +8,13 @@
 <title>Admin :: Putra Tegar</title>
 <link rel="stylesheet" href="../assets/site.css">
 <script src="../assets/theme.js"></script>
+<script src="../assets/transitions.js"></script>
 <!-- SOCIAL / SOCIAL_KEYS come from here, shared with the About page so the
      list of platforms is defined in exactly one place. -->
 <script src="../assets/social.js"></script>
+<!-- TOOLS / TOOL_KEYS / toolBadgeSVG() come from here, shared with the
+     project detail page so the tool index is defined in exactly one place. -->
+<script src="../assets/tools.js"></script>
 <style>
   body{padding-bottom:120px}
   .bar{position:sticky;top:0;z-index:20;background:var(--ink);
@@ -71,6 +75,17 @@
   .row-check input{width:17px;height:17px;accent-color:var(--acc)}
   .row-check label{font-size:13.5px;font-weight:500;color:var(--fg);
     letter-spacing:-.01em;text-transform:none}
+
+  .tools-picker{display:flex;flex-wrap:wrap;gap:8px}
+  .tool-pick{display:inline-flex;align-items:center;gap:7px;font:inherit;
+    font-size:13px;font-weight:500;color:var(--dim);background:var(--ink);
+    border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 6px;
+    cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+  .tool-pick .tool-badge-svg{width:20px;height:20px;flex:none;border-radius:50%}
+  .tool-pick .tool-badge-custom{overflow:hidden;background:var(--card)}
+  .tool-pick .tool-badge-custom svg{display:block;width:100%;height:100%}
+  .tool-pick:hover{border-color:var(--dim)}
+  .tool-pick.active{color:var(--fg);border-color:var(--fg);background:var(--card)}
 
   .thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--line-soft);
     border-radius:var(--r-lg);background:var(--art);margin-top:4px}
@@ -642,6 +657,66 @@ const BLOCK_URL_PLACEHOLDER = {
   custom: 'https://…'
 };
 
+/* p.tools stays a plain comma-separated string of names (unchanged format —
+   the project detail page and cards just split on comma, same as always).
+   This builds a picker on top of that string instead of a bare text input:
+   indexed tools (assets/tools.js) toggle as pills, anything else goes in
+   the free-text field below and gets merged back in on every change. */
+function renderToolsField(p) {
+  const wrap = document.createElement('div');
+  wrap.className = 'f w12';
+  const lab = document.createElement('label');
+  lab.textContent = 'Tools';
+  wrap.appendChild(lab);
+
+  const current = () => (p.tools || '').split(',').map(s => s.trim()).filter(Boolean);
+  const indexedTitlesLower = TOOL_KEYS.map(k => TOOLS[k].title.toLowerCase());
+  const isChecked = title => current().some(t => t.toLowerCase() === title.toLowerCase());
+
+  const picker = document.createElement('div');
+  picker.className = 'tools-picker';
+  TOOL_KEYS.forEach(key => {
+    const tool = TOOLS[key];
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tool-pick' + (isChecked(tool.title) ? ' active' : '');
+    btn.innerHTML = toolBadgeSVG(tool) + '<span>' + tool.title + '</span>';
+    btn.setAttribute('aria-pressed', String(isChecked(tool.title)));
+    btn.addEventListener('click', () => {
+      let list = current();
+      list = isChecked(tool.title)
+        ? list.filter(t => t.toLowerCase() !== tool.title.toLowerCase())
+        : list.concat(tool.title);
+      p.tools = list.join(', ');
+      markDirty(); render();
+    });
+    picker.appendChild(btn);
+  });
+  wrap.appendChild(picker);
+
+  const other = document.createElement('input');
+  other.type = 'text';
+  other.placeholder = 'Other tools not listed above, comma-separated';
+  other.style.marginTop = '10px';
+  other.value = current().filter(t => !indexedTitlesLower.includes(t.toLowerCase())).join(', ');
+  other.addEventListener('input', () => {
+    const indexedSelected = current().filter(t => indexedTitlesLower.includes(t.toLowerCase()));
+    const otherList = other.value.split(',').map(s => s.trim()).filter(Boolean);
+    p.tools = [...new Set(indexedSelected.concat(otherList))].join(', ');
+    markDirty();
+  });
+  wrap.appendChild(other);
+
+  const hint = document.createElement('div');
+  hint.className = 'hint';
+  hint.textContent = 'Click a tool above to toggle it (its badge is a generated ' +
+    'monogram, not a brand logo — see assets/tools.js). Anything not listed, type ' +
+    'in the field, comma-separated.';
+  wrap.appendChild(hint);
+
+  return wrap;
+}
+
 function renderBlocks(p) {
   const box = document.createElement('div');
   box.className = 'f w12';
@@ -886,7 +961,7 @@ function render() {
             wide: 6, placeholder: 'json, interactive, sport',
             hint: 'Comma- or space-separated, # optional either way. Shown on the project page as #json #interactive #sport.'
           }),
-          field(p, 'tools', 'Tools', { wide: 6, placeholder: 'After Effects, Blender' }),
+          renderToolsField(p),
           field(p, 'summary', 'Overview', { wide: 12, textarea: true }),
           field(p, 'poster', 'Thumbnail', {
             wide: 6, placeholder: 'https://media.putrategar.com/thumb.webp',

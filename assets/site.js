@@ -38,6 +38,11 @@ function ytThumbs(url) {
    instead of showing as a still — the moving-thumbnail option. */
 const isVideoPath = s => /\.(webm|mp4|mov)(\?|#|$)/i.test(String(s || ''));
 
+/* Accepts comma- or space-separated tags, with or without a leading # —
+   see the matching comment in works/project/index.html. */
+const parseTags = p => (p.tags || '').split(/[,\s]+/).map(s => s.replace(/^#+/, '').trim()).filter(Boolean);
+const tagsHTML = p => parseTags(p).map(t => `<span class="tagchip">#${esc(t)}</span>`).join(' ');
+
 /* Card-thumbnail resolution: an explicit project-level `poster` always wins;
    otherwise the first block marked "Use as project thumbnail" in the admin
    panel supplies one — its own file if it's an image, its own poster still
@@ -166,7 +171,7 @@ function cardHTML(p, hrefBase, index = 99) {
     aria-label="${esc(p.title)} — ${cat}">
     <div class="frame" style="aspect-ratio:${shape.css}">${media}</div>
     <div class="meta"><h3>${esc(p.title)}</h3></div>
-    <div class="under"><span class="cat">${cat}</span><span class="fmt">${p.format}</span></div>
+    <div class="under">${tagsHTML(p)}</div>
   </a>`;
 }
 
@@ -293,9 +298,6 @@ function bentoThumb(p, b) {
 function bentoCellHTML(p, b, hrefBase, index) {
   const cat = p.category[0].toUpperCase() + p.category.slice(1);
   const thumb = bentoThumb(p, b);
-  /* Accepts comma- or space-separated tags, with or without a leading # —
-     see the matching comment in works/project/index.html. */
-  const tags = (p.tags || '').split(/[,\s]+/).map(s => s.replace(/^#+/, '').trim()).filter(Boolean);
   const eager = index < 2;
   const loadAttr = eager
     ? 'loading="eager"' + (index === 0 ? ' fetchpriority="high"' : '')
@@ -303,12 +305,11 @@ function bentoCellHTML(p, b, hrefBase, index) {
   const media = thumb
     ? `<img class="poster" src="${esc(thumb.src)}"${thumb.yt ? ` data-fallback="${esc(thumb.yt.fallback)}"` : ''} alt="" ${loadAttr}>`
     : `<svg viewBox="0 0 160 90" preserveAspectRatio="none" aria-hidden="true">${art(p.category, 1, 160, 90)}</svg>`;
-  const tagsHTML = tags.map(t => `<span class="tagchip">#${esc(t)}</span>`).join(' ');
   return `<a class="cell c-${p.category}" href="${hrefBase}?p=${p.slug}"
     aria-label="${esc(p.title)} — ${cat}">
     <div class="media">${media}</div>
     <div class="meta"><h3>${esc(p.title)}</h3></div>
-    <div class="under">${tagsHTML}</div>
+    <div class="under">${tagsHTML(p)}</div>
   </a>`;
 }
 

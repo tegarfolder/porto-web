@@ -7,6 +7,10 @@
 <title>Project :: Putra Tegar</title>
 <link rel="stylesheet" href="../../assets/site.css">
 <script src="../../assets/theme.js"></script>
+<script src="../../assets/transitions.js"></script>
+<!-- TOOLS / findTool() / toolBadgeSVG() come from here, shared with the
+     admin editor so the tool index is defined in exactly one place. -->
+<script src="../../assets/tools.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -188,33 +192,55 @@
       </div>${cap}</div>`;
     }
 
-    /* Accepts either typing style: comma-separated ("json, interactive") or
-       space-separated with the # already typed ("#json #interactive"), or
-       any mix — split on commas and/or whitespace, then strip any leading #
-       so it's never doubled when this line adds its own. */
-    const tags = (p.tags || '').split(/[,\s]+/).map(s => s.replace(/^#+/, '').trim()).filter(Boolean);
-    /* .pill, not .tagchip — neutral, matching Category/Tools on this page.
-       .tagchip (category-accent colored) is still what the home page's
-       bento hover uses, deliberately, in a different white-on-scrim context. */
-    const tagsHTML = tags.map(t => `<span class="pill pill-thin">#${esc(t)}</span>`).join(' ');
+    /* p.tags isn't shown on this page — still in the data, still what
+       drives the hover title on grid cards and bento tiles (parseTags() /
+       tagsHTML() in assets/site.js). */
     const toolsList = (p.tools || '').split(',').map(s => s.trim()).filter(Boolean);
-    const toolsHTML = toolsList.map(t => `<span class="pill">${esc(t)}</span>`).join(' ');
+    /* An overlapping icon stack + count ("N tools"), not a pill per tool —
+       hovering (or keyboard-focusing) it reveals the full list, each with
+       its badge from assets/tools.js (findTool()/toolBadgeSVG(), shared
+       with the admin editor's picker). Only the first few badges stack
+       visually (TOOL_STACK_MAX); beyond that a "+N" caps the stack instead
+       of it growing without bound. A name typed by hand that isn't in that
+       index still counts and still shows in the hover list, it just has no
+       badge to contribute to the stack. */
+    const TOOL_STACK_MAX = 4;
+    const toolsHTML = toolsList.length ? (() => {
+      const shown = toolsList.slice(0, TOOL_STACK_MAX);
+      const overflow = toolsList.length - shown.length;
+      const stackHTML = shown.map((name, i) => {
+        const tool = findTool(name);
+        return `<span class="tool-stack-item" style="z-index:${shown.length - i}">${
+          tool ? toolBadgeSVG(tool) : '<span class="tool-stack-blank"></span>'}</span>`;
+      }).join('');
+      const moreHTML = overflow > 0 ? `<span class="tool-stack-more">+${overflow}</span>` : '';
+      return `
+      <div class="tools-pop">
+        <button type="button" class="pill tools-trigger">
+          <span class="tool-stack">${stackHTML}${moreHTML}</span>
+          <span>${toolsList.length} tool${toolsList.length === 1 ? '' : 's'}</span>
+        </button>
+        <div class="tools-list" role="tooltip">
+          ${toolsList.map(name => {
+            const tool = findTool(name);
+            return `<div class="tools-list-row">${tool ? toolBadgeSVG(tool) : ''}<span>${esc(name)}</span></div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    })() : '';
 
-    /* Meta section: Description and Tools each get their own full-width row;
-       Category and Hashtags share one row, side by side, since Category is
-       always present but often short enough to sit next to the tag list
-       rather than claim a whole row of its own. Any row/column with nothing
-       in it is simply omitted, never shown as a label over nothing. */
+    /* Category and Tools now share one row — Category on the left, Tools on
+       the right (.pmeta-split) — instead of each claiming a full row of its
+       own. Description keeps its "Description" label; neither of these
+       does, just the pill/trigger. Tools is omitted entirely when there are
+       none, leaving Category to fill the row alone. Tags no longer show on
+       this page at all — still in the data, still used by the card/bento
+       hover (see the comment above toolsList for where p.tags is used). */
     const metaParts = [];
     if (p.summary) metaParts.push(
       `<div class="pmeta-row"><span class="lab">Description</span><p>${p.summary}</p></div>`);
     metaParts.push(
-      `<div class="pmeta-row pmeta-pair">
-        <div class="pmeta-col"><span class="lab">Category</span><span class="pill">${cat}</span></div>
-        ${tagsHTML ? `<div class="pmeta-col"><span class="lab">Hashtags</span>${tagsHTML}</div>` : ''}
-      </div>`);
-    if (toolsHTML) metaParts.push(
-      `<div class="pmeta-row"><span class="lab">Tools</span>${toolsHTML}</div>`);
+      `<div class="pmeta-row pmeta-split"><span class="pill">${cat}</span>${toolsHTML}</div>`);
     const metaHTML = metaParts.join('');
 
     const blocksHTML = (p.blocks && p.blocks.length)

@@ -95,6 +95,7 @@ about/index.html         About
 assets/site.css          All styling, design tokens, responsive rules
 assets/site.js           Card rendering, hover-scrub, data loading
 assets/theme.js          Restores light/dark choice before first paint
+assets/transitions.js    Fade + slide-up page-enter/exit transition
 data/projects.json       ALL CONTENT LIVES HERE
 admin/index.html         Local editor for projects.json (see §6)
 .claude/launch.json      Dev-server config (editor tooling only)
@@ -159,7 +160,7 @@ strongest piece first.
 | `format` | Card and still aspect ratio. One of `21:9` (cinematic), `16:9` (landscape), `4:3` (standard), `1:1` (square), `4:5` (portrait), `9:16` (vertical). |
 | `span` | Grid width on `/works/`: `8` wide, `6` half, `4` narrow. Ignored on phones, and irrelevant to the home page (its bento layout doesn't use `span`/`format` at all — see below). **`span` sets the width and `format` sets the height**, so a tall ratio in a wide slot makes a huge card — `9:16` at span 8 is about 802×1426px. The admin panel shows the resulting size and warns past 900px. |
 | `featured` | Not currently used by anything rendered. What the home page shows is controlled per **content block**, not per project — see `featured` under "Content blocks" below. Left in place rather than stripped from existing data; harmless either way. |
-| `tags` | Shown as "Hashtags" in the admin panel. Comma-separated, e.g. `"json, interactive, sport"` — rendered on the project page as `#json #interactive #sport` chips. |
+| `tags` | Shown as "Hashtags" in the admin panel. Comma- or space-separated, `#` optional either way, e.g. `"json, interactive, sport"` or `"#json #interactive"`. Rendered as `#tag` chips: on the project page under a "Tags" row (§3's "Page layout"), and on every card's hover overlay (works/category grids, bento) in place of a category/format badge. |
 | `tools` | e.g. "After Effects, Cinema 4D". |
 | `summary` | Shown as "Overview" in the admin panel. One or two sentences on the project page. |
 | `poster` | Shown as **Thumbnail** in the admin panel. Grid-card override — see "Card thumbnails" below for the full resolution order. Paths are **relative to the site root** (`assets/name.jpg`) or absolute URLs. An image (JPEG/PNG/WebP/GIF) shows as a still; a video (WebM/MP4/MOV, by file extension) plays muted and looping instead — a moving thumbnail. Must be hosted on R2 if it's a video; not committed to the repo. |
@@ -192,6 +193,13 @@ This is deliberately explicit rather than automatic: nothing becomes a card's
 thumbnail just because it happens to be the first block. Pick which one (if
 any) should represent the project on the grid.
 
+The card itself is a plain image at rest; hovering or keyboard-focusing it
+reveals the title and `tags` (as `#tag` chips) over a dark scrim, the same
+interaction as the home page's bento tiles — see "Home page — the bento
+grid" below for the underlying mechanics (they share the same CSS pattern,
+just different class names, `.card`/`.frame` here vs `.cell`/`.media` there).
+A project with no tags just shows the title alone.
+
 ### Content blocks
 
 A project's page is a **stack of content blocks** — video and image, in the
@@ -204,11 +212,21 @@ each entry looks like this:
 **Page layout:** `#proj` caps out at 860px and centres itself — narrower than
 the site's usual 1440px `.shell`, with visible margin on both sides at any
 wider viewport, rather than running edge to edge like the rest of the site.
-Above the block stack, `.pmeta` lists Description, Category, Hashtags, and
-Tools, in that order, as stacked labelled rows (Category and each hashtag/tool
-as its own pill) — `client` still exists in the data but isn't shown here.
-A row is simply omitted when its value is empty, so an untagged
-project doesn't show a bare "Tags" label over nothing.
+Above the block stack, `.pmeta` lists three rows, in order: Description
+(kept its "Description" label), Category (label-less — just the pill), and
+Tools (label-less too). `client` and `tags` both still exist in the data but
+aren't shown on this page at all — `tags` still drives the hover title on
+grid cards and bento tiles (§3's "Home page — the bento grid"); `client` just
+isn't surfaced anywhere public right now. Description's row is omitted when
+`summary` is empty; Category's is unconditional (every project has one).
+
+**Tools:** rather than one pill per tool, this page shows a single summary
+pill — "N tools" — and reveals the full list (each with a badge, see
+"Tool icons" below) on hover or keyboard focus, via `.tools-pop`/
+`.tools-list` in `site.css`. `:focus-within` covers keyboard use and, in
+every mainstream mobile browser, touch too (tapping a `<button>` focuses
+it) — no JS needed for either. A tool name that isn't in the tools index
+(below) still shows in the list, just without a badge.
 
 **Aspect ratio:** an `image` block or an `r2` video block fits its own file's
 real dimensions automatically — a 1:1 square, a 9:16 vertical clip, whatever
@@ -279,6 +297,54 @@ style case-study sites use between the main pieces — check Autoplay, Loop, and
 uncheck Controls on that one block (Muted checks and locks itself once
 Autoplay is on). It's a combination you opt into per block, not a preset.
 
+### Tool icons
+
+`assets/tools.js` is a small index of common tools (`TOOLS`, keyed by slug —
+`title`/`short`/`color` per entry), loaded as a plain `<script>` (not fetched
+JSON) so it's available synchronously wherever it's needed — same pattern as
+`assets/social.js`. Both the admin panel and the project page read from this
+one file.
+
+**The icons are generated monogram badges, not brand logos** — a coloured
+circle with a 1-2 letter abbreviation, rendered as real `<svg>` markup by
+`toolBadgeSVG()`. This is deliberate, not a placeholder: reproducing an exact
+trademarked software icon (After Effects, Cinema 4D, whichever) needs real
+source SVG files this project doesn't have, and guessing at path data from
+memory would just render something wrong. A generated monogram is safe,
+original, and distinct per tool.
+
+**Using your own SVG instead:** add an `svg` field to that tool's entry with
+raw `<svg>...</svg>` markup — `toolBadgeSVG()` uses it as-is when present,
+falling back to the generated monogram otherwise:
+
+```js
+aftereffects: {
+  title: 'After Effects', short: 'Ae', color: '#9999FF',
+  svg: '<svg viewBox="0 0 24 24">...</svg>'
+},
+```
+
+It's dropped straight into the page and sized to a small circle by CSS
+wherever it renders (admin picker, project-page icon stack, hover list), so
+whatever viewBox the source art uses is fine — keep it roughly square so it
+isn't stretched. `short`/`color` are ignored once `svg` is set but harmless
+to leave in place. Nothing else needs to change.
+
+**In the admin panel:** the old free-text Tools field is now a picker —
+click a tool to toggle it, plus a plain text field underneath for anything
+not in the index. `p.tools` itself is still just a comma-separated string of
+names, exactly as before; the picker only changes *how* you edit that
+string, not its shape, so every existing project's `tools` value kept
+working with zero migration. A tool typed in the "other" field that happens
+to already be indexed just won't get a badge from that field specifically —
+click its pill in the picker instead so it's recognised.
+
+**Adding a tool:** edit the `TOOLS` object in `assets/tools.js` — pick a
+slug, a `title` (this is what actually gets stored/matched, so keep it
+consistent — see `findTool()`'s case-insensitive exact-match), a 1-2
+character `short`, and a `color`. It's picked up everywhere immediately,
+no other file to touch.
+
 ### Home page — the bento grid
 
 The home page's featured section pulls individual **content blocks**, not
@@ -309,9 +375,13 @@ row.
 
 ### Editing categories
 
-Category names and descriptions live in the `categories` array at the top of the
-same file. Changing a category **slug** also means renaming its folder under
-`works/` and updating the links — don't rename slugs casually.
+The `categories` array at the top of the same file (name/slug/blurb per
+category) isn't actually read by any page — `/works/`'s category pills
+(`.cats` in `index.html`) are plain static HTML, not rendered from it. The
+array exists for the admin panel to round-trip losslessly on save; treat it
+as inert unless you're building something that will read it. Changing a
+category **slug** means renaming its folder under `works/` and updating the
+pill's `href` in `works/index.html` by hand — don't rename slugs casually.
 
 ### Hero background
 
@@ -713,13 +783,42 @@ does have heavier cuts, those are the declarations to raise back up.
 | Cards without a poster | 8 generated SVG frames that pointer position scrubs through. |
 | Card thumbnails | Resolution order documented in "Card thumbnails" in §3. YouTube stills come from `img.youtube.com/vi/<id>/maxresdefault.jpg`, falling back to `mqdefault.jpg`. Only those two are true 16:9 — `hqdefault` and `sddefault` are 4:3 with black bars. Videos never uploaded in HD return either a 404 **or a 200 carrying a 120×90 grey placeholder**, so the fallback triggers on both. |
 | Card shapes | Six ratios, defined once in `FORMATS` in `assets/site.js` (mirrored in `admin/index.html`). Each entry carries the CSS ratio for the box and a viewBox for the generated art, so placeholder artwork stays in proportion at any shape. |
-| Home-page grid | Fixed 8-cell bento template (`.bento`), not a masonry — see "Home page — the bento grid" in §3. `renderBento()` in `site.js` pulls `featured` **blocks**, not projects, so needs no layout math at render time, unlike the works/category pages' packed grid below. |
-| Works/category grid | `.grid.pins` — a packed "pinboard" layout, fixed column count per breakpoint (4 / 3 / 2 / 1), each card given a row span matching its own height so cards pack instead of leaving ragged gaps. Currently unused (the home page moved to the bento grid above) but left intact in case a future page wants a masonry layout again. |
+| Home-page grid | Fixed 8-cell bento template (`.bento`), not a masonry — see "Home page — the bento grid" in §3. `renderBento()` in `site.js` pulls `featured` **blocks**, not projects, so needs no layout math at render time, unlike a measured masonry would. |
+| Works/category grid | Plain `.grid`/`.card` (`cardHTML()` in `site.js`) — a normal CSS grid, 6/8/4-column card widths from `span`. Title and hashtags are hidden until hover/focus, then revealed over a dark scrim on the thumbnail — same interaction model as the bento cards, just different markup (`.card`/`.frame` vs `.cell`/`.media`), so they share it rather than duplicate it. |
+| `.grid.pins` | A separate packed "pinboard"/masonry variant — fixed column count per breakpoint (4 / 3 / 2 / 1), each card given a row span matching its own height (`layoutPins()` in `site.js`) so cards pack instead of leaving ragged gaps. Not used by any page right now (the home page uses the bento grid above instead) but kept in case a future page wants a masonry layout; it reuses the same `.card`/`.frame` hover-reveal as the works/category grid, just with tighter spacing. |
 | Cards with a poster | Still image, gentle zoom on hover. |
 | Touch devices | No hover, so each card plays its build once as it scrolls into view. |
+| Page-to-page | Every page fades + slides up .38s on load, and fades out .2s before a same-origin link click navigates away — `assets/transitions.js`, loaded in `<head>` right after `theme.js` on every page. Plain multi-page site (no router, no fetch-swap), so this is CSS transitioning each top-level section of the page across a real navigation, not a SPA transition. The fixed nav header is deliberately excluded — it stays fully static throughout. |
 
 The headline keeps working with JavaScript disabled — the split simply doesn't
 happen and the sentence renders normally.
+
+**Page transitions, in more detail:** `transitions.js` adds a `pt-init` class
+to `<html>` synchronously (before paint, same reasoning as `theme.js` and
+theme flash) — `site.css` uses that class to start every top-level child of
+`.shell` **except `<header>`** at `opacity:0`, so there's something to fade
+in from. Once the DOM is ready it adds `pt-in` on the next frame, which is
+what actually plays the fade/slide-up. It deliberately targets
+`.shell>:not(header)` rather than `<body>` itself, for two reasons: the nav
+shouldn't visually fade/slide with the rest of the page, and giving
+`transform` to any *ancestor* of the fixed-position header would hijack its
+containing block away from the viewport (a transformed ancestor becomes the
+containing block for `position:fixed` descendants per spec) — the header
+would then scroll away with the page instead of staying frozen in place,
+which is what actually happened the first time this was wired up wrong.
+A delegated click handler catches plain, same-tab, same-origin `<a href>`
+clicks anywhere on the page — including links `site.js` renders dynamically,
+nothing per-link to wire up — prevents the default navigation, plays a
+quicker `pt-out` fade, then navigates after 220ms. External links, links
+with a different `target`, modified clicks (⌘/Ctrl/Shift/middle-click),
+`download` links, and same-page `#anchor` links are all left alone. Under
+`prefers-reduced-motion`, the script returns immediately and never adds
+`pt-init` at all — the page just renders normally, and (importantly) that's
+also the fail-safe if the script fails to load for any reason: `<body>` is
+only ever hidden by a class *this script* adds, so nothing else can leave a
+page stuck invisible. To change the feel, edit the durations/easing on the
+`body` transition and the `.pt-in`/`.pt-out` transform values in `site.css`;
+to exempt a specific link from the fade-out, add `data-no-transition` to it.
 
 ---
 
@@ -799,6 +898,7 @@ happen and the sentence renders normally.
 | A project is missing from its category page | `category` value doesn't exactly match a category slug — check spelling and case. |
 | Cards look plain / wrong font | `site.css` didn't load, or no internet for Google Fonts. |
 | Theme toggle resets when navigating | `theme.js` isn't loading — it must be in `<head>` on every page, before the stylesheet renders. |
+| Page loads blank / stays faded out | `transitions.js` didn't run (blocked, 404, or removed from `<head>`) after it added `pt-init` to `<html>` — see below; only JS ever removes that hidden state. |
 | Clicking a card 404s | `slug` doesn't match, or you're viewing a stale copy of `projects.json` — hard-refresh with `Ctrl+Shift+R`. |
 | Hero area is an empty panel | `assets/hero1.mp4` is missing (§8.1). |
 | Project page shows a broken block | An `r2` block's `url` points at a file that isn't there — check it resolves, and remember `.gitignore` excludes `*.mp4` (§8.1). |

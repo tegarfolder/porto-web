@@ -8,6 +8,7 @@
 <meta name="description" content="Every piece Putra Tegar has made, across explainer, product, event, and brand.">
 <link rel="stylesheet" href="../assets/site.css">
 <script src="../assets/theme.js"></script>
+<script src="../assets/transitions.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -30,31 +31,11 @@
   </section>
 
   <div class="cats">
-    <a class="c-explainer" href="explainer/">
-      <h2>Explainer</h2>
-      <p>Films that make a product make sense before anyone reads a word of documentation.</p>
-      <span class="n" data-count="explainer"></span>
-    </a>
-    <a class="c-product" href="product/">
-      <h2>Product</h2>
-      <p>Feature launches and interface films — the thing itself, moving.</p>
-      <span class="n" data-count="product"></span>
-    </a>
-    <a class="c-event" href="event/">
-      <h2>Event</h2>
-      <p>Opens, stings, and stage loops built for a room and a running order.</p>
-      <span class="n" data-count="event"></span>
-    </a>
-    <a class="c-brand" href="brand/">
-      <h2>Brand</h2>
-      <p>Motion systems: how a logo behaves, how a transition resolves, what moves and what never does.</p>
-      <span class="n" data-count="brand"></span>
-    </a>
-    <a class="c-exploration" href="exploration/">
-      <h2>Exploration</h2>
-      <p>Self-initiated pieces — technique tests, style frames, and things made to find out what happens.</p>
-      <span class="n" data-count="exploration"></span>
-    </a>
+    <a class="pill" href="explainer/">Explainer</a>
+    <a class="pill" href="product/">Product</a>
+    <a class="pill" href="event/">Event</a>
+    <a class="pill" href="brand/">Brand</a>
+    <a class="pill" href="exploration/">Exploration</a>
   </div>
 
   <section>
@@ -84,14 +65,6 @@
 
 </div>
 <script src="../assets/site.js" data-root="../"></script>
-<script>
-renderGrid({ hrefBase: 'project/' });
-data().then(d => {
-  document.querySelectorAll('[data-count]').forEach(el => {
-    const n = d.projects.filter(p => p.category === el.dataset.count).length;
-    el.textContent = n + (n === 1 ? ' piece' : ' pieces');
-  });
-}).catch(() => {});
-</script>
+<script>renderGrid({ hrefBase: 'project/' });</script>
 </body>
 </html>

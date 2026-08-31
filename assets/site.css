@@ -37,6 +37,23 @@ body{background:var(--ink);color:var(--fg);font-family:var(--sans);
   -webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;
   transition:background-color .3s ease,color .3s ease}
 .shell{max-width:1440px;margin:0 auto;padding:0 var(--gut)}
+/* Page-enter/exit transition (assets/transitions.js). Targets every
+   top-level child of .shell EXCEPT <header> — deliberately not `body`
+   itself, for two reasons: the nav shouldn't fade/slide with the rest of
+   the page at all, and giving `transform` to any ancestor of a
+   `position:fixed` header hijacks its containing block away from the
+   viewport (per spec, a transformed ancestor becomes the containing block
+   for fixed descendants), which breaks the header's "stays put while you
+   scroll" behaviour entirely — it'd scroll away with the page instead.
+   html.pt-init starts the page hidden pre-paint; .pt-in reveals it (fade +
+   slide-up); .pt-out plays a quicker fade-out before a same-origin link
+   navigates away. JS skips adding pt-init entirely under
+   prefers-reduced-motion, so a page never gets stuck hidden with no script
+   running to reveal it. */
+html.pt-init .shell>:not(header){opacity:0;transform:translateY(14px);
+  transition:opacity .38s cubic-bezier(.22,.61,.36,1),transform .38s cubic-bezier(.22,.61,.36,1)}
+html.pt-init.pt-in .shell>:not(header){opacity:1;transform:translateY(0)}
+html.pt-init.pt-out .shell>:not(header){opacity:0;transform:translateY(-10px);transition-duration:.2s}
 /* Fixed glass nav sits on top of the hero footage. Body gets top padding
    equal to the header height so non-hero pages clear the fixed bar; body's
    overflow-x:hidden establishes a block formatting context, so the padding
@@ -222,7 +239,8 @@ nav a[aria-current="page"]{color:var(--fg)}
 .rw-all svg{display:block}
 .grid{display:grid;grid-template-columns:repeat(12,1fr);
   gap:clamp(22px,2.4vw,40px) clamp(16px,1.6vw,28px);padding-bottom:84px}
-.card{grid-column:span 6;text-decoration:none;color:var(--acc);display:block;outline:none}
+.card{grid-column:span 6;text-decoration:none;color:var(--acc);display:block;
+  outline:none;position:relative}
 .card.w8{grid-column:span 8}
 .card.w4{grid-column:span 4}
 .frame{position:relative;background:var(--art);overflow:hidden;
@@ -236,26 +254,37 @@ nav a[aria-current="page"]{color:var(--fg)}
   object-fit:cover;transition:transform .5s ease}
 .card:hover .frame img.poster,.card:hover .frame video.poster{transform:scale(1.04)}
 
-.meta{display:flex;justify-content:space-between;align-items:baseline;
-  padding-top:10px;gap:14px}
-.meta h3{font-size:16px;font-weight:600;letter-spacing:-.024em;color:var(--fg)}
-.under{display:flex;justify-content:space-between;padding-top:4px;gap:14px}
-.cat{font-size:10.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
-.fmt{font-size:10.5px;font-weight:500;color:var(--dimmer);letter-spacing:.13em;
-  font-variant-numeric:tabular-nums}
+/* Title/tags move off the page and onto the image itself — a scrim +
+   overlay on hover, instead of a text block underneath. This is the base
+   for every card everywhere (works index, category pages); .bento has its
+   own equivalent using different class names (.cell/.media), kept separate
+   since its markup differs, not because the behaviour should. */
+.frame::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:rgba(10,10,14,.2);
+  opacity:0;transition:opacity .25s}
+.card:hover .frame::after,.card:focus-visible .frame::after{opacity:1}
+/* z-index:1 — ::after is a pseudo-element, which paints after (on top of)
+   real DOM children like these when nothing has an explicit stacking order;
+   without it the scrim renders over the text instead of behind it. */
+.meta,.under{position:absolute;left:16px;right:16px;margin:0;padding:0;
+  opacity:0;transform:translateY(6px);pointer-events:none;z-index:1;
+  transition:opacity .22s,transform .22s}
+.meta{bottom:32px}
+.meta h3{font-size:16px;font-weight:600;letter-spacing:-.024em;color:#fff}
+.under{bottom:14px;display:flex;flex-wrap:wrap;gap:6px}
+.card:hover .meta,.card:focus-visible .meta,
+.card:hover .under,.card:focus-visible .under{opacity:1;transform:translateY(0)}
 
 /* ---------- category index ---------- */
-.cats{display:grid;grid-template-columns:repeat(5,1fr);
-  gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);
-  margin-bottom:52px}
-.cats a{background:var(--ink);padding:20px 20px 22px;text-decoration:none;
-  color:var(--acc);display:flex;flex-direction:column;gap:9px;min-height:132px;
-  transition:background .2s}
-.cats a:hover,.cats a:focus-visible{background:var(--card)}
-.cats h2{font-size:15px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
-.cats p{font-size:13.5px;color:var(--dim);line-height:1.5;letter-spacing:-.01em}
-.cats .n{margin-top:auto;font-size:12px;font-weight:500;color:var(--dimmer);
-  font-variant-numeric:tabular-nums;letter-spacing:.1em}
+/* A row of pills, not a tile mosaic — just the category name, reusing .pill
+   (same neutral style as Category/Tools on the project detail page) rather
+   than a parallel component. flex-wrap reflows on any width on its own, so
+   unlike the old grid this needs no column-count breakpoints. */
+.cats{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:52px}
+.cats .pill{font-size:13.5px;padding:9px 20px;
+  transition:border-color .2s,transform .2s}
+.cats .pill:hover,.cats .pill:focus-visible{border-color:var(--fg);transform:translateY(-2px)}
+.cats .pill:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 
 /* ---------- project page ---------- */
 /* Narrower than the site's usual 1440px shell, and centred within it — a
@@ -273,27 +302,60 @@ nav a[aria-current="page"]{color:var(--fg)}
    (which also use .ptitle) are untouched. */
 #proj .ptitle{font-size:clamp(32px,6vw,60px)}
 
-/* Description, a Category+Hashtags row, and Tools — stacked labelled rows
-   above the content, each just skipped when its value is empty — this is
-   what makes it read like a spec sheet rather than a two-column layout. */
+/* Description, Category, Tags, and Tools — each its own full-width stacked
+   row, skipped when its value is empty — this is what makes it read like a
+   spec sheet rather than a two-column layout. Tags used to share a row with
+   Category, but a project with several tags needs the full width to lay
+   them out horizontally instead of a squeezed half-width column. */
 .pmeta{display:flex;flex-direction:column;gap:22px;padding-bottom:38px}
 /* align-items:flex-start — without it, a column flex container's default
-   stretch makes each row's content (pills included) fill the full width.
-   Only visible on Tools/Description, whose row spans the whole column;
-   Category/Hashtags happen to look fine already only because their shared
-   parent (.pmeta-col) is itself content-width, not because this was set. */
+   stretch makes each row's content (pills included) fill the full width. */
 .pmeta-row{display:flex;flex-direction:column;gap:9px;align-items:flex-start}
 .pmeta-row p{font-size:16px;line-height:1.6;color:var(--fg);max-width:60ch}
-/* Category + Hashtags share a row, each keeping its own label-above-content
-   column, rather than each claiming a full row like Description/Tools. */
-.pmeta-row.pmeta-pair{flex-direction:row;flex-wrap:wrap;gap:36px}
-.pmeta-col{display:flex;flex-direction:column;gap:9px;align-items:flex-start}
+/* Category + Tools share one row, pushed to opposite ends — unlike the
+   plain .pmeta-row above, this one *does* need the full row width (it's
+   what makes "opposite ends" mean anything), so align-items:flex-start is
+   overridden back to stretch's effect via width:100% instead. */
+.pmeta-row.pmeta-split{flex-direction:row;flex-wrap:wrap;
+  justify-content:space-between;align-items:center;width:100%;gap:12px}
 .pill{display:inline-flex;align-items:center;font-size:12.5px;font-weight:600;
   color:var(--fg);background:var(--card);border:1px solid var(--line);
-  border-radius:999px;padding:5px 13px;margin:0 6px 6px 0;letter-spacing:.01em}
-/* Hashtags only — Category/Tools stay at .pill's default 600. General Sans
-   ships 400/500/600/700 (see README §7), so 400 is as thin as it gets. */
-.pill.pill-thin{font-weight:400}
+  border-radius:999px;padding:5px 13px;letter-spacing:.01em;text-decoration:none}
+
+/* An overlapping icon stack + count ("N tools") standing in for a pill per
+   tool — hovering or keyboard-focusing it reveals the full list.
+   :focus-within covers keyboard use (and most touch — tapping a <button>
+   focuses it in every mainstream mobile browser); no JS needed for either. */
+.tools-pop{position:relative;display:inline-block}
+.tools-trigger{font:inherit;cursor:pointer;gap:9px;padding:4px 14px 4px 4px}
+.tool-stack{display:flex;align-items:center}
+/* Each icon's border matches the pill's own background, so it reads as a
+   "cutout" ring separating it from the icon behind — the overlap itself is
+   just a negative margin pulling each one left over the previous. */
+.tool-stack-item{display:block;width:22px;height:22px;flex:none;
+  border-radius:50%;border:2px solid var(--card);background:var(--card);
+  margin-left:-8px}
+.tool-stack-item:first-child{margin-left:0}
+.tool-stack-item .tool-badge-svg{width:100%;height:100%}
+.tool-stack-blank{display:block;width:100%;height:100%;border-radius:50%;
+  background:var(--line)}
+.tool-stack-more{display:flex;align-items:center;justify-content:center;
+  width:22px;height:22px;flex:none;border-radius:50%;background:var(--ink);
+  border:2px solid var(--card);margin-left:-8px;font-size:9px;font-weight:700;
+  color:var(--dimmer)}
+.tools-pop .tools-list{position:absolute;top:calc(100% + 8px);right:0;z-index:20;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:10px;display:flex;flex-direction:column;gap:8px;min-width:190px;
+  box-shadow:0 12px 32px rgba(0,0,0,.2);
+  opacity:0;transform:translateY(4px);pointer-events:none;
+  transition:opacity .15s,transform .15s}
+.tools-pop:hover .tools-list,.tools-pop:focus-within .tools-list{
+  opacity:1;transform:translateY(0);pointer-events:auto}
+.tools-list-row{display:flex;align-items:center;gap:9px;font-size:13px;
+  font-weight:500;color:var(--fg);white-space:nowrap}
+.tool-badge-svg{width:20px;height:20px;flex:none;border-radius:50%}
+.tool-badge-custom{overflow:hidden;background:var(--card)}
+.tool-badge-custom svg{display:block;width:100%;height:100%}
 
 /* A case study is a stack of content blocks (video/image, any provider) in
    the order set in the admin panel, not one single embed. Each block clips
@@ -354,9 +416,11 @@ nav a[aria-current="page"]{color:var(--fg)}
 .specs dt{color:var(--dimmer);font-size:11px;font-weight:500;
   letter-spacing:.14em;text-transform:uppercase}
 .specs dd{color:var(--fg);font-weight:500;letter-spacing:-.01em}
-.tagchip{display:inline-block;font-size:11px;font-weight:600;color:var(--acc);
-  border:1px solid currentColor;border-radius:999px;padding:3px 9px;
-  margin:0 4px 4px 0;letter-spacing:.02em}
+/* No border/pill shape — .tagchip only ever sits over a dark hover scrim
+   now (cards, bento), never on the page background, so plain white text is
+   both simpler and always legible without needing a background of its own. */
+.tagchip{display:inline-block;font-size:11px;font-weight:600;color:#fff;
+  letter-spacing:.02em}
 .nextrow{display:flex;justify-content:space-between;align-items:baseline;
   gap:20px;padding:24px 0 72px;border-top:1px solid var(--line-soft);flex-wrap:wrap}
 .nextrow a{color:var(--fg);text-decoration:none;font-size:clamp(20px,2.6vw,32px);
@@ -425,31 +489,10 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
 .grid.pins .card,
 .grid.pins .card.w8,
 .grid.pins .card.w4{grid-column:auto}
-
-/* Title/category/format move off the page and onto the image itself — a
-   scrim + overlay on hover, rather than a text block underneath. Because
-   .meta/.under leave normal flow, the card's flow height becomes just the
-   image's height, which is what makes layoutPins()'s packing read tight. */
-.grid.pins .card{position:relative}
-.grid.pins .frame::after{content:'';position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(to top,rgba(10,10,14,.86) 0%,rgba(10,10,14,.5) 40%,transparent 70%);
-  opacity:0;transition:opacity .25s}
-.grid.pins .card:hover .frame::after,
-.grid.pins .card:focus-visible .frame::after{opacity:1}
-/* z-index:1 — same fix as .bento's identical pattern: without it, the
-   ::after scrim (a pseudo-element, painted after real children by default)
-   renders over this text instead of behind it. */
-.grid.pins .meta,.grid.pins .under{position:absolute;left:16px;right:16px;
-  margin:0;padding:0;opacity:0;transform:translateY(6px);pointer-events:none;
-  z-index:1;transition:opacity .22s,transform .22s}
-.grid.pins .meta{bottom:32px}
-.grid.pins .meta h3{font-size:14px;letter-spacing:-.02em;color:#fff}
-.grid.pins .under{bottom:14px}
-.grid.pins .cat{font-size:9.5px;letter-spacing:.12em;color:#fff}
-.grid.pins .fmt{font-size:9.5px;letter-spacing:.12em;color:rgba(255,255,255,.65)}
-.grid.pins .card:hover .meta,.grid.pins .card:focus-visible .meta,
-.grid.pins .card:hover .under,.grid.pins .card:focus-visible .under{
-  opacity:1;transform:translateY(0)}
+/* Slightly smaller than the base 16px, for this tighter/denser layout —
+   the hover-reveal scrim/overlay itself is the shared .card/.frame
+   treatment (see "work grid" above); nothing pins-specific to repeat here. */
+.grid.pins .meta h3{font-size:14px}
 /* column count per breakpoint — kept with the section it belongs to */
 @media (max-width:1199px){.grid.pins{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:860px){.grid.pins{grid-template-columns:repeat(2,1fr)}}
@@ -479,7 +522,7 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
 /* Title/category on hover — same treatment as .grid.pins, independently
    scoped since the markup (.cell/.media) differs from (.card/.frame). */
 .bento .cell::after{content:'';position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(to top,rgba(10,10,14,.86) 0%,rgba(10,10,14,.5) 40%,transparent 70%);
+  background:rgba(10,10,14,.2);
   opacity:0;transition:opacity .25s}
 .bento .cell:hover::after,.bento .cell:focus-visible::after{opacity:1}
 /* z-index:1 is load-bearing — ::after is a pseudo-element, which paints
@@ -492,8 +535,7 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
 .bento .meta{bottom:32px}
 .bento .meta h3{font-size:15px;font-weight:600;letter-spacing:-.02em;color:#fff}
 .bento .under{bottom:14px;display:flex;flex-wrap:wrap;gap:5px}
-.bento .under .tagchip{color:#fff;border-color:rgba(255,255,255,.55);
-  font-size:10px;margin:0}
+.bento .under .tagchip{font-size:10px}
 .bento .cell:hover .meta,.bento .cell:focus-visible .meta,
 .bento .cell:hover .under,.bento .cell:focus-visible .under{opacity:1;transform:translateY(0)}
 
@@ -529,20 +571,17 @@ footer{display:flex;justify-content:space-between;padding:20px 0 44px;
 }
 
 /* ---------- breakpoints ---------- */
-@media (max-width:1199px){.cats{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:1024px){
   .grid{grid-template-columns:repeat(6,1fr);grid-auto-flow:row dense}
   .card{grid-column:span 3}
   .card.w8{grid-column:span 6}
   .card.w4{grid-column:span 3}
-  .cats{grid-template-columns:repeat(2,1fr)}
   .close,.stack{grid-template-columns:repeat(2,1fr)}
   .close .l,.close .r,.prose,.side,.svc{grid-column:auto}
   }
 @media (max-width:640px){
   .grid{grid-template-columns:1fr;padding-bottom:56px}
   .card,.card.w8,.card.w4{grid-column:span 1}
-  .cats{grid-template-columns:1fr}
   .close,.stack{grid-template-columns:1fr;gap:34px}
   .close{padding:40px 0 18px}
     .lede h1{max-width:100%}
