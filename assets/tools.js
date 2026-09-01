@@ -35,7 +35,9 @@
    freehand. A hand-typed name that isn't in this list still saves and still
    displays, just without a badge (see findTool()). */
 const TOOLS = {
-  aftereffects: { title: 'After Effects',   short: 'Ae', color: '#9999FF' },
+  aftereffects: {
+    title: 'After Effects',   short: 'Ae', color: '#9999FF'
+  },
   premiere:     { title: 'Premiere Pro',    short: 'Pr', color: '#9999FF' },
   photoshop:    { title: 'Photoshop',       short: 'Ps', color: '#31A8FF' },
   illustrator:  { title: 'Illustrator',     short: 'Ai', color: '#FF9A00' },

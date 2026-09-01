@@ -315,7 +315,7 @@ function bentoCellHTML(p, b, hrefBase, index) {
 
 /* Renders into #bento. cellCount must match the number of sized slots the
    .bento CSS template defines — see the nth-child rules in site.css. */
-async function renderBento({ hrefBase = 'project/', cellCount = 8 } = {}) {
+async function renderBento({ hrefBase = 'project/', cellCount = 10 } = {}) {
   const el = document.getElementById('bento');
   if (!el) return;
   try {
