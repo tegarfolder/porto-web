@@ -159,7 +159,8 @@
           "featured": true,
           "useAsThumbnail": true
         }
-      ]
+      ],
+      "hidden": true
     },
     {
       "slug": "travie",
@@ -186,7 +187,8 @@
           "featured": true,
           "useAsThumbnail": true
         }
-      ]
+      ],
+      "hidden": true
     },
     {
       "slug": "distory",
@@ -213,7 +215,8 @@
           "featured": true,
           "useAsThumbnail": true
         }
-      ]
+      ],
+      "hidden": true
     }
   ]
 }
