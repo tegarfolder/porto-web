@@ -1,0 +1,194 @@
+<svg viewBox="0 0 1200 4650" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif">
+  <title>Home page wireframe — full scroll, hero to footer (stacking-cards hero)</title>
+  <desc>Header nav. Hero (rounded video panel, headline + service list top,
+    tagline/CTA + status card bottom) stays pinned while Selected Work slides
+    up and stacks on top of it as a rounded card, leaving a thin strip of
+    hero peeking above — not a curtain that covers the hero, a card that
+    stacks on it. Below that: Approach (statement + 4-step list), Process
+    (4 step cards with arrows), Services (4 category cards + quote note),
+    About (bio + details, then Let's connect/social + Start/mailto), footer.</desc>
+
+  <rect x="0" y="0" width="1200" height="4650" fill="#fafafa"/>
+
+  <!-- ============ HEADER ============ -->
+  <rect x="0" y="0" width="1200" height="64" fill="#f1f1f4" stroke="#d4d4db"/>
+  <text x="40" y="38" font-size="18" font-weight="700" fill="#26262e">Putra Tegar</text>
+  <g font-size="14" fill="#54545f">
+    <text x="480" y="37">Work</text>
+    <text x="560" y="37">Approach</text>
+    <text x="660" y="37">Process</text>
+    <text x="750" y="37">Services</text>
+    <text x="850" y="37">About</text>
+  </g>
+  <circle cx="1150" cy="32" r="14" fill="none" stroke="#8a8a99" stroke-width="1.5"/>
+
+  <!-- ============ HERO (full, unobstructed state) ============ -->
+  <rect x="15" y="79" width="1170" height="660" rx="25" fill="#1c1c22" stroke="#8a8a99" stroke-dasharray="8 6"/>
+  <text x="40" y="112" font-size="13" fill="#c4c4d0">hero — sticky, pinned while Selected Work stacks on top of it</text>
+
+  <rect x="55" y="160" width="620" height="150" rx="4" fill="none" stroke="#5a5a66" stroke-dasharray="6 5"/>
+  <text x="75" y="235" font-size="28" font-weight="700" fill="#fff">Shaping the way brands move</text>
+  <text x="75" y="264" font-size="13" fill="#9a9aa8">(bold, large headline — per-word blur reveal)</text>
+
+  <rect x="920" y="160" width="230" height="150" rx="4" fill="none" stroke="#5a5a66" stroke-dasharray="6 5"/>
+  <g font-size="14" fill="#d2d2dc" text-anchor="end">
+    <text x="1130" y="195">Explainer</text>
+    <text x="1130" y="225">Product</text>
+    <text x="1130" y="255">Event</text>
+    <text x="1130" y="285">Brand</text>
+  </g>
+
+  <g stroke="#5a5a66" stroke-width="2">
+    <path d="M210,410 h16 M218,402 v16"/>
+    <path d="M430,440 h16 M438,432 v16"/>
+    <path d="M660,400 h16 M668,392 v16"/>
+    <path d="M880,430 h16 M888,422 v16"/>
+  </g>
+
+  <rect x="55" y="500" width="500" height="60" rx="4" fill="none" stroke="#5a5a66" stroke-dasharray="6 5"/>
+  <text x="75" y="535" font-size="14" fill="#d2d2dc">Product, Explainer, Event and Brand Needs.</text>
+
+  <rect x="55" y="580" width="260" height="46" rx="23" fill="#2c2c33" stroke="#8a8a99"/>
+  <text x="185" y="608" text-anchor="middle" font-size="12" fill="#fff">View Selected Work</text>
+  <rect x="330" y="580" width="200" height="46" rx="23" fill="none" stroke="#5a5a66"/>
+  <text x="430" y="608" text-anchor="middle" font-size="12" fill="#d2d2dc">Start a project</text>
+
+  <rect x="900" y="555" width="250" height="90" rx="14" fill="#2c2c33" stroke="#8a8a99"/>
+  <circle cx="935" cy="590" r="10" fill="none" stroke="#8a8a99"/>
+  <text x="960" y="585" font-size="12" fill="#fff">Taking projects</text>
+  <text x="960" y="605" font-size="11" fill="#9a9aa8">Start a project ›</text>
+
+  <!-- ============ SELECTED WORK — stacked card, overlapping hero's bottom ============ -->
+  <!-- Drawn overlapping the hero rect above (starts before hero's own bottom
+       edge at y=739) to depict the settled stacking-cards state: hero stays
+       visible as a 15px strip peeking above this card, not fully covered. -->
+  <rect x="15" y="700" width="1170" height="590" rx="25" fill="#ffffff" stroke="#26262e" stroke-width="2"/>
+  <g stroke="#8a8a99" stroke-width="2">
+    <path d="M15,700 h1170"/>
+  </g>
+  <text x="1120" y="694" text-anchor="end" font-size="11" fill="#9a9aa8" font-style="italic">↑ 15px peek strip of hero, still visible above this line</text>
+
+  <text x="40" y="745" font-size="26" font-weight="700" fill="#26262e">Selected Work</text>
+  <text x="40" y="769" font-size="13" fill="#6b6b78">Work that turned brand problems into brand identities people remember.  ↗</text>
+
+  <g fill="#eeeef2" stroke="#8a8a99">
+    <rect x="40" y="800" width="480" height="190" rx="8"/>
+    <rect x="536" y="800" width="384" height="190" rx="8"/>
+    <rect x="936" y="800" width="224" height="90" rx="8"/>
+    <rect x="936" y="900" width="224" height="90" rx="8"/>
+    <rect x="40" y="1006" width="278" height="90" rx="8"/>
+    <rect x="334" y="1006" width="278" height="90" rx="8"/>
+    <rect x="628" y="1006" width="278" height="90" rx="8"/>
+    <rect x="922" y="1006" width="238" height="90" rx="8"/>
+    <rect x="40" y="1112" width="558" height="88" rx="8"/>
+    <rect x="614" y="1112" width="546" height="88" rx="8"/>
+  </g>
+  <text x="600" y="1235" text-anchor="middle" font-size="12" fill="#9a9aa8">10-cell bento grid — project tiles</text>
+  <text x="40" y="1270" font-size="11" fill="#9a9aa8">card sticks at top:15px, releases after its own scroll range, then flows normally →</text>
+
+  <!-- ============ APPROACH ============ -->
+  <rect x="15" y="1310" width="1170" height="420" fill="none" stroke="#8a8a99" stroke-dasharray="8 6"/>
+  <text x="40" y="1350" font-size="13" font-weight="700" letter-spacing="1" fill="#6b6b78">APPROACH</text>
+  <text x="40" y="1390" font-size="26" font-weight="700" fill="#26262e">Good motion starts before animation.</text>
+  <text x="40" y="1420" font-size="15" fill="#54545f">I believe the animation should be clear before it is beautiful.</text>
+
+  <g font-size="14">
+    <line x1="700" y1="1350" x2="1160" y2="1350" stroke="#d4d4db"/>
+    <text x="700" y="1375" fill="#9a9aa8" font-size="12">01</text>
+    <text x="740" y="1375" fill="#26262e">Clarify the message</text>
+
+    <line x1="700" y1="1430" x2="1160" y2="1430" stroke="#d4d4db"/>
+    <text x="700" y="1455" fill="#9a9aa8" font-size="12">02</text>
+    <text x="740" y="1455" fill="#26262e">Structure the story</text>
+
+    <line x1="700" y1="1510" x2="1160" y2="1510" stroke="#d4d4db"/>
+    <text x="700" y="1535" fill="#9a9aa8" font-size="12">03</text>
+    <text x="740" y="1535" fill="#26262e">Visualize the idea</text>
+
+    <line x1="700" y1="1590" x2="1160" y2="1590" stroke="#d4d4db"/>
+    <text x="700" y="1615" fill="#9a9aa8" font-size="12">04</text>
+    <text x="740" y="1615" fill="#26262e">Animate what matters</text>
+  </g>
+
+  <!-- ============ PROCESS ============ -->
+  <rect x="15" y="1760" width="1170" height="480" fill="none" stroke="#8a8a99" stroke-dasharray="8 6"/>
+  <text x="40" y="1800" font-size="26" font-weight="700" fill="#26262e">How it runs</text>
+  <text x="40" y="1824" font-size="13" fill="#6b6b78">What happens after you say yes? The same four steps, every time.</text>
+
+  <g fill="#f7f7f9" stroke="#8a8a99">
+    <rect x="40" y="1860" width="240" height="180" rx="8"/>
+    <rect x="320" y="1860" width="240" height="180" rx="8"/>
+    <rect x="600" y="1860" width="240" height="180" rx="8"/>
+    <rect x="880" y="1860" width="240" height="180" rx="8"/>
+  </g>
+  <g stroke="#8a8a99" stroke-width="2">
+    <path d="M290,1950 h20 M303,1943 l7,7 -7,7"/>
+    <path d="M570,1950 h20 M583,1943 l7,7 -7,7"/>
+    <path d="M850,1950 h20 M863,1943 l7,7 -7,7"/>
+  </g>
+  <g font-size="12" fill="#26262e" font-weight="700">
+    <text x="60" y="1910">01 SCRIPT</text>
+    <text x="340" y="1910">02 STORYBOARD</text>
+    <text x="620" y="1910">03 ANIMATION</text>
+    <text x="900" y="1910">04 DELIVERY</text>
+  </g>
+  <text x="40" y="2080" font-size="12" fill="#6b6b78">Good to know — timeline note</text>
+
+  <!-- ============ SERVICES ============ -->
+  <rect x="15" y="2270" width="1170" height="440" fill="none" stroke="#8a8a99" stroke-dasharray="8 6"/>
+  <text x="40" y="2310" font-size="26" font-weight="700" fill="#26262e">Services</text>
+  <text x="40" y="2334" font-size="13" fill="#6b6b78">Four modes. Each one starts with a script and a storyboard.</text>
+
+  <g fill="#fdf6e3" stroke="#8a8a99">
+    <rect x="40" y="2370" width="270" height="220" rx="8"/>
+  </g>
+  <g fill="#e6f7f8" stroke="#8a8a99">
+    <rect x="330" y="2370" width="270" height="220" rx="8"/>
+  </g>
+  <g fill="#fdeaf1" stroke="#8a8a99">
+    <rect x="620" y="2370" width="270" height="220" rx="8"/>
+  </g>
+  <g fill="#eeeafb" stroke="#8a8a99">
+    <rect x="910" y="2370" width="250" height="220" rx="8"/>
+  </g>
+  <g font-size="16" font-weight="700" fill="#26262e">
+    <text x="60" y="2440">Explainer</text>
+    <text x="350" y="2440">Product</text>
+    <text x="640" y="2440">Event</text>
+    <text x="930" y="2440">Brand</text>
+  </g>
+  <text x="40" y="2670" font-size="12" fill="#6b6b78">Quote — pricing note</text>
+
+  <!-- ============ ABOUT ============ -->
+  <rect x="15" y="2730" width="1170" height="900" fill="none" stroke="#8a8a99" stroke-dasharray="8 6"/>
+  <text x="40" y="2770" font-size="26" font-weight="700" fill="#26262e">About</text>
+  <text x="40" y="2794" font-size="13" fill="#6b6b78">A motion designer who would rather cut thirty seconds than add thirty more.</text>
+
+  <rect x="40" y="2830" width="700" height="220" rx="4" fill="none" stroke="#8a8a99" stroke-dasharray="6 5"/>
+  <text x="60" y="2865" font-size="13" fill="#54545f">Bio — who I am, how I work, exploration link</text>
+
+  <rect x="770" y="2830" width="400" height="220" rx="4" fill="none" stroke="#8a8a99" stroke-dasharray="6 5"/>
+  <text x="790" y="2865" font-size="13" fill="#54545f">Details — Based / Working / Tools / Languages / Available</text>
+
+  <rect x="40" y="3100" width="540" height="440" rx="4" fill="#f7f7f9" stroke="#8a8a99"/>
+  <text x="60" y="3145" font-size="20" font-weight="700" fill="#26262e">Let's connect</text>
+  <text x="60" y="3180" font-size="13" fill="#54545f">Small number of projects at a time...</text>
+  <g stroke="#8a8a99" fill="none">
+    <circle cx="70" cy="3470" r="16"/>
+    <circle cx="115" cy="3470" r="16"/>
+    <circle cx="160" cy="3470" r="16"/>
+    <circle cx="205" cy="3470" r="16"/>
+    <circle cx="250" cy="3470" r="16"/>
+  </g>
+  <text x="60" y="3510" font-size="11" fill="#9a9aa8">social icon row (hidden if empty)</text>
+
+  <rect x="630" y="3100" width="540" height="440" rx="4" fill="#f7f7f9" stroke="#8a8a99"/>
+  <text x="650" y="3145" font-size="20" font-weight="700" fill="#26262e">Start</text>
+  <text x="650" y="3180" font-size="13" fill="#54545f">Have an idea that needs explaining?</text>
+  <text x="650" y="3210" font-size="14" fill="#26262e" text-decoration="underline">hello@putrategar.com</text>
+
+  <!-- ============ FOOTER ============ -->
+  <rect x="0" y="4590" width="1200" height="60" fill="#f1f1f4" stroke="#d4d4db"/>
+  <text x="40" y="4626" font-size="12" fill="#6b6b78">Putra Tegar © 2026</text>
+  <text x="1000" y="4626" font-size="12" fill="#6b6b78">Instagram · Behance · YouTube</text>
+</svg>

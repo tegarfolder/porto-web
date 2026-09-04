@@ -136,14 +136,16 @@
   </section>
   </div>
 
-  <!-- .hero-cover is what actually does the covering: pulled up over the
-       second half of .hero-pin (margin-top:-100vh) with its own opaque
-       background and a higher z-index, so it visually slides up the screen
-       and over the still-pinned hero as you scroll through that stretch. -->
-  <div class="hero-cover">
-  <div class="rule"></div>
-
-  <section id="work">
+  <!-- .work-pin is exactly 2x WORK_H (see assets/site.css) — same trick as
+       .hero-pin above it: that spare height is what lets #work.work-card
+       (position:sticky inside it) stay pinned at top:15px for a real
+       stretch of scroll before it runs out of room and releases normally.
+       On desktop this stacks #work on top of the still-pinned hero like a
+       card, leaving a 15px strip of hero peeking above it — not a curtain
+       that covers the hero, a card that stacks on it. Mobile disables the
+       whole mechanic (see the ≤860px override) — plain stacking there. -->
+  <div class="work-pin">
+  <section id="work" class="work-card">
     <div class="rw-head">
       <div class="rw-head-txt">
         <h2>Selected Work</h2>
