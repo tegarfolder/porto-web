@@ -66,8 +66,8 @@ You should see, on the home page:
 
 - A centred headline whose words rise into place out of a blur, one after
   another left to right (the last word lands about 1.4s in)
-- A "Recent Works" heading, then a row of bento-style tiles — however many
-  content blocks are currently marked `featured` (§3), up to 8. Each tile's
+- A "Selected Work" heading, then a row of bento-style tiles — however many
+  content blocks are currently marked `featured` (§3), up to 10. Each tile's
   title only shows on hover/focus; at rest they're plain images.
 
 The hero video panel will be empty until `assets/hero1.mp4` exists — see §8.
@@ -81,16 +81,20 @@ project root, not a parent folder.
 ## 2. What's where
 
 ```
-index.html               Home
-works/index.html         All work + category cards
+index.html               Home — single long-scroll page: Hero, Selected
+                         Work, Approach, Process, Services, About, Contact.
+                         The header nav on every page is 6 anchor links to
+                         these sections — same-page (#work, #approach, …)
+                         on the home page itself, path-prefixed (../#work,
+                         ../../#work) from every other page.
+works/index.html         Browse-everything index + category cards
+                         (secondary page, not in primary nav)
 works/explainer/         ┐
 works/product/           │
 works/event/             │ one page per category
 works/brand/             │
 works/exploration/       ┘
 works/project/           Project template — reads ?p=<slug>
-services/index.html      Services
-about/index.html         About
 
 assets/site.css          All styling, design tokens, responsive rules
 assets/site.js           Card rendering, hover-scrub, data loading
@@ -770,9 +774,9 @@ improvement — `@import` is also the slowest way to load a webfont, since the
 browser must fetch and parse `site.css` before it even discovers the font.
 
 General Sans only ships weights 400/500/600/700 — there is no 800 or 900. Every
-`font-weight` in `site.css` (and the one inline in `services/index.html`) is
-capped at `700` for exactly that reason; if you ever swap in a typeface that
-does have heavier cuts, those are the declarations to raise back up.
+`font-weight` in `site.css` is capped at `700` for exactly that reason; if you
+ever swap in a typeface that does have heavier cuts, those are the
+declarations to raise back up.
 
 ### Motion
 
@@ -863,8 +867,8 @@ to exempt a specific link from the fade-out, add `data-no-transition` to it.
 7. **All content is placeholder** apart from the first entry. Client names
    and summaries are invented.
 
-8. **`hello@putrategar.studio` is a guess.** Replace it — it appears on the home,
-   works, services and about pages.
+8. **`hello@putrategar.com` may still be a placeholder.** Confirm it's real —
+   it appears in the home page's `#contact` section and on the works index.
 
 9. **Project URLs use a query string** (`/works/project/?p=slug`) rather than
     `/works/acme-launch/`. The cost of having no build step; a small generator
@@ -874,8 +878,10 @@ to exempt a specific link from the fade-out, add `data-no-transition` to it.
     weaker for SEO than pre-rendered HTML. Google executes JS and will index it,
     but it is a real trade-off.
 
-11. **Header and footer are duplicated across 9 pages.** Changing a nav item
-    means 9 edits. Fine at this size; the first thing that will decay.
+11. **Header and footer are duplicated across 8 pages** (home, the works
+    index, 5 category pages, the project template — services/about no longer
+    exist as separate pages, folded into home sections instead). Changing a
+    nav item means 8 edits. Fine at this size; the first thing that will decay.
 
 12. **Generated card art is heavy.** With no posters, `/works/` ships 64 inline
     SVGs (~986 nodes, ~120KB of grid HTML). Each real `poster` removes one

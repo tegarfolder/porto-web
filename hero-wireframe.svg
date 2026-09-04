@@ -1,0 +1,66 @@
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <title>Hero wireframe — measured at 1920x1080</title>
+  <desc>Nav bar full width, square edges, ~61px tall. Below it, the hero panel
+    is inset by a 6px margin on the left, right, and bottom (near full-bleed,
+    not a wide card margin), 25px corner radius. Headline large on the left,
+    a compact 4-item service list top-right, decorative plus marks scattered
+    through the middle, tagline + two CTAs bottom-left, a status card
+    bottom-right.</desc>
+
+  <!-- artboard background so the wireframe is visible on any viewer -->
+  <rect x="0" y="0" width="1920" height="1080" fill="#fafafa"/>
+
+  <!-- nav -->
+  <rect x="0" y="0" width="1920" height="61" fill="#f1f1f4" stroke="#d4d4db" stroke-width="1"/>
+  <text x="960" y="38" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#6b6b78">nav — full width, square edges, ~61px tall</text>
+
+  <!-- hero rounded panel -->
+  <rect x="6" y="67" width="1908" height="1007" rx="25" fill="#eeeef2" stroke="#8a8a99" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="30" y="100" font-family="sans-serif" font-size="16" fill="#6b6b78">6px margin left / right / bottom — measured on the reference, not a guess (0.3% of width)</text>
+
+  <!-- 6px callout -->
+  <g stroke="#8a8a99" stroke-width="2">
+    <line x1="6" y1="130" x2="6" y2="170"/>
+    <line x1="0" y1="150" x2="12" y2="150"/>
+  </g>
+  <text x="16" y="154" font-family="sans-serif" font-size="16" fill="#6b6b78">6px</text>
+
+  <!-- headline -->
+  <rect x="90" y="280" width="1050" height="280" rx="6" fill="none" stroke="#8a8a99" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="120" y="380" font-family="sans-serif" font-size="28" font-weight="600" fill="#26262e">large-scale headline</text>
+  <text x="120" y="420" font-family="sans-serif" font-size="16" fill="#6b6b78">(current tagline, set much bigger)</text>
+
+  <!-- service list -->
+  <rect x="1280" y="280" width="500" height="280" rx="6" fill="none" stroke="#8a8a99" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="1730" y="340" text-anchor="end" font-family="sans-serif" font-size="20" fill="#26262e">Explainer</text>
+  <text x="1730" y="400" text-anchor="end" font-family="sans-serif" font-size="20" fill="#26262e">Product</text>
+  <text x="1730" y="460" text-anchor="end" font-family="sans-serif" font-size="20" fill="#26262e">Event</text>
+  <text x="1730" y="520" text-anchor="end" font-family="sans-serif" font-size="20" fill="#26262e">Brand</text>
+
+  <!-- plus marks -->
+  <g stroke="#8a8a99" stroke-width="3">
+    <path d="M340,660 h34 M357,643 v34"/>
+    <path d="M700,690 h34 M717,673 v34"/>
+    <path d="M1060,650 h34 M1077,633 v34"/>
+    <path d="M1420,680 h34 M1437,663 v34"/>
+  </g>
+  <text x="960" y="760" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#6b6b78">scattered plus-mark motif (decorative)</text>
+
+  <!-- tagline -->
+  <rect x="90" y="860" width="800" height="100" rx="6" fill="none" stroke="#8a8a99" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="120" y="915" font-family="sans-serif" font-size="16" fill="#6b6b78">subhead / tagline (existing copy)</text>
+
+  <!-- CTAs -->
+  <rect x="90" y="980" width="400" height="70" rx="35" fill="#f1f1f4" stroke="#8a8a99" stroke-width="2"/>
+  <text x="290" y="1023" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#26262e">View Selected Work</text>
+  <rect x="510" y="980" width="320" height="70" rx="35" fill="none" stroke="#8a8a99" stroke-width="2"/>
+  <text x="670" y="1023" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#26262e">Start a project</text>
+
+  <!-- status card -->
+  <rect x="1400" y="890" width="450" height="160" rx="16" fill="#f1f1f4" stroke="#8a8a99" stroke-width="2"/>
+  <circle cx="1450" cy="950" r="20" fill="none" stroke="#8a8a99" stroke-width="2"/>
+  <text x="1490" y="940" font-family="sans-serif" font-size="16" fill="#6b6b78">status card</text>
+  <text x="1490" y="968" font-family="sans-serif" font-size="16" fill="#6b6b78">("Taking projects")</text>
+  <rect x="1430" y="990" width="380" height="40" rx="20" fill="none" stroke="#8a8a99" stroke-width="1.5"/>
+  <text x="1620" y="1016" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#26262e">Start a project</text>
+</svg>
